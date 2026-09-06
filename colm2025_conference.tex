@@ -36,6 +36,16 @@
 % Default finding box style: teal box with bookmark icon
 \findingstyle{finding}
 
+% Float placement: this report carries many wide tables, so allow a page to be
+% mostly float and permit more floats per page than the LaTeX defaults.
+\setcounter{topnumber}{4}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{6}
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.60}
+\renewcommand{\textfraction}{0.06}
+\renewcommand{\floatpagefraction}{0.70}
+
 % Tighter paragraph spacing so the report fits the page budget.
 \setlength{\parskip}{0.15\baselineskip}
 

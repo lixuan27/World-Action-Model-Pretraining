@@ -332,15 +332,15 @@ the projector.
   lk/.style={-{Stealth[length=1.3mm]}, draw=tianzhegreen!60!black},
   lk2/.style={{Stealth[length=1.3mm]}-{Stealth[length=1.3mm]}, draw=tianzhegreen!60!black},
   ttl/.style={font=\scriptsize\bfseries, align=center},
-  cap/.style={font=\scriptsize, align=center, text=black!70}]
+  cpt/.style={font=\scriptsize, align=center, text=black!70}]
 
 % ---------- panel A: single system ----------
 \begin{scope}[shift={(0,0)}]
   \foreach \i in {0,1,2,3} { \node[vb] (a\i) at (0, \i*0.62) {}; }
   \node[ab, minimum width=9mm] (atok) at (0,-0.78) {};
-  \node[cap] at (0,-1.60) {action and state\\tokens in sequence};
+  \node[cpt] at (0,-1.60) {action and state\\tokens in sequence};
   \node[ttl] at (0,2.92) {(a) single system};
-  \node[cap, anchor=west] at (0.62,1.86) {shared\\blocks};
+  \node[cpt, anchor=west] at (0.62,1.86) {shared\\blocks};
   \draw[lk] (atok.north) -- (a0.south);
 \end{scope}
 
@@ -350,7 +350,7 @@ the projector.
   \foreach \i in {0,1,2,3} { \node[ab, minimum width=3.4mm] (e\i) at (0.92, \i*0.62) {}; }
   \foreach \i in {0,1,2,3} { \draw[lk2] (b\i.east) -- (e\i.west); }
   \node[ab, minimum width=9mm] (atok2) at (0,-0.78) {};
-  \node[cap] at (0.3,-1.60) {expert feed-forward\\on the action segment};
+  \node[cpt] at (0.3,-1.60) {expert feed-forward\\on the action segment};
   \node[ttl] at (0.4,2.92) {(b) single system\\with modality expert};
   \draw[lk] (atok2.north) -- (b0.south);
 \end{scope}
@@ -360,7 +360,7 @@ the projector.
   \foreach \i in {0,1,2,3} { \node[vb] (c\i) at (0, \i*0.62) {}; }
   \foreach \i in {0,1,2,3} { \node[ab] (d\i) at (1.5, \i*0.62) {}; }
   \foreach \i in {0,1,2,3} { \draw[lk2] (c\i.east) -- (d\i.west); }
-  \node[cap] at (0.75,-0.95) {one mixed attention\\at every layer};
+  \node[cpt] at (0.75,-0.95) {one mixed attention\\at every layer};
   \node[ttl] at (0.75,2.92) {(c) dual system\\joint self-attention};
 \end{scope}
 
@@ -369,7 +369,7 @@ the projector.
   \foreach \i in {0,1,2,3} { \node[vb] (f\i) at (0, \i*0.62) {}; }
   \foreach \i in {0,1,2,3} { \node[ab] (g\i) at (1.5, \i*0.62) {}; }
   \foreach \i in {0,1,2,3} { \draw[lk] (f\i.east) -- (g\i.west); }
-  \node[cap] at (0.75,-0.95) {video completes, then\\action reads the bridge};
+  \node[cpt] at (0.75,-0.95) {video completes, then\\action reads the bridge};
   \node[ttl] at (0.75,2.92) {(d) dual system\\bridge cross-attention};
 \end{scope}
 
@@ -379,9 +379,9 @@ the projector.
   \foreach \i in {0,1,2,3} { \node[cb] (k\i) at (1.35, \i*0.62) {}; }
   \foreach \i in {0,1,2,3} { \node[ab] (l\i) at (2.7, \i*0.62) {}; }
   \foreach \i in {0,1,2,3} { \draw[lk] (k\i.east) -- (l\i.west); }
-  \node[cap] at (0,-0.95) {noisy};
-  \node[cap] at (1.35,-0.95) {condition};
-  \node[cap] at (2.7,-0.95) {action};
+  \node[cpt] at (0,-0.95) {noisy};
+  \node[cpt] at (1.35,-0.95) {condition};
+  \node[cpt] at (2.7,-0.95) {action};
   \node[ttl] at (1.35,2.92) {(e) dual system\\teacher forcing};
 \end{scope}
 
@@ -392,7 +392,7 @@ the projector.
   \foreach \i in {0,1,2,3} { \node[ub] (o\i) at (2.8, \i*0.62) {}; }
   \foreach \i in {0,1,2,3} { \draw[lk2] (m\i.east) -- (n\i.west); }
   \foreach \i in {0,1,2,3} { \draw[lk] (o\i.west) -- (n\i.east); }
-  \node[cap] at (1.4,-0.95) {frozen understanding\\tokens as a read-only tail};
+  \node[cpt] at (1.4,-0.95) {frozen understanding\\tokens as a read-only tail};
   \node[ttl] at (1.4,2.92) {(f) tri system};
 \end{scope}
 
@@ -515,11 +515,10 @@ after pretraining. \sref{sec:q4} measures both halves of this prediction.
 \adjustbox{max width=\linewidth}{%
 \begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
   ttl/.style={font=\scriptsize\bfseries, align=center},
-  lbl/.style={font=\tiny, text=black!70}]
-
-\def\onst{fill=tianzhegreen!45, draw=black!35, line width=0.15pt}
-\def\offst{fill=black!6, draw=black!25, line width=0.15pt}
-\def\halfst{fill=tianzheblue!32, draw=black!35, line width=0.15pt}
+  lbl/.style={font=\tiny, text=black!70},
+  onst/.style={fill=tianzhegreen!45},
+  offst/.style={fill=black!6},
+  halfst/.style={fill=tianzheblue!32}]
 
 % ---- top row: the four cross-modal modes ----
 \def\maskmat#1#2#3#4#5#6#7{%
@@ -539,16 +538,16 @@ after pretraining. \sref{sec:q4} measures both halves of this prediction.
   \end{scope}}
 
 \node[anchor=west, font=\scriptsize\itshape] at (0,36) {cross-modal visibility};
-\maskmat{0}{0}{\onst}{\halfst}{\onst}{\onst}{$\VAV$\\mutual}
-\maskmat{40}{0}{\onst}{\offst}{\onst}{\onst}{$\AV$\\action reads video}
-\maskmat{80}{0}{\onst}{\halfst}{\halfst}{\onst}{$\VA$\\video reads action}
-\maskmat{120}{0}{\onst}{\offst}{\halfst}{\onst}{$\ISO$\\isolated}
+\maskmat{0}{0}{onst}{halfst}{onst}{onst}{$\VAV$\\mutual}
+\maskmat{40}{0}{onst}{offst}{onst}{onst}{$\AV$\\action reads video}
+\maskmat{80}{0}{onst}{halfst}{halfst}{onst}{$\VA$\\video reads action}
+\maskmat{120}{0}{onst}{offst}{halfst}{onst}{$\ISO$\\isolated}
 
 % ---- bottom row: the three video self-visibility modes ----
 \node[anchor=west, font=\scriptsize\itshape] at (0,-12) {video self-visibility};
 
 \begin{scope}[shift={(0,-44)}]
-  \fill[\onst] (0,0) rectangle (18,18);
+  \fill[onst] (0,0) rectangle (18,18);
   \draw[black!60, line width=0.3pt] (0,0) rectangle (18,18);
   \node[ttl] at (9,23) {bidirectional};
 \end{scope}
@@ -557,17 +556,17 @@ after pretraining. \sref{sec:q4} measures both halves of this prediction.
   \foreach \rr in {0,1,2} {
     \foreach \cc in {0,1,2} {
       \ifnum\cc>\rr
-        \fill[\offst] (\cc*6,12-\rr*6) rectangle (\cc*6+6,18-\rr*6);
+        \fill[offst] (\cc*6,12-\rr*6) rectangle (\cc*6+6,18-\rr*6);
       \else
-        \fill[\onst] (\cc*6,12-\rr*6) rectangle (\cc*6+6,18-\rr*6);
+        \fill[onst] (\cc*6,12-\rr*6) rectangle (\cc*6+6,18-\rr*6);
       \fi}}
   \draw[black!60, line width=0.3pt] (0,0) rectangle (18,18);
   \node[ttl] at (9,23) {per-frame causal};
 \end{scope}
 
 \begin{scope}[shift={(80,-44)}]
-  \fill[\onst] (0,0) rectangle (18,18);
-  \fill[\offst] (6,12) rectangle (18,18);
+  \fill[onst] (0,0) rectangle (18,18);
+  \fill[offst] (6,12) rectangle (18,18);
   \draw[black!60, line width=0.3pt] (0,0) rectangle (18,18);
   \node[ttl] at (9,23) {first-frame causal};
 \end{scope}
