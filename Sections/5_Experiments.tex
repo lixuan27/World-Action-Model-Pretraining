@@ -71,44 +71,63 @@ The first question is whether joint flow matching on a pretrained video prior
 reaches the performance regime that a released world-action implementation
 occupies on these suites, because a mechanism study is only informative once the
 mainline arm is competitive. The reference values in \tref{tab:mainline} are
-reproduced verbatim from that public release and from the public reports of two
+reproduced verbatim from that public release and from the public reports of three
 vision-language-action policies, and they define the regime rather than a target
-that this work claims. The mainline arm is the bidirectional coupling fine-tuned
-from the video prior with no embodied pretraining, and the pre-registered
-criterion accepts a gap of at most three points against the reference average
-and otherwise demands a stated root cause.
+that this work claims.
 
-\tref{tab:mainline} reports the reference regime together with the target for the
-mainline arm.
+One difference between the rows governs how the table is read. Every reference
+row comes from a model that received large-scale embodied pretraining, and the
+world-action reference in particular fine-tunes a foundation checkpoint trained
+on about six thousand four hundred hours. The mainline arm of this work is
+deliberately the opposite end of that axis: bidirectional coupling fine-tuned
+from the video prior alone, with the embodied corpus of \tref{tab:corpus} held
+out. Fixing the mainline arm this way makes the coupling axis of
+\sref{sec:coupling-exp} interpretable, because every arm of that axis shares the
+same starting weights and the same absence of embodied pretraining, so a
+difference between arms is attributable to the coupling. The pretraining column
+of \tref{tab:mainline} therefore separates two claims: the first row of this work
+tests whether the coupling alone lands in the reference regime on the
+in-distribution splits, and the second row adds the corpus of
+\sref{sec:data} to show where the remaining distance sits. The pre-registered
+criterion accepts a gap of at most three points on the in-distribution average
+and otherwise demands a stated root cause; the shifted splits carry no such
+criterion, because a corpus six times smaller cannot be expected to match there.
+
+\tref{tab:mainline} reports the reference regime together with the targets for
+the two arms of this work.
 
 \begin{table}[t]
 \centering
-\small
+\footnotesize
 % PLANNED-VALUE
 \caption{Reference regime and mainline reproduction. \refnote{} \plannednote{}
-The mainline arm is bidirectional coupling fine-tuned from the video prior
-without embodied pretraining, which is the same configuration that appears as
-the bidirectional row of \tref{tab:coupling-exp} and as the third row of
-\tref{tab:ood}.}
+The pretraining column is load bearing: every reference row received large-scale
+embodied pretraining, and the world-action reference fine-tunes a foundation
+checkpoint trained on about 6\,400 hours. The first row of this work holds that
+corpus out on purpose, which is what makes every arm of
+\tref{tab:coupling-exp} share one starting point; the second row adds the
+990-hour corpus of \tref{tab:corpus}. The in-distribution average carries the
+three-point acceptance criterion and the shifted columns carry none.}
 \label{tab:mainline}
 \adjustbox{max width=\linewidth}{%
-\begin{tabular}{@{}lrrrrr@{\hspace{7mm}}rrr@{}}
+\begin{tabular}{@{}llrrrrrrrr@{}}
 \toprule
-& \multicolumn{5}{c}{\textbf{Single-arm tabletop, in-distribution}} & \multicolumn{3}{c}{\textbf{Bimanual tabletop}} \\
-\cmidrule(lr){2-6} \cmidrule(lr){7-9}
-\textbf{Method} & \textbf{Spatial} & \textbf{Object} & \textbf{Goal} & \textbf{Long} & \textbf{Avg} & \textbf{Clean} & \textbf{Random.} & \textbf{Avg} \\
+& & \multicolumn{5}{c}{\textbf{Single-arm tabletop}} & \textbf{Pert.} & \multicolumn{2}{c}{\textbf{Bimanual tabletop}} \\
+\cmidrule(lr){3-7} \cmidrule(lr){8-8} \cmidrule(lr){9-10}
+\textbf{Method} & \textbf{Embodied pretraining} & \textbf{Spatial} & \textbf{Object} & \textbf{Goal} & \textbf{Long} & \textbf{avg} & \textbf{avg} & \textbf{Clean} & \textbf{Rand} \\
 \midrule
-\panel{9}{Public vision-language-action policies} \\
-OpenVLA \citep{kim2024openvla} & 84.7 & 88.4 & 79.2 & 53.7 & 76.5 & n/a & n/a & n/a \\
-\pizero{} \citep{black2024pi0} & 98.0 & 96.8 & 94.4 & 88.4 & 94.4 & n/a & n/a & n/a \\
-\pihalf{} \citep{intelligence2025pi05} & 98.8 & 98.2 & 98.0 & 92.4 & 96.9 & 70.7 & 46.0 & 58.4 \\
+\panel{10}{Public vision-language-action policies} \\
+OpenVLA \citep{kim2024openvla} & yes & 84.7 & 88.4 & 79.2 & 53.7 & 76.5 & n/a & n/a & n/a \\
+\pizero{} \citep{black2024pi0} & yes & 98.0 & 96.8 & 94.4 & 88.4 & 94.4 & 53.6 & n/a & n/a \\
+\pihalf{} \citep{intelligence2025pi05} & yes & 98.8 & 98.2 & 98.0 & 92.4 & 96.9 & \best{84.4} & 70.7 & \best{46.0} \\
 \addlinespace[2pt]
-\panel{9}{Public world-action reference implementation} \\
-Reference stack \citep{referencestack} & \best{99.6} & \best{99.6} & \best{99.8} & \best{98.2} & \best{99.3} & \best{89.4} & \best{48.7} & \best{69.0} \\
+\panel{10}{Public world-action reference implementation} \\
+Reference stack \citep{referencestack} & yes, about 6\,400\,h & \best{99.6} & \best{99.6} & \best{99.8} & \best{98.2} & \best{99.3} & 69.2 & \best{89.4} & \best{48.7} \\
 \addlinespace[2pt]
-\panel{9}{This work} \\
+\panel{10}{This work} \\
 \rowcolor{tabhl}
-\sys{}, bidirectional, no pretraining & \pv{97.8} & \pv{98.4} & \pv{97.2} & \pv{95.4} & \pv{97.2} & \pv{87.2} & \pv{47.9} & \pv{67.6} \\
+\sys{}, \vbi{}, mainline arm & none & \pv{97.8} & \pv{98.4} & \pv{97.2} & \pv{95.4} & \pv{97.2} & \pv{53.8} & \pv{87.2} & \pv{14.5} \\
+\sys{}, \vbi{} & yes, 990\,h & \pv{98.6} & \pv{99.0} & \pv{98.2} & \pv{96.2} & \pv{98.0} & \pv{62.7} & \pv{88.4} & \pv{26.6} \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -135,8 +154,10 @@ that representation.
 \centering
 \small
 % PLANNED-VALUE
-\caption{The coupling axis under matched parameters, data, and seeds.
-\plannednote{} The bidirectional row without boundary rays is the mainline arm of
+\caption{The coupling axis under matched parameters, data, and seeds. Every arm
+here fine-tunes from the video prior with no embodied pretraining, so a
+difference between rows is attributable to the coupling alone. \plannednote{} The
+bidirectional row at unit boundary mass is the mainline arm of
 \tref{tab:mainline}. The pre-registered criterion asks for a monotone ordering
 of the visibility settings on the out-of-distribution columns and asks the
 detached arm to show a smaller gain than the attached arm at equal visibility.}
@@ -146,14 +167,14 @@ detached arm to show a smaller gain than the attached arm at equal visibility.}
 \toprule
 \textbf{Arm} & \textbf{Visibility} & \textbf{World keys} & \textbf{In-dist.\ avg} & \textbf{Perturbation avg} & \textbf{Randomised} \\
 \midrule
-Single stream, structural control & concatenated & attached & \pv{96.4} & \pv{60.3} & \pv{41.0} \\
-Independent objectives & \vnone{} & n/a & \pv{96.1} & \pv{58.4} & \pv{39.2} \\
-Auxiliary action head & \vwa{} & detached & \pv{96.8} & \pv{61.0} & \pv{42.1} \\
-World model with readout & \vwa{} & attached & \pv{97.0} & \pv{63.6} & \pv{44.8} \\
-Action-conditioned world model & \vaw{} & attached & \pv{96.6} & \pv{62.2} & \pv{43.5} \\
+Single stream, structural control & concatenated & attached & \pv{96.4} & \pv{48.8} & \pv{13.4} \\
+Independent objectives & \vnone{} & n/a & \pv{96.1} & \pv{47.6} & \pv{13.1} \\
+Auxiliary action head & \vwa{} & detached & \pv{96.8} & \pv{49.4} & \pv{13.6} \\
+World model with readout & \vwa{} & attached & \pv{97.0} & \pv{51.7} & \pv{14.1} \\
+Action-conditioned world model & \vaw{} & attached & \pv{96.6} & \pv{50.5} & \pv{13.8} \\
 \rowcolor{tabhl}
-\sys{} & \vbi{} & attached & \pv{97.2} & \pv{66.5} & \pv{47.9} \\
-\sys{} with boundary rays & \vbi{} & attached & \pv{97.3} & \pv{67.8} & \pv{49.1} \\
+\sys{} & \vbi{} & attached & \pv{97.2} & \pv{53.8} & \pv{14.5} \\
+\sys{} with boundary rays & \vbi{} & attached & \pv{97.3} & \pv{54.9} & \pv{15.1} \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -339,16 +360,16 @@ video-only egocentric recipe.}
 \textbf{Pretraining corpus} & \textbf{Hours} & \textbf{In-dist.\ avg} & \textbf{Perturbation avg} & \textbf{Randomised} & \textbf{Step-0 action loss} $\downarrow$ \\
 \midrule
 \panel{6}{Composition at the full budget} \\
-None, direct fine-tuning & \phantom{00}0 & \pv{97.2} & \pv{66.5} & \pv{47.9} & \pv{0.412} \\
-Robot sources only & \phantom{0}395 & \pv{97.6} & \pv{71.3} & \pv{53.4} & \pv{0.361} \\
-Robot and egocentric video & \phantom{0}990 & \pv{97.7} & \pv{74.0} & \pv{56.1} & \pv{0.352} \\
+None, direct fine-tuning & \phantom{00}0 & \pv{97.2} & \pv{53.8} & \pv{14.5} & \pv{0.412} \\
+Robot sources only & \phantom{0}395 & \pv{97.6} & \pv{57.9} & \pv{20.1} & \pv{0.361} \\
+Robot and egocentric video & \phantom{0}990 & \pv{97.7} & \pv{60.2} & \pv{23.4} & \pv{0.352} \\
 \rowcolor{tabhl}
-Robot and egocentric video with consequence & \phantom{0}990 & \pv{98.0} & \pv{77.2} & \pv{59.6} & \pv{0.318} \\
+Robot and egocentric video with consequence & \phantom{0}990 & \pv{98.0} & \pv{62.7} & \pv{26.6} & \pv{0.318} \\
 \addlinespace[2pt]
 \panel{6}{Corpus ladder, consequence recipe} \\
-One tenth of the corpus & \phantom{0}\phantom{0}99 & \pv{97.3} & \pv{69.4} & \pv{50.2} & \pv{0.389} \\
-Three tenths of the corpus & \phantom{0}297 & \pv{97.6} & \pv{73.1} & \pv{54.8} & \pv{0.347} \\
-The whole corpus & \phantom{0}990 & \pv{98.0} & \pv{77.2} & \pv{59.6} & \pv{0.318} \\
+One tenth of the corpus & \phantom{0}\phantom{0}99 & \pv{97.4} & \pv{55.1} & \pv{18.2} & \pv{0.389} \\
+Three tenths of the corpus & \phantom{0}297 & \pv{97.7} & \pv{58.6} & \pv{22.0} & \pv{0.347} \\
+The whole corpus & \phantom{0}990 & \pv{98.0} & \pv{62.7} & \pv{26.6} & \pv{0.318} \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -359,50 +380,51 @@ The whole corpus & \phantom{0}990 & \pv{98.0} & \pv{77.2} & \pv{59.6} & \pv{0.31
 \begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
 % PLANNED-VALUE
 % x: log-ish corpus hours mapped to 0..70 mm; y: 1 point = 1.5 mm above 60
-\def\yz{60}
-\def\sy{1.55}
+\def\yz{50}
+\def\sy{1.90}
 \newcommand{\xa}{0}
 \newcommand{\xb}{28}
 \newcommand{\xc}{62}
 
-\draw[black!60] (-2,0) -- (-2,32);
+\draw[black!60] (-2,0) -- (-2,30);
 \draw[black!60] (-2,0) -- (78,0);
-\foreach \v in {62,66,70,74,78} {
+\foreach \v in {52,56,60,64} {
   \draw[black!16, line width=0.25pt] (-2,{(\v-\yz)*\sy}) -- (78,{(\v-\yz)*\sy});
   \node[anchor=east, font=\tiny] at (-3.5,{(\v-\yz)*\sy}) {\v};}
 \foreach \x/\l in {0/99, 28/297, 62/990} {
   \node[anchor=north, font=\tiny] at (\x,-1) {\l};}
 \node[anchor=north, font=\tiny] at (33,-6) {pretraining corpus hours};
-\node[anchor=south, font=\tiny, rotate=90] at (-11,16) {perturbation average};
+\node[anchor=south, font=\tiny, rotate=90] at (-11,15) {perturbation average};
 
 % consequence recipe
 \draw[jamgreen!60!black, line width=1.0pt]
-  (\xa,{(69.4-\yz)*\sy}) -- (\xb,{(73.1-\yz)*\sy}) -- (\xc,{(77.2-\yz)*\sy});
-\foreach \x/\v in {0/69.4, 28/73.1, 62/77.2} {
+  (\xa,{(55.1-\yz)*\sy}) -- (\xb,{(58.6-\yz)*\sy}) -- (\xc,{(62.7-\yz)*\sy});
+\foreach \x/\v in {0/55.1, 28/58.6, 62/62.7} {
   \filldraw[fill=jamgreen!55, draw=black!50, line width=0.2pt] (\x,{(\v-\yz)*\sy}) circle (0.9);}
 % robot + ego video
 \draw[jamblue!70!black, line width=1.0pt, densely dashed]
-  (\xa,{(67.1-\yz)*\sy}) -- (\xb,{(70.6-\yz)*\sy}) -- (\xc,{(74.0-\yz)*\sy});
-\foreach \x/\v in {0/67.1, 28/70.6, 62/74.0} {
+  (\xa,{(53.2-\yz)*\sy}) -- (\xb,{(56.4-\yz)*\sy}) -- (\xc,{(60.2-\yz)*\sy});
+\foreach \x/\v in {0/53.2, 28/56.4, 62/60.2} {
   \filldraw[fill=jamblue!45, draw=black!50, line width=0.2pt] (\x,{(\v-\yz)*\sy}) circle (0.9);}
 % robot only
 \draw[jamorange!85!black, line width=1.0pt, densely dotted]
-  (\xa,{(66.0-\yz)*\sy}) -- (\xb,{(68.4-\yz)*\sy}) -- (\xc,{(71.3-\yz)*\sy});
-\foreach \x/\v in {0/66.0, 28/68.4, 62/71.3} {
+  (\xa,{(52.1-\yz)*\sy}) -- (\xb,{(54.8-\yz)*\sy}) -- (\xc,{(57.9-\yz)*\sy});
+\foreach \x/\v in {0/52.1, 28/54.8, 62/57.9} {
   \filldraw[fill=jamorange!55, draw=black!50, line width=0.2pt] (\x,{(\v-\yz)*\sy}) circle (0.9);}
 % no pretraining reference
 \draw[black!45, line width=0.9pt, dash pattern=on 2pt off 1.4pt]
-  (-2,{(66.5-\yz)*\sy}) -- (78,{(66.5-\yz)*\sy});
+  (-2,{(53.8-\yz)*\sy}) -- (78,{(53.8-\yz)*\sy});
 
-\node[anchor=west, font=\tiny, text=jamgreen!45!black] at (63.5,{(77.2-\yz)*\sy}) {robot, ego video, consequence};
-\node[anchor=west, font=\tiny, text=jamblue!55!black] at (63.5,{(74.0-\yz)*\sy}) {robot and ego video};
-\node[anchor=west, font=\tiny, text=jamorange!70!black] at (63.5,{(71.3-\yz)*\sy}) {robot only};
-\node[anchor=west, font=\tiny, text=black!50] at (63.5,{(66.5-\yz)*\sy-1.6}) {no pretraining};
+\node[anchor=west, font=\tiny, text=jamgreen!45!black] at (63.5,{(62.7-\yz)*\sy}) {robot, ego video, consequence};
+\node[anchor=west, font=\tiny, text=jamblue!55!black] at (63.5,{(60.2-\yz)*\sy}) {robot and ego video};
+\node[anchor=west, font=\tiny, text=jamorange!70!black] at (63.5,{(57.9-\yz)*\sy}) {robot only};
+\node[anchor=west, font=\tiny, text=black!50] at (63.5,{(53.8-\yz)*\sy-1.8}) {no pretraining};
 \end{tikzpicture}}
 \caption{Perturbation average against pretraining corpus hours for three
 recipes. \plannedfig{} The panel answers whether the three recipes differ by a
 constant offset or by slope, which distinguishes a data-volume effect from a
-composition effect. The horizontal line marks the arm that skips pretraining.}
+composition effect. The horizontal line marks the arm that skips pretraining, so
+a curve below that line marks a corpus too small to pay for itself.}
 \label{fig:scale}
 \end{figure}
 
@@ -421,7 +443,10 @@ bimanual suite, and two arm types that appear only at evaluation time. The
 in-distribution column travels with every out-of-distribution column, because a
 robustness claim only means something once the in-distribution score is stated
 next to it. The pre-registered criterion asks whether pretraining and coupling
-interact superadditively on the shifted splits.
+interact superadditively on the shifted splits. Absolute values on those splits
+belong to the corpus scale of \tref{tab:corpus}, so they compare between the rows
+of this table and stay below the reference row of \tref{tab:mainline}, which
+carries a corpus six times larger.
 
 \tref{tab:ood} reports the decomposition.
 
@@ -443,15 +468,15 @@ third row is the mainline arm of \tref{tab:mainline}.}
 \cmidrule(lr){3-3} \cmidrule(lr){4-10} \cmidrule(lr){11-11} \cmidrule(lr){12-13} \cmidrule(lr){14-14}
 \textbf{Representation} & \textbf{Pretrain} & \textbf{avg} & \textbf{Cam} & \textbf{Robot} & \textbf{Lang} & \textbf{Light} & \textbf{Bkg} & \textbf{Noise} & \textbf{Layout} & \textbf{avg} & \textbf{Clean} & \textbf{Rand} & \textbf{arms} \\
 \midrule
-Passive plus readout & none & \pv{95.4} & \pv{21.4} & \pv{47.2} & \pv{76.8} & \pv{88.4} & \pv{71.2} & \pv{24.6} & \pv{56.1} & \pv{55.1} & \pv{84.0} & \pv{35.8} & \pv{9.4} \\
-\sys{}, \vnone{} & none & \pv{96.1} & \pv{24.6} & \pv{51.8} & \pv{79.2} & \pv{89.6} & \pv{73.8} & \pv{28.4} & \pv{61.4} & \pv{58.4} & \pv{86.1} & \pv{39.2} & \pv{12.6} \\
+Passive plus readout & none & \pv{95.4} & \pv{12.6} & \pv{34.1} & \pv{68.4} & \pv{82.6} & \pv{58.2} & \pv{16.4} & \pv{37.1} & \pv{44.2} & \pv{84.0} & \pv{11.2} & \pv{2.6} \\
+\sys{}, \vnone{} & none & \pv{96.1} & \pv{15.2} & \pv{38.4} & \pv{71.8} & \pv{84.9} & \pv{62.1} & \pv{19.6} & \pv{41.2} & \pv{47.6} & \pv{86.1} & \pv{13.1} & \pv{3.8} \\
 \rowcolor{tabhl}
-\sys{}, \vbi{} & none & \pv{97.2} & \pv{31.2} & \pv{64.5} & \pv{85.4} & \pv{93.8} & \pv{80.6} & \pv{36.4} & \pv{73.6} & \pv{66.5} & \pv{87.2} & \pv{47.9} & \pv{18.3} \\
+\sys{}, \vbi{} & none & \pv{97.2} & \pv{20.4} & \pv{47.2} & \pv{76.5} & \pv{88.1} & \pv{68.4} & \pv{25.8} & \pv{50.2} & \pv{53.8} & \pv{87.2} & \pv{14.5} & \pv{5.2} \\
 \addlinespace[2pt]
-Passive plus readout & consequence & \pv{95.9} & \pv{25.8} & \pv{54.1} & \pv{79.8} & \pv{90.2} & \pv{75.4} & \pv{30.2} & \pv{63.1} & \pv{59.8} & \pv{85.2} & \pv{40.4} & \pv{13.1} \\
-\sys{}, \vnone{} & consequence & \pv{96.6} & \pv{29.4} & \pv{61.2} & \pv{83.6} & \pv{92.4} & \pv{78.9} & \pv{34.8} & \pv{72.6} & \pv{64.7} & \pv{87.0} & \pv{45.6} & \pv{17.5} \\
+Passive plus readout & consequence & \pv{95.9} & \pv{16.1} & \pv{39.6} & \pv{72.4} & \pv{85.3} & \pv{63.0} & \pv{20.4} & \pv{39.9} & \pv{48.1} & \pv{85.2} & \pv{17.4} & \pv{4.9} \\
+\sys{}, \vnone{} & consequence & \pv{96.6} & \pv{20.8} & \pv{46.4} & \pv{76.1} & \pv{87.8} & \pv{67.6} & \pv{25.4} & \pv{49.7} & \pv{53.4} & \pv{87.0} & \pv{21.8} & \pv{7.6} \\
 \rowcolor{tabhl}
-\sys{}, \vbi{} & consequence & \pv{98.0} & \pv{44.6} & \pv{78.4} & \pv{91.2} & \pv{96.4} & \pv{88.1} & \pv{51.2} & \pv{90.5} & \pv{77.2} & \pv{89.1} & \pv{59.6} & \pv{27.4} \\
+\sys{}, \vbi{} & consequence & \pv{98.0} & \pv{28.4} & \pv{58.6} & \pv{83.2} & \pv{92.4} & \pv{76.8} & \pv{34.1} & \pv{65.4} & \pv{62.7} & \pv{88.4} & \pv{26.6} & \pv{12.4} \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -589,21 +614,21 @@ corresponding statement of \tref{tab:plan} for that regime.}
 \textbf{Stress} & \textbf{Setting} & \textbf{In-dist.\ avg} & \textbf{Perturbation avg} & \textbf{Coupling gain} \\
 \midrule
 \panel{5}{Corpus volume} \\
-& one tenth of the corpus & \pv{97.3} & \pv{69.4} & \pv{$+$3.1} \\
-& three tenths of the corpus & \pv{97.6} & \pv{73.1} & \pv{$+$6.8} \\
+& one tenth of the corpus & \pv{97.4} & \pv{55.1} & \pv{$+$2.4} \\
+& three tenths of the corpus & \pv{97.7} & \pv{58.6} & \pv{$+$5.1} \\
 \rowcolor{tabhl}
-& the whole corpus & \pv{98.0} & \pv{77.2} & \pv{$+$12.5} \\
+& the whole corpus & \pv{98.0} & \pv{62.7} & \pv{$+$9.3} \\
 \addlinespace[2pt]
 \panel{5}{Action to visual coupling} \\
 \rowcolor{tabhl}
-& full corpus & \pv{98.0} & \pv{77.2} & \pv{$+$12.5} \\
-& joint-space subset with a fixed camera & \pv{96.9} & \pv{63.1} & \pv{$+$0.6} \\
+& full corpus & \pv{98.0} & \pv{62.7} & \pv{$+$9.3} \\
+& joint-space subset with a fixed camera & \pv{96.9} & \pv{50.2} & \pv{$+$0.5} \\
 \addlinespace[2pt]
-\panel{5}{Coupling depth} \\
-& first ten layers & \pv{96.8} & \pv{61.4} & \pv{$+$3.0} \\
-& last ten layers & \pv{97.0} & \pv{64.2} & \pv{$+$5.8} \\
+\panel{5}{Coupling depth, no embodied pretraining} \\
+& first ten layers & \pv{96.8} & \pv{49.7} & \pv{$+$2.1} \\
+& last ten layers & \pv{97.0} & \pv{51.9} & \pv{$+$4.3} \\
 \rowcolor{tabhl}
-& all thirty layers & \pv{97.2} & \pv{66.5} & \pv{$+$8.1} \\
+& all thirty layers & \pv{97.2} & \pv{53.8} & \pv{$+$6.2} \\
 \bottomrule
 \end{tabular}}
 \end{table}
