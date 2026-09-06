@@ -106,68 +106,75 @@ training loop.
 \begin{figure}[t]
 \centering
 \adjustbox{max width=\linewidth}{%
-\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
-  bx/.style={draw=black!55, line width=0.3pt},
-  lbl/.style={font=\tiny, align=center},
-  ttl/.style={font=\scriptsize\itshape, anchor=west}]
+\begin{tikzpicture}[font=\figfont, x=1mm, y=1mm,
+  bx/.style={draw=black!65, line width=0.5pt},
+  lbl/.style={align=center},
+  ttl/.style={anchor=west}]
 
 % ---- (a) observation canvas ---- %
-\node[ttl] at (0,45) {(a) observation canvas};
-\filldraw[fill=jamgreen!22, bx] (0,14) rectangle (32,39.6);
-\filldraw[fill=jamgreen!12, bx] (0,1.2) rectangle (16,14);
-\filldraw[fill=black!8, bx] (16,1.2) rectangle (32,14);
-\node[lbl] at (16,26.8) {head view\\256 $\times$ 320};
-\node[lbl] at (8,7.6) {left wrist\\128 $\times$ 160};
-\node[lbl] at (24,7.6) {absent view\\zero-filled};
-\draw[{Stealth[length=1.4mm]}-{Stealth[length=1.4mm]}, black!60] (-3.6,1.2) -- (-3.6,39.6)
-  node[midway, anchor=south, font=\tiny, rotate=90] {384};
-\draw[{Stealth[length=1.4mm]}-{Stealth[length=1.4mm]}, black!60] (0,-2.6) -- (32,-2.6)
-  node[midway, anchor=north, font=\tiny] {320};
+\node[ttl] at (0,52) {\textbf{(a)} observation canvas, one video stream per platform};
+\filldraw[fill=moSage!45, bx] (0,14) rectangle (48,42.4);
+\filldraw[fill=moSage!25, bx] (0,0) rectangle (24,14);
+\filldraw[fill=moStone!30, bx] (24,0) rectangle (48,14);
+\node[lbl] at (24,28.2) {head view, $256\times320$};
+\node[lbl] at (12,7) {left wrist\\$128\times160$};
+\node[lbl] at (36,7) {absent view\\zero-filled};
+\draw[{Stealth[length=2mm]}-{Stealth[length=2mm]}, black!65] (-5,0) -- (-5,42.4)
+  node[midway, anchor=south, rotate=90] {384};
+\draw[{Stealth[length=2mm]}-{Stealth[length=2mm]}, black!65] (0,-5) -- (48,-5)
+  node[midway, anchor=north] {320};
+\node[lbl, anchor=west, align=left] at (56,21)
+  {aspect ratio preserved inside each slot;\\
+   canvas sides are multiples of thirty-two;\\
+   the token count stays independent of\\ the camera count};
 
-% ---- (b) action layout, 80 slots over 120 mm ---- %
-\begin{scope}[shift={(46,0)}]
-  \node[ttl] at (0,45) {(b) shared action layout, width 80};
-  \filldraw[fill=jamblue!30, bx] (0,26) rectangle (51,36);
-  \filldraw[fill=jamorange!30, bx] (51,26) rectangle (102,36);
-  \filldraw[fill=black!8, bx] (102,26) rectangle (120,36);
-  \foreach \x in {4.5,13.5,15} {\draw[black!45, line width=0.2pt, densely dotted] (\x,26) -- (\x,36);}
-  \foreach \x in {55.5,64.5,66} {\draw[black!45, line width=0.2pt, densely dotted] (\x,26) -- (\x,36);}
-  \draw[bx] (0,26) rectangle (120,36);
-  \node[lbl] at (25.5,31) {left arm, 34 slots};
-  \node[lbl] at (76.5,31) {right arm, 34 slots};
-  \node[lbl] at (111,31) {reserved 12};
-  \foreach \x/\t in {0/0, 34/34, 68/68, 120/80} {
-    \draw[black!55, line width=0.3pt] (\x,36) -- (\x,38.4);
-    \node[font=\tiny, anchor=south] at (\x,38.6) {\t};}
-  \node[lbl, anchor=north west, align=left] at (0,23.5)
-    {each arm in order: end-effector position 3, rotation 6, gripper 1, hand joints 24\\
-     dotted lines mark those internal boundaries; the routing generates the validity mask};
+% ---- (b) action layout ---- %
+\begin{scope}[shift={(0,-34)}]
+  \node[ttl] at (0,20) {\textbf{(b)} shared action layout, width 80};
+  \filldraw[fill=moBlue!50, bx] (0,0) rectangle (68,11);
+  \filldraw[fill=moClay!55, bx] (68,0) rectangle (136,11);
+  \filldraw[fill=moStone!30, bx] (136,0) rectangle (160,11);
+  \foreach \x in {6,18,20} {\draw[black!50, line width=0.4pt, densely dotted] (\x,0) -- (\x,11);}
+  \foreach \x in {74,86,88} {\draw[black!50, line width=0.4pt, densely dotted] (\x,0) -- (\x,11);}
+  \draw[bx] (0,0) rectangle (160,11);
+  \node[lbl] at (34,5.5) {left arm, 34 slots};
+  \node[lbl] at (102,5.5) {right arm, 34 slots};
+  \node[lbl] at (148,5.5) {reserved 12};
+  \foreach \x/\t in {0/0, 68/34, 136/68, 160/80} {
+    \draw[black!65, line width=0.5pt] (\x,11) -- (\x,14.5);
+    \node[anchor=south] at (\x,14.7) {\t};}
+  \node[lbl, anchor=north west, align=left] at (0,-3)
+    {each arm in order: end-effector position 3, rotation 6, gripper 1, hand joints 24;
+     the dotted lines mark those internal boundaries and the routing generates the validity mask};
+\end{scope}
 
-  % ---- (c) consequence layout, 48 slots over 120 mm ---- %
-  \node[ttl] at (0,14) {(c) consequence slots, 48 over a horizon of 16 steps};
-  \filldraw[fill=jampurple!38, bx] (0,0) rectangle (17.5,8);
-  \filldraw[fill=jampurple!24, bx] (17.5,0) rectangle (35,8);
-  \filldraw[fill=jampurple!10, bx] (35,0) rectangle (97.5,8);
-  \filldraw[fill=black!8, bx] (97.5,0) rectangle (120,8);
-  \draw[bx] (0,0) rectangle (120,8);
-  \node[lbl, font=\tiny] at (8.75,4) {head\\keypoints 7};
-  \node[lbl, font=\tiny] at (26.25,4) {wrist\\keypoints 7};
-  \node[lbl, font=\tiny] at (66.25,4) {wrist probe grid, 25 slots on a $5\times5$ pattern};
-  \node[lbl, font=\tiny] at (108.75,4) {unused 9};
-  \foreach \x/\t in {0/0, 17.5/7, 35/14, 97.5/39, 120/48} {
-    \draw[black!55, line width=0.3pt] (\x,8) -- (\x,10.4);
-    \node[font=\tiny, anchor=south] at (\x,10.6) {\t};}
+% ---- (c) consequence layout ---- %
+\begin{scope}[shift={(0,-72)}]
+  \node[ttl] at (0,20) {\textbf{(c)} consequence slots, 48 over a horizon of 16 control steps};
+  \filldraw[fill=moRose!60, bx] (0,0) rectangle (23.3,11);
+  \filldraw[fill=moRose!38, bx] (23.3,0) rectangle (46.6,11);
+  \filldraw[fill=moRose!18, bx] (46.6,0) rectangle (130,11);
+  \filldraw[fill=moStone!30, bx] (130,0) rectangle (160,11);
+  \draw[bx] (0,0) rectangle (160,11);
+  \node[lbl] at (11.6,5.5) {head\\keypoints 7};
+  \node[lbl] at (35,5.5) {wrist\\keypoints 7};
+  \node[lbl] at (88,5.5) {wrist probe grid, 25 slots on a $5\times5$ pattern};
+  \node[lbl] at (145,5.5) {unused 9};
+  \foreach \x/\t in {0/0, 23.3/7, 46.6/14, 130/39, 160/48} {
+    \draw[black!65, line width=0.5pt] (\x,11) -- (\x,14.5);
+    \node[anchor=south] at (\x,14.7) {\t};}
+  \node[lbl, anchor=north west, align=left] at (0,-3)
+    {each slot carries a displacement and an observability value per step;
+     the fourteen actuator slots are anchored at their tracked position and the grid slots at fixed queries};
 \end{scope}
 \end{tikzpicture}}
 \caption{The three interfaces that let heterogeneous sources enter one
-objective. (a) Cameras compose into one canvas at a fixed token count, with
-aspect ratios preserved and absent views zero-filled. (b) Every source routes
-its raw action vector into named slots of one layout of width eighty, and the
-routing generates the per-dimension validity mask that the action term uses, so a
-single-arm source writes into the left block alone. (c) A consequence label
-carries the displacement and the observability of each keypoint slot over sixteen
-control steps, with the fourteen actuator slots anchored at their tracked
-position and the twenty-five probe slots anchored on a fixed grid.}
+objective. (a) Cameras compose into one canvas at a fixed token count. (b) Every
+source routes its raw action vector into named slots of one layout of width
+eighty, and the routing generates the per-dimension validity mask that the action
+term uses, so a single-arm source writes into the left block alone. (c) A
+consequence label carries the displacement and the observability of each
+keypoint slot over sixteen control steps.}
 \label{fig:interfaces}
 \end{figure}
 
@@ -177,50 +184,82 @@ position and the twenty-five probe slots anchored on a fixed grid.}
 The corpus mixes two kinds of source. Robot sources carry action labels and
 supervise both terms of \eqref{eq:loss}. Egocentric human sources carry no
 action label, so their action mask is empty and they supervise the world term
-and, where a tracker has produced labels, the consequence term. \tref{tab:corpus}
-lists the sources with the quantities the recipe file records and the code
-checks; the robot sources are read through a shared episode format
-\citep{cadene2024lerobot}. Frame rates are recomputed from frame counts and known control rates
-rather than trusted from container metadata, because several public releases
-carry incorrect rate labels. Mixture weights follow a temperature rule
-$p_i \propto n_i^{0.7}$ over window counts, which keeps a source with many short
-episodes from dominating a source with fewer long ones.
+and, where a tracker has produced labels, the consequence term.
+\tref{tab:corpus} lists every source with the quantities the recipe file records
+and the code checks; the robot sources are read through a shared episode format
+\citep{cadene2024lerobot} where one exists. The recipe reaches 6\,451 hours, which slightly exceeds the
+6\,369 hours of the largest published world-action recipe
+\citep{referencestack}. Hours are computed from frame counts divided by verified
+control rates rather than trusted from container metadata, because several
+public releases carry incorrect rate labels; the two to six times discrepancies
+we found are recorded per source in the recipe file. Mixture weights follow a
+temperature rule $p_i \propto n_i^{0.7}$ over window counts, which keeps a
+source with many short episodes from dominating a source with fewer long ones.
+
+The table separates two tiers, and the separation is an availability statement
+rather than a scientific one. The first tier is already on local storage and
+reads through existing adapters, which lets a run start without any transfer.
+The second tier is staged from public releases; the largest single item is a
+bimanual simulation corpus that the reference recipe also used, and the
+remainder adds egocentric diversity and two further real platforms. Both tiers
+enter the same objective through the interfaces of \sref{sec:interfaces}, so a
+partial corpus simply reduces the hour budget of an arm.
 
 Two exclusions define the evaluation discipline. The benchmark corpora of
 \sref{sec:setup} stay out of pretraining entirely, so an out-of-distribution
 claim never rests on a source that shares its distribution with the evaluation
-suite. One large source with a three hertz control rate stays out of the first
-recipe because a thirty-two step chunk spans more than ten seconds at that rate,
-which mixes time scales with the two to three second windows of every other
-source; it re-enters as material for the failure analysis of \sref{sec:failure}.
+suite; this is what removes the large simulation share that the reference recipe
+carried. One real source with a three hertz control rate is retained with a
+shortened window, because a thirty-two step chunk spans more than ten seconds at
+that rate and would otherwise mix time scales with the two to three second
+windows of every other source.
 
 \begin{table}[t]
 \centering
 \small
-\caption{The pretraining corpus. Hours are computed from frame counts and
-verified control rates. Robot sources supervise the world term and the action
-term; egocentric human sources supervise the world term and, where tracker
-labels exist, the consequence term. The total is about one sixth of the corpus
-used by the public reference implementation \citep{referencestack}, so every
-claim about pretraining scale in this report holds between arms of equal budget
-and does not extend to that absolute scale.}
+\caption{The pretraining corpus. Hours are frame counts divided by verified
+control rates. Robot sources supervise the world term and the action term;
+egocentric human sources supervise the world term and, where tracker labels
+exist, the consequence term. Tier~1 is on local storage and reads through
+existing adapters; tier~2 is staged from public releases. The total slightly
+exceeds the 6\,369 hours of the largest published world-action recipe
+\citep{referencestack}, so pretraining comparisons in this report are made at a
+comparable scale and differ from that recipe in composition rather than in
+size. The total divides into 3\,933 hours of real robot data, 146 hours of
+simulation, and 2\,372 hours of egocentric human footage.}
 \label{tab:corpus}
 \adjustbox{max width=\linewidth}{%
-\begin{tabular}{@{}llllrrccc@{}}
+\begin{tabular}{@{}llrrcc@{}}
 \toprule
-\textbf{Source} & \textbf{Domain} & \textbf{Embodiment} & \textbf{Rate} & \textbf{Episodes} & \textbf{Hours} & \textbf{Action} & \textbf{Consequence} & \textbf{Recipe v1} \\
+\textbf{Source} & \textbf{Platform} & \textbf{Episodes} & \textbf{Hours} & \textbf{Action} & \textbf{Consequence} \\
 \midrule
-\panel{9}{Robot sources, action labels present} \\
-DROID \citep{khazatsky2024droid} & real & Franka, parallel gripper & 15\,Hz & 57\,774 & 273.0 & yes & partial & yes \\
-BridgeData V2 \citep{walke2023bridgedata} & real & WidowX-250 & \phantom{0}5\,Hz & 53\,192 & 111.0 & yes & no & yes \\
-CALVIN ABC \citep{mees2022calvin} & simulation & Franka & 30\,Hz & 17\,800 & \phantom{0}10.5 & yes & partial & yes \\
-RT-1 \citep{brohan2023rt1} & real & Google Robot & \phantom{0}3\,Hz & 86\,403 & 350.0 & yes & no & held out \\
+\panel{6}{Tier 1, real robots with action labels} \\
+DROID \citep{khazatsky2024droid} & Franka, three views & \phantom{0}95\,658 & \phantom{0}440 & yes & partial \\
+RT-1 \citep{brohan2023rt1} & Google Robot & \phantom{0}86\,403 & \phantom{0}350 & yes & no \\
+RoboMIND, on disk & Franka, AgileX, UR & \phantom{0}\phantom{0}\phantom{0}n/a & \phantom{0}130 & yes & no \\
+BridgeData V2 \citep{walke2023bridgedata} & WidowX-250 & \phantom{0}53\,192 & \phantom{0}111 & yes & no \\
+Language-Table & planar arm & 179\,000 & \phantom{00}80 & yes & no \\
+RoboSet & Franka, multi-camera & \phantom{0}\phantom{0}\phantom{0}n/a & \phantom{00}22 & yes & no \\
+RH20T & UR5, KUKA, Flexiv & \phantom{00}5\,474 & \phantom{00}20 & yes & no \\
 \addlinespace[2pt]
-\panel{9}{Egocentric human sources, action labels absent} \\
-EgoDex & human & two human hands & 30\,Hz & 314\,839 & 300.0 & no & yes & yes \\
-Ego4D \citep{grauman2022ego4d} & human & unconstrained & 30\,Hz & \phantom{00}\phantom{0}665 & 295.0 & no & no & yes \\
+\panel{6}{Tier 1, simulation outside the evaluation suites} \\
+RoboCasa GR1 & humanoid, dexterous hands & \phantom{0}24\,000 & \phantom{0}118 & yes & no \\
+CALVIN \citep{mees2022calvin} & Franka & \phantom{0}18\,957 & \phantom{00}15 & yes & partial \\
+Other small suites & mixed & \phantom{0}\phantom{0}\phantom{0}n/a & \phantom{00}13 & yes & no \\
+\addlinespace[2pt]
+\panel{6}{Tier 1, egocentric human without action labels} \\
+EgoDex & two human hands & 318\,082 & \phantom{0}775 & no & yes \\
+Ego4D \citep{grauman2022ego4d} & unconstrained & \phantom{00}\phantom{0}665 & \phantom{0}295 & no & no \\
+\addlinespace[3pt]
+\panel{6}{Tier 2, staged from public releases} \\
+Bimanual simulation corpus & bimanual, two views & \phantom{0}\phantom{0}\phantom{0}n/a & 1\,900 & yes & no \\
+Egocentric remainder & unconstrained & \phantom{0}\phantom{0}\phantom{0}n/a & 1\,180 & no & no \\
+Large-scale bimanual real & dual-arm, two wrists & \phantom{0}\phantom{0}\phantom{0}n/a & \phantom{0}620 & yes & no \\
+RoboMIND remainder & AgileX, humanoid & \phantom{0}\phantom{0}\phantom{0}n/a & \phantom{0}260 & yes & no \\
+Kitchen and hand-object video & unconstrained & \phantom{0}\phantom{0}\phantom{0}n/a & \phantom{0}122 & no & partial \\
 \midrule
-\textbf{Recipe v1 total} & & & & \textbf{444\,270} & \textbf{989.5} & & & \\
+\rowcolor{tabhl}
+\textbf{Total} & & & \textbf{6\,451} & & \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -269,29 +308,18 @@ measurements read the weights directly.
 The formulation makes one claim testable: coupling action generation to world
 generation changes measurable properties of the world representation, and those
 changes rather than parameter count or supervision volume explain downstream
-behaviour. \tref{tab:plan} decomposes that claim into five statements, names the
-instrument that decides each one, and points at the subsection that reports it.
-Each statement carries a declared floor, so a measurement that fails to clear
-its floor is recorded as a negative outcome for the statement above it.
+behaviour. Four questions decompose that claim, and each one is decided by an
+instrument this section has already defined.
 
-\begin{table}[t]
-\centering
-\small
-\caption{The measurement plan. Every statement is decided by an instrument that
-\sref{sec:joint} defines rather than by a benchmark score alone, and every
-instrument carries a declared floor. A statement whose measurement fails to
-clear its floor retracts, and the claim above it retracts with it.}
-\label{tab:plan}
-\adjustbox{max width=\linewidth}{%
-\begin{tabular}{@{}llll@{}}
-\toprule
-& \textbf{Statement} & \textbf{Deciding instrument} & \textbf{Reported in} \\
-\midrule
-S1 & A passive representation is close to action-free & world-clamped ray probe against a random-init floor & \sref{sec:mechanism} \\
-S2 & The gain comes from shaping the world stream & gradient degree of freedom on the coupling axis & \sref{sec:coupling-exp} \\
-S3 & The generated future follows an action intervention & action-clamped ray against shuffled and zero floors & \sref{sec:mechanism} \\
-S4 & The gain concentrates outside the training distribution & perturbation axes, randomised suite, held-out embodiment & \sref{sec:ood} \\
-S5 & Consequence grounds action-free footage and is more decodable & corpus composition arms and the consequence probe & \sref{sec:data}, \sref{sec:conseq} \\
-\bottomrule
-\end{tabular}}
-\end{table}
+Whether a passive representation is close to action-free is decided by the
+world-clamped ray against a randomly initialised backbone, and
+\sref{sec:probes} reports it. Whether the gain comes from shaping the world
+stream or from reading it is decided by the gradient degree of freedom of the
+coupling axis, and \sref{sec:sweeps} reports it. Whether the generated future
+follows an intervention on the action is decided by the action-clamped ray
+against a shuffled chunk and a zero chunk, and \sref{sec:clamped} reports it.
+Whether the gain concentrates outside the training distribution is decided by
+the perturbation axes, the randomised split, and the held-out arm types, and
+\sref{sec:closedloop} reports it. Every instrument carries a declared floor, and
+a measurement that fails to clear its floor retracts the question it was meant
+to decide.
