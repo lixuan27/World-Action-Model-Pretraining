@@ -1,77 +1,72 @@
 \section{Introduction}
 \label{sec:intro}
 
-Robot manipulation policies are converging on two ways of turning pixels and
-language into motor commands. The first family starts from a vision-language
-model and attaches an action head to it, so the policy inherits semantic breadth
-from web-scale pretraining and learns the map from an instruction to a motion
-directly. The second family starts from a video generative model and asks a
-single network to produce the future the robot is about to see together with the
-actions that produce it, which places a model of the world inside the policy
-itself. This report studies the second family, which the literature calls
-world-action models. Two properties make that family compelling. A video
-objective supplies dense supervision from footage whose action labels are
-absent, so the policy acquires physical regularity from human activity and from
-unannotated robot logs. The predicted future then acts as an intermediate
-quantity that ties every candidate action to a visible consequence, which
-grounds control in the same representation that already carries scene dynamics.
+Large-scale video pretraining has become the standard way to give an embodied
+agent prior knowledge about the physical world. A video generative model learns
+the statistics of how scenes evolve, so it acquires object permanence, contact
+events, and the temporal regularity of everyday manipulation from footage that
+needs no action annotation. Robot learning takes that prior in two ways. One way
+generates a future observation and recovers a control command from it with a
+separate module. The other way attaches an action decoder to the pretrained
+backbone and fine-tunes both on teleoperation data. Both ways treat the
+pretraining stage as a model of observation dynamics, which is a model of what
+usually happens next in the world.
 
-Building a world-action model requires a long sequence of independent decisions,
-and every published system settles all of them at once. A designer selects the
-video generator that supplies the backbone. The designer selects the visual
-representation that this generator denoises. The designer selects the way the
-action stream attaches to the video stream, and the amount of the video
-computation that the action stream is permitted to read. The designer selects
-the corpus the joint model is pretrained on and the order in which the two
-streams are denoised once the policy drives a robot. Each published result
-reports one point of this space together with one benchmark score. These
-decisions interact strongly, so the reasoning that justifies a choice inside one
-system loses its force inside another. A designer who sets out to build a new
-world-action model therefore inherits a collection of working systems together
-with an open question about which choice actually carries the performance.
+Embodied interaction places a further requirement on that prior. An agent has to
+know how its own actions participate in the evolution it observes, because
+control requires selecting among the futures the agent can actually bring about.
+A model of observation dynamics marginalises the causal variable it needs, since
+the actions that produced the training footage are integrated out. The resulting
+representation supports prediction of the likely future and leaves the mapping
+from an intervention to its visual effect unconstrained. This is the gap the
+paper addresses, and we refer to closing it as action grounding, meaning that the
+pretrained representation encodes how actions constrain and produce changes in
+the world rather than encoding the changes alone.
 
-We address this by treating the design space itself as the object of study. The
-report contributes a framework in which each decision above becomes an
-independent component behind a fixed interface. One configuration file selects
-the video backbone and the visual representation it denoises. The same file
-selects how the action stream couples to that backbone and how much of the
-backbone the action stream reads. The same file selects the pretraining mixture
-and the schedule that drives the policy at run time. The framework is the
-instrument that makes measurement possible, because interchangeable components
-allow a study to hold an entire configuration fixed and move one axis at a time
-under one dataset, one optimisation budget, one evaluation harness and one
-metric. We name the framework and the model family it produces \sys, for joint
-action-world modelling. The pretraining it performs is action grounded in a
-precise sense, because one denoising process predicts the future observation and
-predicts the actions that bring that observation about, and the visibility
-pattern between the two streams sets how far each one informs the other.
+We formulate action grounding as a joint generative problem and call the
+formulation Joint Action-World Modeling, abbreviated \sys{}. A single continuous
+flow-matching process generates the future observation and the future action
+chunk together, and the two token streams exchange information through one
+shared attention space at every layer of the backbone. Two properties make this a
+pretraining principle rather than an added prediction head. The two streams carry
+independently drawn noise levels, so the training distribution covers a whole
+plane of noise-level pairs and every monotone path through that plane is a valid
+sampler of the trained model; one model therefore instantiates a policy, an
+action-conditioned world model, and an inverse dynamics model as three
+conditional slices of the same learned distribution. The exchange is
+bidirectional and carries gradient in both directions, so the action objective
+shapes the world representation as well as reading it. Those two properties turn coupling into a
+single experimental axis with three degrees of freedom, namely cross-stream
+visibility, gradient flow, and coupling depth, and the axis separates joint
+modelling from an auxiliary action head under matched parameters, data, and
+optimisation.
 
-The study asks six questions in the order a designer meets them. It asks how the
-action stream should be coupled to the video stream. It asks which video
-generator repays its computational cost. It asks what property of a visual
-representation makes that representation a good denoising target for a policy.
-It asks how much of the video computation the action stream should read, and
-whether large-scale pretraining moves the answer. It asks which mixture of human
-egocentric footage and robot trajectories to pretrain on, and whether the two
-sources should be staged or combined. It asks how the two streams should be
-denoised once the policy controls a robot. We then compose the configuration
-that the study selects, pretrain it on a large mixture of human egocentric
-footage and robot trajectories spanning simulation and real hardware, and
-fine-tune the result for every benchmark and every physical platform we
-evaluate.
+The formulation extends one step further, from the command an agent issues to the
+change that command produces. A motor command specifies how the actuators move
+and leaves the resulting change in the world implicit. The consequence of an
+action, defined here as the displacement of a set of world keypoints over the
+next few control steps together with their observability, specifies the change
+directly in image coordinates. Consequence supervision therefore reaches data
+that carries no action label, because egocentric human footage shows the effect
+of a manipulation even when the underlying commands are unavailable. Consequence
+also gives a probe of representation content that does not depend on the action
+space of any single embodiment, so the same measurement applies across robots
+with different kinematics. We treat consequence as a third generated stream
+inside the same joint process, which keeps one formulation, one objective, and
+one model tree.
 
-The value of this report follows from the completeness of what it releases. Every
-point of the study corresponds to a checkpoint we publish, so a reader who
-doubts a conclusion can reload the exact model that produced it. The pretrained
-model demonstrates that the resulting map is actionable, because that model is
-precisely the configuration the study selected, scaled to a large corpus and
-trained once. A designer consequently gains a defensible default for every
-decision, an account of which decisions deserve additional capacity, and an open
-path that runs from raw footage to a policy executing on physical hardware. Our
-contributions follow this structure. We build a modular framework that turns the
-world-action design space into a set of interchangeable components sharing one
-training, deployment and evaluation interface (\sref{sec:framework}). We run a
-controlled six-axis study of that space under a single protocol
-(\sref{sec:study}). We release a pretrained foundation model together with
-fine-tuned variants covering a broad suite of simulated benchmarks and several
-real robots (\sref{sec:alpha}).
+This paper delivers the formulation, its implementation, the pretraining corpus
+that mixes robot trajectories with egocentric human footage, and a
+pre-registered measurement programme built around one question: whether
+structurally coupling action generation to world generation changes measurable
+properties of the world representation, and whether those changes explain
+downstream control behaviour. The programme declares its floors, its criteria,
+and the conditions under which the coupling stops paying, so a negative outcome
+is recorded rather than absorbed. Reference values reproduced from a public
+world-action implementation fix the performance regime that the mainline
+reproduction has to reach, and every value the programme still has to measure is
+marked as a target in the text and in the source. \sref{sec:joint} develops the
+formulation and the measurement instruments it implies. \sref{sec:pretrain}
+gives the realisation, the interfaces that let heterogeneous sources enter one
+objective, and the pretraining procedure. \sref{sec:exp} states the programme
+and its result tables.

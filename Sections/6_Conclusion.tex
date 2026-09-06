@@ -1,53 +1,53 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-This report treated the design of a world-action model as a space to be mapped
-and built the instrument that maps it. The framework of \sref{sec:framework}
-turns six independent decisions into interchangeable components behind one
-training, deployment and evaluation interface, and it states each decision
-formally, so a coupling architecture, a visibility pattern and a denoising
-trajectory become objects with definite semantics. Two derivations carried the
-design. Independent noise-level sampling across the two streams covers the whole
-level square, which makes the deployment-time trajectory a variable a practitioner
-selects after training. Cross-modal visibility determines whether an action-free
-mixture component contributes a consistent video objective, which predicts that
-the best visibility pattern changes once large-scale pretraining enters.
+World pretraining supplies a model of how the visual world evolves, and embodied
+interaction needs a model of how the agent participates in that evolution. This
+report closes that gap by construction rather than by an added prediction task.
+Joint Action-World Modeling places the future observation and the future action
+chunk in one continuous flow-matching process, gives each stream its own noise
+level, and lets the two streams exchange keys and values through one shared
+attention space at every layer of the backbone.
 
-The study of \sref{sec:study} moved one axis at a time under one dataset, one
-budget and one harness, and it selects a specific configuration. The action
-stream becomes its own transformer that meets the video backbone through one
-mixed attention at every layer. The backbone is the five-billion-parameter
-text-and-image-to-video model, which balances accuracy against the cost of a
-generation. The denoising target is a compact reconstructive latent, and a
-frozen reducer brings a semantic latent to comparable quality by matching its
-width, which identifies compactness as the property that matters. Visibility is
-mutual once pretraining is available and one-directional before it. The corpus
-co-trains human egocentric footage with robot trajectories in a single mixture,
-which raises out-of-distribution success far more than it raises
-in-distribution success. The two streams denoise together at deployment.
+Two consequences follow from the formulation alone and hold independently of any
+measurement. Independent noise levels give the training distribution full
+support on the square of level pairs, which makes the sampler a deployment-time
+choice and turns one trained network into a policy, an action-conditioned world
+model, and an inverse dynamics model at once. Those same three paths are
+measurement instruments, because the world-clamped ray reads how much action
+information the world representation carries and the action-clamped ray reads how
+strongly the generated future follows an intervention on the action. The
+coupling therefore becomes a single experimental axis with three declared
+degrees of freedom, and the gradient degree of freedom separates a representation
+that the action objective shapes from a representation that an auxiliary head
+merely reads.
 
-\sysa{} is that configuration scaled to a corpus of six thousand hours and
-trained once, then fine-tuned per platform with nothing else changed. It reaches
-the strongest reported world-action result on five of the nine simulated suites
-in \sref{sec:sim}, and it operates three physical platforms including a
-dexterous hand and three bimanual arm types in \sref{sec:real}. The deployment
-stack of \sref{sec:cost} brings one generation into a range a thirty-hertz
-controller absorbs, and the asynchronous executor removes the replanning stall
-that a receding-horizon policy otherwise imposes on a physical loop.
+The formulation extends to action consequence without a second method. Defining
+consequence as the displacement and observability of world keypoints places the
+grounding signal in image coordinates, which reaches egocentric human footage
+that carries no action label and gives a probe of representation content that
+transfers across embodiments. Consequence enters as a third generated stream of
+the same joint process, shares the action noise level, and inherits the
+visibility setting under study, so the model tree stays single.
 
-Three directions stay open. Robustness to camera placement and to sensor noise
-is the weakest axis of the current model, and the perturbation results of
-\tref{tab:liberoplus} locate the gap precisely enough to target it with
-viewpoint augmentation inside the pretraining mixture. Precision tasks remain
-harder for the model than generalization tasks, which points at the temporal
-resolution of the action chunk and at the granularity of the latent the video
-stream denoises. The tri-system coupling reaches a higher success rate than the
-selected one at a higher cost per generation, so a version of it that keeps the
-understanding expert active only when the instruction demands semantic
-disambiguation is worth building.
+The implementation is verified at the level the current runs support. The
+uncoupled forward pass reproduces the official backbone implementation to the
+bit, gradients are blocked exactly where the coupling specification says they
+are, and a resumed run repeats no optimiser step. Normalisation statistics for
+both battlegrounds are computed and frozen into the cache fingerprint. The
+closed-loop and representation measurements of \sref{sec:exp} are pre-registered
+with their arms, their floors, their statistical test, and their acceptance
+criteria fixed in advance, and the targets printed in this report record what
+each measurement is expected to show rather than what it has shown. Reference
+values reproduced from a public world-action implementation fix the regime the
+mainline arm has to reach.
 
-Every element of this report is released: the framework, the pretrained
-checkpoint, the fine-tuned variant for each benchmark and each robot, and one
-checkpoint per point of the design study. A reader who disagrees with a
-conclusion can therefore reload the model that produced it and move the axis
-again.
+The core insight the formulation offers is therefore stated as a testable
+proposition rather than as a result: if coupling helps, it helps by changing what
+the world representation encodes about action and consequence, and the three
+paths through the noise plane are sufficient to decide that question without
+appealing to a benchmark average. The measurement plan of \tref{tab:plan} names
+the outcome that would retract each statement, and the honest boundaries are
+recorded with it: the study runs in simulation alone, and its pretraining corpus
+is about one sixth of the largest published recipe, so every claim about
+pretraining scale holds between arms of equal budget.

@@ -1,0 +1,297 @@
+\section{Action-Grounded World Pretraining}
+\label{sec:pretrain}
+
+\sref{sec:joint} states the objective and the measurement instruments it
+implies. This section gives the realisation: the two streams and the geometry
+that lets them share one attention space, the interfaces that let heterogeneous
+sources enter one objective, the corpus, the pretraining procedure, and the
+mapping from the formulation to the measurements of \sref{sec:exp}.
+
+\subsection{Two Streams in One Attention Space}
+\label{sec:streams}
+
+\Paragraph{World stream.}
+The world stream is a pretrained text-and-image-to-video diffusion transformer of
+five billion parameters from the Wan family \citep{wan2025wan}, used with its
+official weights and its official implementation. It carries thirty layers of
+width 3072 arranged as twenty-four attention heads of width 128. Its frozen variational
+autoencoder \citep{kingma2014vae,rombach2022ldm} compresses space by sixteen and
+time by four into forty-eight latent channels, and its frozen text encoder supplies a variable-length language
+context. Neither frozen module holds gradient, and both are evaluated offline
+(\sref{sec:procedure}).
+
+\Paragraph{Action stream.}
+The action stream is a pre-norm transformer of thirty layers and width 1024 with
+adaptive layer normalisation driven by its own noise level, one-dimensional
+rotary positions over the chunk, and its own text cross-attention projections.
+Its readout heads are zero-initialised, so training starts from a model whose
+world behaviour equals the video prior and whose action output is null. The
+stream projects queries, keys, and values into twenty-four heads of width 128,
+matching the world backbone exactly, which is the condition that lets the two
+streams share one attention space while keeping different residual widths. The
+construction is a mixture of two experts over one attention operator, applied
+across the action and world modalities.
+
+\Paragraph{The exchange.}
+World layer $i$ pairs with action layer $j$. The action block projects its
+queries, keys, and values first and publishes the keys and values. The world
+block then runs with an attention processor that appends those keys and values
+when the visibility setting lets the world read the action. The action block
+finally attends over the concatenation of the world keys and values with its
+own, optionally through a stop-gradient, and finishes its block. Attention
+carries no parameters, so the coupling costs exactly the parameters of the
+second stream and nothing else. One boolean mask built from the coupling
+specification decides every visibility question, and no other part of the
+forward pass reads the coupling.
+
+\Paragraph{Token layout.}
+The action-side sequence is the state condition token, then thirty-two action
+tokens, then sixteen consequence tokens when the consequence stream is enabled,
+which gives forty-nine action-side tokens. A window samples nine observation
+frames at stride four across thirty-two raw control steps, and the autoencoder
+turns them into three latent frames of which the first is the clean present
+observation. The observation canvas of \sref{sec:interfaces} yields 288 world
+tokens for a two-camera platform and 360 for a three-camera platform. The action
+side is therefore a small fraction of the joint sequence, and the cost of the
+coupling is dominated by the second stream rather than by the attention.
+
+\subsection{Interfaces That Admit Heterogeneous Sources}
+\label{sec:interfaces}
+
+\Paragraph{Observation canvas.}
+Every platform composes its cameras into one canvas whose slots are declared in
+configuration, so multiple views enter as a single video stream and the token
+count stays independent of the camera count. Each view keeps its aspect ratio
+inside its slot, absent views are zero-filled, and canvas dimensions are
+multiples of thirty-two. A two-camera platform uses a canvas of height 384 and
+width 256 with a 256 by 256 head view above a 128 by 128 wrist view. A
+three-camera bimanual platform uses height 384 and width 320 with a 256 by 320
+head view above two 128 by 160 wrist views. \fref{fig:interfaces} draws both the
+canvas and the two vector layouts.
+
+\Paragraph{Action layout.}
+All sources write into one typed layout of width eighty. Each arm contributes an
+end-effector position of three dimensions, a rotation in the six-dimensional
+continuous representation, one gripper aperture, and twenty-four hand joints,
+which gives thirty-four dimensions per arm and sixty-eight for two arms; twelve
+slots stay reserved. A source declares a binding that routes each range of its
+raw vector to a named slot, and the layout derives the per-dimension validity
+mask from that binding. The mask enters the action term of \eqref{eq:loss}
+directly, so a single-arm platform contributes gradient to the left-arm slots
+alone and a source without action labels contributes to the world term alone. No
+index arithmetic lives outside the layout object, which is what makes the
+binding checkable rather than conventional.
+
+\Paragraph{Normalisation.}
+Statistics are computed per source over its training split and frozen into the
+cache fingerprint. Positions and joints receive quantile normalisation into
+$[-1,1]$. The rotation slots are pinned to the identity range so the continuous
+rotation representation passes through unchanged. The gripper slot receives a
+fixed affine map that sends a closed gripper to the low end and an open gripper
+to the high end, which removes a convention that differs between sources.
+Deployment inverts the same map before commanding the robot.
+
+\Paragraph{Consequence layout.}
+A consequence label uses forty-eight global keypoint slots over a horizon of
+sixteen control steps with the displacement gain of \eqref{eq:consequence} set
+to four. Seven slots track keypoints of the manipulator in the head view and
+seven track them in the wrist view, each anchored at its own position at the
+observation step. Twenty-five slots form a five by five probe grid over the
+wrist view anchored at fixed query locations, which gives coverage of the scene
+rather than the actuator alone. Labels come from an off-the-shelf point tracker
+run offline \citep{doersch2023tapir,karaev2024cotracker} and are stored as
+sidecar files beside the episodes, so the consequence stream adds no cost to the
+training loop.
+
+\begin{figure}[t]
+\centering
+\adjustbox{max width=\linewidth}{%
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  bx/.style={draw=black!55, line width=0.3pt},
+  lbl/.style={font=\tiny, align=center},
+  ttl/.style={font=\scriptsize\itshape, anchor=west}]
+
+% ---- (a) observation canvas ---- %
+\node[ttl] at (0,45) {(a) observation canvas};
+\filldraw[fill=jamgreen!22, bx] (0,14) rectangle (32,39.6);
+\filldraw[fill=jamgreen!12, bx] (0,1.2) rectangle (16,14);
+\filldraw[fill=black!8, bx] (16,1.2) rectangle (32,14);
+\node[lbl] at (16,26.8) {head view\\256 $\times$ 320};
+\node[lbl] at (8,7.6) {left wrist\\128 $\times$ 160};
+\node[lbl] at (24,7.6) {absent view\\zero-filled};
+\draw[{Stealth[length=1.4mm]}-{Stealth[length=1.4mm]}, black!60] (-3.6,1.2) -- (-3.6,39.6)
+  node[midway, anchor=south, font=\tiny, rotate=90] {384};
+\draw[{Stealth[length=1.4mm]}-{Stealth[length=1.4mm]}, black!60] (0,-2.6) -- (32,-2.6)
+  node[midway, anchor=north, font=\tiny] {320};
+
+% ---- (b) action layout, 80 slots over 120 mm ---- %
+\begin{scope}[shift={(46,0)}]
+  \node[ttl] at (0,45) {(b) shared action layout, width 80};
+  \filldraw[fill=jamblue!30, bx] (0,26) rectangle (51,36);
+  \filldraw[fill=jamorange!30, bx] (51,26) rectangle (102,36);
+  \filldraw[fill=black!8, bx] (102,26) rectangle (120,36);
+  \foreach \x in {4.5,13.5,15} {\draw[black!45, line width=0.2pt, densely dotted] (\x,26) -- (\x,36);}
+  \foreach \x in {55.5,64.5,66} {\draw[black!45, line width=0.2pt, densely dotted] (\x,26) -- (\x,36);}
+  \draw[bx] (0,26) rectangle (120,36);
+  \node[lbl] at (25.5,31) {left arm, 34 slots};
+  \node[lbl] at (76.5,31) {right arm, 34 slots};
+  \node[lbl] at (111,31) {reserved 12};
+  \foreach \x/\t in {0/0, 34/34, 68/68, 120/80} {
+    \draw[black!55, line width=0.3pt] (\x,36) -- (\x,38.4);
+    \node[font=\tiny, anchor=south] at (\x,38.6) {\t};}
+  \node[lbl, anchor=north west, align=left] at (0,23.5)
+    {each arm in order: end-effector position 3, rotation 6, gripper 1, hand joints 24\\
+     dotted lines mark those internal boundaries; the routing generates the validity mask};
+
+  % ---- (c) consequence layout, 48 slots over 120 mm ---- %
+  \node[ttl] at (0,14) {(c) consequence slots, 48 over a horizon of 16 steps};
+  \filldraw[fill=jampurple!38, bx] (0,0) rectangle (17.5,8);
+  \filldraw[fill=jampurple!24, bx] (17.5,0) rectangle (35,8);
+  \filldraw[fill=jampurple!10, bx] (35,0) rectangle (97.5,8);
+  \filldraw[fill=black!8, bx] (97.5,0) rectangle (120,8);
+  \draw[bx] (0,0) rectangle (120,8);
+  \node[lbl, font=\tiny] at (8.75,4) {head\\keypoints 7};
+  \node[lbl, font=\tiny] at (26.25,4) {wrist\\keypoints 7};
+  \node[lbl, font=\tiny] at (66.25,4) {wrist probe grid, 25 slots on a $5\times5$ pattern};
+  \node[lbl, font=\tiny] at (108.75,4) {unused 9};
+  \foreach \x/\t in {0/0, 17.5/7, 35/14, 97.5/39, 120/48} {
+    \draw[black!55, line width=0.3pt] (\x,8) -- (\x,10.4);
+    \node[font=\tiny, anchor=south] at (\x,10.6) {\t};}
+\end{scope}
+\end{tikzpicture}}
+\caption{The three interfaces that let heterogeneous sources enter one
+objective. (a) Cameras compose into one canvas at a fixed token count, with
+aspect ratios preserved and absent views zero-filled. (b) Every source routes
+its raw action vector into named slots of one layout of width eighty, and the
+routing generates the per-dimension validity mask that the action term uses, so a
+single-arm source writes into the left block alone. (c) A consequence label
+carries the displacement and the observability of each keypoint slot over sixteen
+control steps, with the fourteen actuator slots anchored at their tracked
+position and the twenty-five probe slots anchored on a fixed grid.}
+\label{fig:interfaces}
+\end{figure}
+
+\subsection{The Pretraining Corpus}
+\label{sec:corpus}
+
+The corpus mixes two kinds of source. Robot sources carry action labels and
+supervise both terms of \eqref{eq:loss}. Egocentric human sources carry no
+action label, so their action mask is empty and they supervise the world term
+and, where a tracker has produced labels, the consequence term. \tref{tab:corpus}
+lists the sources with the quantities the recipe file records and the code
+checks; the robot sources are read through a shared episode format
+\citep{cadene2024lerobot}. Frame rates are recomputed from frame counts and known control rates
+rather than trusted from container metadata, because several public releases
+carry incorrect rate labels. Mixture weights follow a temperature rule
+$p_i \propto n_i^{0.7}$ over window counts, which keeps a source with many short
+episodes from dominating a source with fewer long ones.
+
+Two exclusions define the evaluation discipline. The benchmark corpora of
+\sref{sec:setup} stay out of pretraining entirely, so an out-of-distribution
+claim never rests on a source that shares its distribution with the evaluation
+suite. One large source with a three hertz control rate stays out of the first
+recipe because a thirty-two step chunk spans more than ten seconds at that rate,
+which mixes time scales with the two to three second windows of every other
+source; it re-enters as material for the failure analysis of \sref{sec:failure}.
+
+\begin{table}[t]
+\centering
+\small
+\caption{The pretraining corpus. Hours are computed from frame counts and
+verified control rates. Robot sources supervise the world term and the action
+term; egocentric human sources supervise the world term and, where tracker
+labels exist, the consequence term. The total is about one sixth of the corpus
+used by the public reference implementation \citep{referencestack}, so every
+claim about pretraining scale in this report holds between arms of equal budget
+and does not extend to that absolute scale.}
+\label{tab:corpus}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llllrrccc@{}}
+\toprule
+\textbf{Source} & \textbf{Domain} & \textbf{Embodiment} & \textbf{Rate} & \textbf{Episodes} & \textbf{Hours} & \textbf{Action} & \textbf{Consequence} & \textbf{Recipe v1} \\
+\midrule
+\panel{9}{Robot sources, action labels present} \\
+DROID \citep{khazatsky2024droid} & real & Franka, parallel gripper & 15\,Hz & 57\,774 & 273.0 & yes & partial & yes \\
+BridgeData V2 \citep{walke2023bridgedata} & real & WidowX-250 & \phantom{0}5\,Hz & 53\,192 & 111.0 & yes & no & yes \\
+CALVIN ABC \citep{mees2022calvin} & simulation & Franka & 30\,Hz & 17\,800 & \phantom{0}10.5 & yes & partial & yes \\
+RT-1 \citep{brohan2023rt1} & real & Google Robot & \phantom{0}3\,Hz & 86\,403 & 350.0 & yes & no & held out \\
+\addlinespace[2pt]
+\panel{9}{Egocentric human sources, action labels absent} \\
+EgoDex & human & two human hands & 30\,Hz & 314\,839 & 300.0 & no & yes & yes \\
+Ego4D \citep{grauman2022ego4d} & human & unconstrained & 30\,Hz & \phantom{00}\phantom{0}665 & 295.0 & no & no & yes \\
+\midrule
+\textbf{Recipe v1 total} & & & & \textbf{444\,270} & \textbf{989.5} & & & \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Pretraining and Downstream Use}
+\label{sec:procedure}
+
+\Paragraph{Cached encoders.}
+The frozen autoencoder and the frozen text encoder are evaluated offline. Latent
+shards store the three latent frames of each window in bfloat16 after the
+autoencoder's own standardisation, and text embeddings are deduplicated by
+prompt so that a corpus with a few thousand distinct instructions stores a few
+thousand embeddings. The cache key is the tuple of source, canvas, window,
+normalisation, codec, and consequence layout, and any change to one element
+rebuilds the cache. Training reads the cache, so the frozen modules stay outside
+the loop, which removes the largest fixed cost from the step time and makes an arm of the
+coupling axis cheap enough to run several times.
+
+\Paragraph{Optimisation.}
+Training uses fully sharded data parallelism \citep{zhao2023fsdp,paszke2019pytorch} with bfloat16
+compute, single-precision master weights and optimiser state, and per-layer
+activation recomputation. The optimiser is AdamW at a base learning rate of one
+times ten to the minus four with momentum coefficients 0.9 and 0.95, weight decay
+0.01, gradient clipping at unit norm, and a cosine schedule with linear warmup
+down to one percent of the peak. The per-device batch holds sixteen windows.
+Checkpoints are written atomically at a fixed step interval and the job chain
+resumes from the newest one, which is what lets a long run survive the preemption
+policy of the cluster. Seeds fix the data order, the noise draw, and the dropout
+mask, and the evaluation seed is configured separately from the training seed.
+
+\Paragraph{Downstream use.}
+A published checkpoint is a self-contained directory holding the resolved
+configuration, the merged weights, the component assets, the normalisation
+statistics, and the data fingerprint. Deployment loads that directory alone and
+serves a policy behind a websocket protocol that existing benchmark clients
+speak without modification, which keeps the evaluation harness independent of
+the training code. The policy walks the joint path of \sref{sec:paths}, returns
+an action chunk in the platform's native units after inverting the layout and the
+normalisation, and executes it under receding-horizon control. The other two
+paths are driven from the checkpoint by the analysis code, so the representation
+measurements read the weights directly.
+
+\subsection{From the Formulation to the Measurements}
+\label{sec:plan}
+
+The formulation makes one claim testable: coupling action generation to world
+generation changes measurable properties of the world representation, and those
+changes rather than parameter count or supervision volume explain downstream
+behaviour. \tref{tab:plan} decomposes that claim into five statements, names the
+instrument that decides each one, and points at the subsection that reports it.
+Each statement carries a declared floor, so a measurement that fails to clear
+its floor is recorded as a negative outcome for the statement above it.
+
+\begin{table}[t]
+\centering
+\small
+\caption{The measurement plan. Every statement is decided by an instrument that
+\sref{sec:joint} defines rather than by a benchmark score alone, and every
+instrument carries a declared floor. A statement whose measurement fails to
+clear its floor retracts, and the claim above it retracts with it.}
+\label{tab:plan}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llll@{}}
+\toprule
+& \textbf{Statement} & \textbf{Deciding instrument} & \textbf{Reported in} \\
+\midrule
+S1 & A passive representation is close to action-free & world-clamped ray probe against a random-init floor & \sref{sec:mechanism} \\
+S2 & The gain comes from shaping the world stream & gradient degree of freedom on the coupling axis & \sref{sec:coupling-exp} \\
+S3 & The generated future follows an action intervention & action-clamped ray against shuffled and zero floors & \sref{sec:mechanism} \\
+S4 & The gain concentrates outside the training distribution & perturbation axes, randomised suite, held-out embodiment & \sref{sec:ood} \\
+S5 & Consequence grounds action-free footage and is more decodable & corpus composition arms and the consequence probe & \sref{sec:data}, \sref{sec:conseq} \\
+\bottomrule
+\end{tabular}}
+\end{table}

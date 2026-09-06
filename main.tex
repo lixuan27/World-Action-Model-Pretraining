@@ -1,0 +1,135 @@
+\documentclass{cambrian}
+
+% ---------------------------------------------------------------
+% cambrian.cls already loads: microtype, inputenc, babel, amsmath,
+% amsfonts, amssymb, amsthm, cmap, fontenc, xurl, hyperref, pifont,
+% xcolor[table,dvipsnames], graphicx, colortbl, booktabs, tabularx,
+% enumitem, caption, authblk, titlesec, fancyhdr, lastpage, mathpazo,
+% newtxmath[xcharter], zlmtt, geometry, mdframed, needspace, datetime,
+% bibentry, textcomp, textcase, cleveref (via AtEndPreamble).
+% Do not reload any of the above.
+% ---------------------------------------------------------------
+
+\usepackage[round]{natbib}
+\usepackage{wrapfig}
+\usepackage{multirow}
+\usepackage{subcaption}
+\usepackage{placeins}
+\usepackage{fontawesome5}
+
+\newcommand\blfootnote[1]{%
+  \begingroup\renewcommand\thefootnote{}\footnotetext{#1}%
+  \addtocounter{footnote}{-1}\endgroup}
+
+\input{Sections/_preamble}
+\input{Sections/_macros}
+
+% Every figure in this report is drawn with TikZ primitives, so the document
+% carries no external image dependency.
+\usetikzlibrary{calc,arrows.meta,decorations.pathreplacing}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+
+\findingstyle{finding}
+\setlength{\parskip}{0.15\baselineskip}
+
+% Float placement: the report carries many wide tables, so a page may be
+% mostly float and may hold more floats than the LaTeX defaults allow.
+\setcounter{topnumber}{4}
+\setcounter{bottomnumber}{2}
+\setcounter{totalnumber}{6}
+\renewcommand{\topfraction}{0.92}
+\renewcommand{\bottomfraction}{0.60}
+\renewcommand{\textfraction}{0.06}
+\renewcommand{\floatpagefraction}{0.70}
+
+\definecolor{scholarblue}{rgb}{0.21,0.49,0.74}
+\definecolor{cornellred}{rgb}{0.7, 0.11, 0.11}
+\definecolor{Blue9}{rgb}{0.098,0.3,0.9}
+\hypersetup{pagebackref=true, breaklinks=true, linkcolor=cornellred,
+  citecolor=scholarblue, colorlinks=true, urlcolor=Blue9}
+
+\let\rawfinding\finding
+\renewcommand{\finding}[1]{\rawfinding{}{}{#1}}
+
+\definecolor{jamblue}{HTML}{6C8EBF}
+\definecolor{jamorange}{HTML}{D79B00}
+\definecolor{jamgreen}{HTML}{5F8940}
+\definecolor{jampurple}{HTML}{884EA0}
+\definecolor{jamred}{HTML}{B85450}
+\definecolor{jambrown}{HTML}{80461B}
+\definecolor{tabhl}{HTML}{EDF2F8}
+
+% ---------------------------------------------------------------
+% Planning marker.
+% Every number in this document that is a pre-registered target rather than a
+% measurement is wrapped in \pv{...}.  It renders in a distinct colour and the
+% LaTeX source carries the machine-searchable token PLANNED-VALUE next to every
+% table or figure that contains one.  Search the source for PLANNED-VALUE to
+% enumerate everything that is still awaiting measurement.
+% ---------------------------------------------------------------
+\definecolor{plannedcolor}{HTML}{9C4A2F}
+\newcommand{\pv}[1]{\textcolor{plannedcolor}{#1}}      % PLANNED-VALUE
+\newcommand{\plannedfig}{This panel is a pre-registered target awaiting
+  measurement; the source marks it with the token \texttt{PLANNED-VALUE}.}
+\newcommand{\plannednote}{Every value printed in
+  \textcolor{plannedcolor}{this colour} is a pre-registered target awaiting
+  measurement; the source marks each such block with the token
+  \texttt{PLANNED-VALUE}.}
+\newcommand{\refnote}{Values printed in black are reproduced verbatim from the
+  released benchmark tables of the public reference implementation
+  \citep{referencestack} and are not measurements of this work.}
+
+% Shared table furniture.
+\newcommand{\best}[1]{\textbf{#1}}
+\newcommand{\panel}[2]{\multicolumn{#1}{l}{\itshape #2}}
+
+% ---------------------------------------------------------------
+% Naming and notation.
+\newcommand{\sys}{\textsc{Jam}\xspace}
+\newcommand{\pizero}{$\pi_{0}$}
+\newcommand{\pihalf}{$\pi_{0.5}$}
+\newcommand{\tw}{\ensuremath{\tau_{w}}}
+\newcommand{\ta}{\ensuremath{\tau_{a}}}
+\newcommand{\tc}{\ensuremath{\tau_{c}}}
+\newcommand{\vnone}{\textsc{off}}
+\newcommand{\vwa}{\textsc{w}$\rightarrow$\textsc{a}}
+\newcommand{\vaw}{\textsc{a}$\rightarrow$\textsc{w}}
+\newcommand{\vbi}{\textsc{bi}}
+
+% ---------------------------------------------------------------
+\title{\center{
+JAM: Action-Grounded World Pretraining
+}}
+\author{Lixuan He}
+\date{September 2026}
+
+\begin{document}
+
+\input{Sections/0_Abstract}
+
+\blfootnote{\faGithub~\footnotesize Code, configuration files, and the
+experiment ledger that binds every number in this report to a run are released
+with the paper.}
+\maketitle
+
+\fancyhead[C]{\footerfont JAM: Action-Grounded World Pretraining}
+
+\input{Sections/1_Introduction}
+\input{Sections/2_RelatedWork}
+\input{Sections/3_JointModeling}
+\input{Sections/4_Pretraining}
+\input{Sections/5_Experiments}
+\input{Sections/6_Conclusion}
+
+\clearpage
+{
+    \small
+    \bibliographystyle{plainnat}
+    \bibliography{jam}
+}
+
+\input{Sections/A_Appendix}
+
+\end{document}

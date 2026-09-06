@@ -1,0 +1,611 @@
+\section{Experiments}
+\label{sec:exp}
+
+\subsection{Setup}
+\label{sec:setup}
+
+\Paragraph{Evaluation suites.}
+Two closed-loop battlegrounds carry the study, and \tref{tab:suites} states their
+protocols. The first is a single-arm tabletop benchmark with four task families
+that separate spatial reasoning, object identity, goal specification, and
+long-horizon composition, together with a perturbation suite over the same tasks
+that varies camera placement, robot initial state, language phrasing, lighting,
+background, sensor noise, and object layout along seven independent axes
+\citep{liu2023libero,liberoplus}. The second is a bimanual benchmark of fifty
+tasks with a clean split and a domain-randomised split that alters table height,
+clutter, background, and lighting, plus two arm types that appear only at
+evaluation time \citep{chen2025robotwin2}. The first battleground measures
+precision and perturbation robustness on one embodiment, and the second measures
+in-distribution precision, layout generalisation, and embodiment transfer.
+Neither corpus enters pretraining.
+
+\Paragraph{Model and budget.}
+Every arm uses the world stream and the action stream of \sref{sec:streams} at
+their stated sizes. The coupling axis changes one attention mask and one
+stop-gradient, so its arms are parameter-matched by construction; the only arm
+with a different parameter count is the single-stream structural control, which
+concatenates the action tokens into the video sequence and removes the second
+stream. Fine-tuning runs consume twenty thousand optimiser steps at sixteen
+windows per device. Pretraining runs share one step budget across recipes, so a
+recipe comparison separates corpus composition from corpus size. Compute is a
+per-user allocation of sixteen accelerators with eighty gigabytes each, with
+short jobs permitted to overflow to forty-eight under a preemptible queue, which
+sets the pretraining scale recorded in \tref{tab:corpus}.
+
+\Paragraph{Protocol, floors, and statistics.}
+Closed-loop scores come from the official client of each benchmark driven through
+the policy server of \sref{sec:procedure}, with fifty trials per task, a fixed
+initial-state seed, and the evaluation seed recorded in the result file. Main
+tables report the mean over three training seeds. Every comparison between two
+arms is step-matched, uses the same data manifest and the same seed set, and is
+tested with a paired bootstrap over tasks at the ninety-five percent level; a
+difference counts as established when the interval excludes zero. Each
+representation measurement declares its degenerate floors in advance, and a
+measurement that fails to clear its floors is reported as such. Every run writes
+a metrics file and a manifest holding the resolved configuration, the git commit,
+and the data fingerprint, and the experiment ledger binds each number in this
+section to one such file.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Evaluation protocol. Neither training corpus enters pretraining, so an
+out-of-distribution score never rests on a source that shares its distribution
+with the evaluation suite.}
+\label{tab:suites}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lllll@{}}
+\toprule
+\textbf{Battleground} & \textbf{Embodiment} & \textbf{In-distribution split} & \textbf{Out-of-distribution splits} & \textbf{Trials} \\
+\midrule
+Single-arm tabletop & Franka, 2 cameras & four task families, 40 tasks & seven perturbation axes & 50 per task \\
+Bimanual tabletop & 2 arms, 3 cameras & clean split, 50 tasks & randomised split, two held-out arm types & 50 per task \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Reference Regime and Mainline Reproduction}
+\label{sec:mainline}
+
+The first question is whether joint flow matching on a pretrained video prior
+reaches the performance regime that a released world-action implementation
+occupies on these suites, because a mechanism study is only informative once the
+mainline arm is competitive. The reference values in \tref{tab:mainline} are
+reproduced verbatim from that public release and from the public reports of two
+vision-language-action policies, and they define the regime rather than a target
+that this work claims. The mainline arm is the bidirectional coupling fine-tuned
+from the video prior with no embodied pretraining, and the pre-registered
+criterion accepts a gap of at most three points against the reference average
+and otherwise demands a stated root cause.
+
+\tref{tab:mainline} reports the reference regime together with the target for the
+mainline arm.
+
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{Reference regime and mainline reproduction. \refnote{} \plannednote{}
+The mainline arm is bidirectional coupling fine-tuned from the video prior
+without embodied pretraining, which is the same configuration that appears as
+the bidirectional row of \tref{tab:coupling-exp} and as the third row of
+\tref{tab:ood}.}
+\label{tab:mainline}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lrrrrr@{\hspace{7mm}}rrr@{}}
+\toprule
+& \multicolumn{5}{c}{\textbf{Single-arm tabletop, in-distribution}} & \multicolumn{3}{c}{\textbf{Bimanual tabletop}} \\
+\cmidrule(lr){2-6} \cmidrule(lr){7-9}
+\textbf{Method} & \textbf{Spatial} & \textbf{Object} & \textbf{Goal} & \textbf{Long} & \textbf{Avg} & \textbf{Clean} & \textbf{Random.} & \textbf{Avg} \\
+\midrule
+\panel{9}{Public vision-language-action policies} \\
+OpenVLA \citep{kim2024openvla} & 84.7 & 88.4 & 79.2 & 53.7 & 76.5 & n/a & n/a & n/a \\
+\pizero{} \citep{black2024pi0} & 98.0 & 96.8 & 94.4 & 88.4 & 94.4 & n/a & n/a & n/a \\
+\pihalf{} \citep{intelligence2025pi05} & 98.8 & 98.2 & 98.0 & 92.4 & 96.9 & 70.7 & 46.0 & 58.4 \\
+\addlinespace[2pt]
+\panel{9}{Public world-action reference implementation} \\
+Reference stack \citep{referencestack} & \best{99.6} & \best{99.6} & \best{99.8} & \best{98.2} & \best{99.3} & \best{89.4} & \best{48.7} & \best{69.0} \\
+\addlinespace[2pt]
+\panel{9}{This work} \\
+\rowcolor{tabhl}
+\sys{}, bidirectional, no pretraining & \pv{97.8} & \pv{98.4} & \pv{97.2} & \pv{95.4} & \pv{97.2} & \pv{87.2} & \pv{47.9} & \pv{67.6} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Joint Modelling Against Auxiliary Action Supervision}
+\label{sec:coupling-exp}
+
+The central comparison sweeps the coupling axis of \sref{sec:coupling} one
+degree of freedom at a time. Six arms differ only in the joint attention mask
+and one stop-gradient, so parameters, data, optimiser, and seeds are identical
+across them, and a seventh arm replaces the two-stream construction with a
+single stream that concatenates action tokens into the video sequence. Two
+further arms add the boundary-ray mass of \sref{sec:plane} on top of the
+bidirectional setting, which tests whether training the two conditional slices
+explicitly changes the joint model. The comparison is designed to separate two
+hypotheses that a benchmark average alone confounds: the auxiliary hypothesis,
+realised by letting the action stream read a world representation it cannot
+shape, and the joint hypothesis, realised by letting the action objective shape
+that representation.
+
+\tref{tab:coupling-exp} reports the sweep.
+
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{The coupling axis under matched parameters, data, and seeds.
+\plannednote{} The bidirectional row without boundary rays is the mainline arm of
+\tref{tab:mainline}. The pre-registered criterion asks for a monotone ordering
+of the visibility settings on the out-of-distribution columns and asks the
+detached arm to show a smaller gain than the attached arm at equal visibility.}
+\label{tab:coupling-exp}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llcrrr@{}}
+\toprule
+\textbf{Arm} & \textbf{Visibility} & \textbf{World keys} & \textbf{In-dist.\ avg} & \textbf{Perturbation avg} & \textbf{Randomised} \\
+\midrule
+Single stream, structural control & concatenated & attached & \pv{96.4} & \pv{60.3} & \pv{41.0} \\
+Independent objectives & \vnone{} & n/a & \pv{96.1} & \pv{58.4} & \pv{39.2} \\
+Auxiliary action head & \vwa{} & detached & \pv{96.8} & \pv{61.0} & \pv{42.1} \\
+World model with readout & \vwa{} & attached & \pv{97.0} & \pv{63.6} & \pv{44.8} \\
+Action-conditioned world model & \vaw{} & attached & \pv{96.6} & \pv{62.2} & \pv{43.5} \\
+\rowcolor{tabhl}
+\sys{} & \vbi{} & attached & \pv{97.2} & \pv{66.5} & \pv{47.9} \\
+\sys{} with boundary rays & \vbi{} & attached & \pv{97.3} & \pv{67.8} & \pv{49.1} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{What the Coupling Changes Inside the Representation}
+\label{sec:mechanism}
+
+\Paragraph{Linear decodability.}
+The world-clamped ray of \sref{sec:paths} turns the trained model into an
+inverse dynamics model, and a linear probe on the hidden states of the world
+stream measures the same property without running the sampler. Every arm of the
+coupling axis is frozen, the hidden state of each world layer is read, and one
+ridge regression per layer predicts the future action chunk and the future
+consequence trajectory. Two floors bound the measurement: a randomly initialised
+backbone of the same shape, which gives the score attainable from architecture
+alone, and a shuffled-label probe, which gives the score attainable from the
+marginal statistics of the target.
+
+\Paragraph{Counterfactual controllability.}
+The action-clamped ray asks whether the generated future follows the action
+rather than merely correlating with it. The action tokens are clamped to four
+different chunks and the world stream is denoised to completion, and the
+displacement of the manipulator keypoints in the generated future is compared
+with the displacement the clamped chunk implies. The true chunk is the
+condition of interest, and a chunk drawn from a different episode, a zero chunk,
+and a time-shuffled chunk are the three floors. A passive world model has no
+action input at all and therefore sits at the uncontrollable end of the scale.
+
+\tref{tab:probe} reports the linear probes and \fref{fig:probe} reports them per
+layer.
+
+\tref{tab:counterfactual} reports the counterfactual test.
+
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{Linear decodability of the frozen world stream. \plannednote{} The
+action column reports the coefficient of determination of a ridge probe onto the
+future action chunk and the two consequence columns report the average
+displacement error of a probe onto the consequence trajectory and the fraction
+of steps whose predicted displacement direction agrees with the label. Floors
+bound what architecture alone and target statistics alone deliver.}
+\label{tab:probe}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+& \textbf{Action} & \multicolumn{2}{c}{\textbf{Consequence}} \\
+\cmidrule(lr){2-2} \cmidrule(lr){3-4}
+\textbf{Frozen representation} & $R^2$ $\uparrow$ & \textbf{ADE} $\downarrow$ & \textbf{Direction} $\uparrow$ \\
+\midrule
+\panel{4}{Floors} \\
+Randomly initialised backbone & \pv{0.04} & \pv{0.121} & \pv{53.6} \\
+Shuffled-label probe & \pv{0.01} & \pv{0.134} & \pv{49.2} \\
+Copy-the-first-step predictor & n/a & \pv{0.142} & \pv{50.0} \\
+Cross-embodiment mean predictor & n/a & \pv{0.135} & \pv{51.1} \\
+\addlinespace[2pt]
+\panel{4}{Trained representations} \\
+Passive world model & \pv{0.21} & \pv{0.098} & \pv{63.8} \\
+\sys{}, \vnone{} & \pv{0.24} & \pv{0.094} & \pv{65.1} \\
+\sys{}, \vwa{}, detached keys & \pv{0.29} & \pv{0.089} & \pv{67.4} \\
+\sys{}, \vwa{}, attached keys & \pv{0.41} & \pv{0.076} & \pv{72.5} \\
+\rowcolor{tabhl}
+\sys{}, \vbi{} & \pv{0.52} & \pv{0.067} & \pv{76.9} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{Counterfactual controllability along the action-clamped ray.
+\plannednote{} The keypoint error compares the displacement in the generated
+future with the displacement the clamped chunk implies, and the follow rate is
+the fraction of keypoints whose generated displacement agrees in sign and
+magnitude band with that implication. A passive world model admits no action
+input and marks the uncontrollable end of the scale.}
+\label{tab:counterfactual}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrr@{}}
+\toprule
+\textbf{Model} & \textbf{Clamped chunk} & \textbf{Keypoint error} $\downarrow$ & \textbf{Follow rate} $\uparrow$ \\
+\midrule
+Passive world model & no action input & \pv{0.171} & \pv{6.2} \\
+\addlinespace[2pt]
+\sys{}, \vaw{} & true chunk & \pv{0.074} & \pv{58.3} \\
+\rowcolor{tabhl}
+\sys{}, \vbi{} & true chunk & \pv{0.058} & \pv{71.4} \\
+\sys{}, \vbi{} & chunk from another episode & \pv{0.149} & \pv{12.8} \\
+\sys{}, \vbi{} & zero chunk & \pv{0.163} & \pv{8.1} \\
+\sys{}, \vbi{} & time-shuffled chunk & \pv{0.142} & \pv{15.6} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\adjustbox{max width=\linewidth}{%
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+% PLANNED-VALUE
+\def\sx{2.6}   % mm per layer index / 3
+\def\sy{95}    % mm per unit R^2
+
+% ---- axes ---- %
+\draw[black!60] (0,0) -- (0,58);
+\draw[black!60] (0,0) -- (81,0);
+\foreach \v/\l in {0/0.0, 0.1/0.1, 0.2/0.2, 0.3/0.3, 0.4/0.4, 0.5/0.5} {
+  \draw[black!16, line width=0.25pt] (0,\v*\sy) -- (81,\v*\sy);
+  \node[anchor=east, font=\tiny] at (-1,\v*\sy) {\l};}
+\foreach \k in {0,5,10,15,20,25,30} {
+  \node[anchor=north, font=\tiny] at (\k*\sx,-1) {\k};}
+\node[anchor=north, font=\tiny] at (40,-6.5) {world-stream layer index};
+\node[anchor=south, font=\tiny, rotate=90] at (-7.5,29) {action probe $R^2$};
+
+% ---- curves: (layer, R2) ---- %
+\draw[jamgreen!60!black, line width=1.0pt]
+  (0*\sx,0.05*\sy) -- (5*\sx,0.11*\sy) -- (10*\sx,0.20*\sy)
+  -- (15*\sx,0.31*\sy) -- (20*\sx,0.42*\sy) -- (25*\sx,0.49*\sy) -- (30*\sx,0.52*\sy);
+\draw[jamblue!70!black, line width=1.0pt, densely dashed]
+  (0*\sx,0.04*\sy) -- (5*\sx,0.09*\sy) -- (10*\sx,0.16*\sy)
+  -- (15*\sx,0.25*\sy) -- (20*\sx,0.34*\sy) -- (25*\sx,0.39*\sy) -- (30*\sx,0.41*\sy);
+\draw[jamorange!80!black, line width=1.0pt, densely dotted]
+  (0*\sx,0.03*\sy) -- (5*\sx,0.07*\sy) -- (10*\sx,0.12*\sy)
+  -- (15*\sx,0.18*\sy) -- (20*\sx,0.24*\sy) -- (25*\sx,0.28*\sy) -- (30*\sx,0.29*\sy);
+\draw[black!55, line width=1.0pt, dash pattern=on 2pt off 1pt on 0.5pt off 1pt]
+  (0*\sx,0.03*\sy) -- (5*\sx,0.06*\sy) -- (10*\sx,0.10*\sy)
+  -- (15*\sx,0.14*\sy) -- (20*\sx,0.18*\sy) -- (25*\sx,0.20*\sy) -- (30*\sx,0.21*\sy);
+\draw[black!30, line width=0.9pt] (0*\sx,0.035*\sy) -- (30*\sx,0.04*\sy);
+
+\node[anchor=west, font=\tiny, text=jamgreen!45!black] at (30*\sx+1.5,0.52*\sy) {\sys{}, \vbi{}};
+\node[anchor=west, font=\tiny, text=jamblue!55!black] at (30*\sx+1.5,0.41*\sy) {\vwa{}, attached};
+\node[anchor=west, font=\tiny, text=jamorange!65!black] at (30*\sx+1.5,0.29*\sy) {\vwa{}, detached};
+\node[anchor=west, font=\tiny, text=black!55] at (30*\sx+1.5,0.21*\sy) {passive world model};
+\node[anchor=west, font=\tiny, text=black!40] at (30*\sx+1.5,0.04*\sy) {random-init floor};
+\end{tikzpicture}}
+\caption{Layer-wise action decodability of the frozen world stream, which is the
+per-layer form of the action column of \tref{tab:probe}. \plannedfig{} The
+question the panel answers is where in the backbone action information appears
+and whether the gradient degree of freedom changes the depth profile rather than
+only the final value.}
+\label{fig:probe}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Corpus Composition and Pretraining Scale}
+\label{sec:data}
+
+Four pretraining recipes share one step budget and one fine-tuning protocol, so
+the comparison isolates what each kind of data contributes. The first recipe
+skips pretraining and fine-tunes the video prior directly, which reproduces the
+mainline arm and fixes the reference point of the section. The second pretrains
+on the robot sources of \tref{tab:corpus} alone, where both terms of the
+objective are supervised. The third adds the egocentric human sources with an
+empty action mask, so those windows supervise the world term alone. The fourth
+adds the consequence stream on the egocentric sources, so the same action-free
+footage supervises the consequence term as well and grounds the action side of
+the model without any action label. A separate ladder holds the recipe fixed and
+varies the corpus fraction over one tenth, three tenths, and the whole, which
+separates the effect of composition from the effect of volume. The additional
+column records the action loss at the first fine-tuning step, which reads how
+much of the downstream action mapping the pretrained model already carries.
+
+\tref{tab:data} reports the recipes and the ladder, and \fref{fig:scale} plots
+the perturbation average against corpus hours.
+
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{Pretraining recipes at a shared step budget, and the corpus ladder
+underneath. \plannednote{} Every row fine-tunes with the bidirectional coupling
+and the same protocol, so the rows differ in the pretraining corpus alone. The
+last column is the action loss at the first fine-tuning step, which measures how
+much of the downstream action mapping survives pretraining. The
+pre-registered criterion asks the consequence recipe to improve on the
+video-only egocentric recipe.}
+\label{tab:data}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+\textbf{Pretraining corpus} & \textbf{Hours} & \textbf{In-dist.\ avg} & \textbf{Perturbation avg} & \textbf{Randomised} & \textbf{Step-0 action loss} $\downarrow$ \\
+\midrule
+\panel{6}{Composition at the full budget} \\
+None, direct fine-tuning & \phantom{00}0 & \pv{97.2} & \pv{66.5} & \pv{47.9} & \pv{0.412} \\
+Robot sources only & \phantom{0}395 & \pv{97.6} & \pv{71.3} & \pv{53.4} & \pv{0.361} \\
+Robot and egocentric video & \phantom{0}990 & \pv{97.7} & \pv{74.0} & \pv{56.1} & \pv{0.352} \\
+\rowcolor{tabhl}
+Robot and egocentric video with consequence & \phantom{0}990 & \pv{98.0} & \pv{77.2} & \pv{59.6} & \pv{0.318} \\
+\addlinespace[2pt]
+\panel{6}{Corpus ladder, consequence recipe} \\
+One tenth of the corpus & \phantom{0}\phantom{0}99 & \pv{97.3} & \pv{69.4} & \pv{50.2} & \pv{0.389} \\
+Three tenths of the corpus & \phantom{0}297 & \pv{97.6} & \pv{73.1} & \pv{54.8} & \pv{0.347} \\
+The whole corpus & \phantom{0}990 & \pv{98.0} & \pv{77.2} & \pv{59.6} & \pv{0.318} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\adjustbox{max width=\linewidth}{%
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+% PLANNED-VALUE
+% x: log-ish corpus hours mapped to 0..70 mm; y: 1 point = 1.5 mm above 60
+\def\yz{60}
+\def\sy{1.55}
+\newcommand{\xa}{0}
+\newcommand{\xb}{28}
+\newcommand{\xc}{62}
+
+\draw[black!60] (-2,0) -- (-2,32);
+\draw[black!60] (-2,0) -- (78,0);
+\foreach \v in {62,66,70,74,78} {
+  \draw[black!16, line width=0.25pt] (-2,{(\v-\yz)*\sy}) -- (78,{(\v-\yz)*\sy});
+  \node[anchor=east, font=\tiny] at (-3.5,{(\v-\yz)*\sy}) {\v};}
+\foreach \x/\l in {0/99, 28/297, 62/990} {
+  \node[anchor=north, font=\tiny] at (\x,-1) {\l};}
+\node[anchor=north, font=\tiny] at (33,-6) {pretraining corpus hours};
+\node[anchor=south, font=\tiny, rotate=90] at (-11,16) {perturbation average};
+
+% consequence recipe
+\draw[jamgreen!60!black, line width=1.0pt]
+  (\xa,{(69.4-\yz)*\sy}) -- (\xb,{(73.1-\yz)*\sy}) -- (\xc,{(77.2-\yz)*\sy});
+\foreach \x/\v in {0/69.4, 28/73.1, 62/77.2} {
+  \filldraw[fill=jamgreen!55, draw=black!50, line width=0.2pt] (\x,{(\v-\yz)*\sy}) circle (0.9);}
+% robot + ego video
+\draw[jamblue!70!black, line width=1.0pt, densely dashed]
+  (\xa,{(67.1-\yz)*\sy}) -- (\xb,{(70.6-\yz)*\sy}) -- (\xc,{(74.0-\yz)*\sy});
+\foreach \x/\v in {0/67.1, 28/70.6, 62/74.0} {
+  \filldraw[fill=jamblue!45, draw=black!50, line width=0.2pt] (\x,{(\v-\yz)*\sy}) circle (0.9);}
+% robot only
+\draw[jamorange!85!black, line width=1.0pt, densely dotted]
+  (\xa,{(66.0-\yz)*\sy}) -- (\xb,{(68.4-\yz)*\sy}) -- (\xc,{(71.3-\yz)*\sy});
+\foreach \x/\v in {0/66.0, 28/68.4, 62/71.3} {
+  \filldraw[fill=jamorange!55, draw=black!50, line width=0.2pt] (\x,{(\v-\yz)*\sy}) circle (0.9);}
+% no pretraining reference
+\draw[black!45, line width=0.9pt, dash pattern=on 2pt off 1.4pt]
+  (-2,{(66.5-\yz)*\sy}) -- (78,{(66.5-\yz)*\sy});
+
+\node[anchor=west, font=\tiny, text=jamgreen!45!black] at (63.5,{(77.2-\yz)*\sy}) {robot, ego video, consequence};
+\node[anchor=west, font=\tiny, text=jamblue!55!black] at (63.5,{(74.0-\yz)*\sy}) {robot and ego video};
+\node[anchor=west, font=\tiny, text=jamorange!70!black] at (63.5,{(71.3-\yz)*\sy}) {robot only};
+\node[anchor=west, font=\tiny, text=black!50] at (63.5,{(66.5-\yz)*\sy-1.6}) {no pretraining};
+\end{tikzpicture}}
+\caption{Perturbation average against pretraining corpus hours for three
+recipes. \plannedfig{} The panel answers whether the three recipes differ by a
+constant offset or by slope, which distinguishes a data-volume effect from a
+composition effect. The horizontal line marks the arm that skips pretraining.}
+\label{fig:scale}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Out of Distribution and Transfer}
+\label{sec:ood}
+
+The distribution shift study crosses the coupling with the corpus. Three
+representation settings appear, namely a passive world model with a policy
+readout trained on top of it, the independent-objective arm, and the
+bidirectional arm, and each appears with and without the consequence pretraining
+recipe. Four kinds of shift are measured on the same checkpoints: the seven
+perturbation axes of the single-arm suite, the domain-randomised split of the
+bimanual suite, and two arm types that appear only at evaluation time. The
+in-distribution column travels with every out-of-distribution column, because a
+robustness claim only means something once the in-distribution score is stated
+next to it. The pre-registered criterion asks whether pretraining and coupling
+interact superadditively on the shifted splits.
+
+\tref{tab:ood} reports the decomposition.
+
+\begin{table}[t]
+\centering
+\footnotesize
+% PLANNED-VALUE
+\caption{Distribution shift decomposed over seven perturbation axes, one
+randomised split, and two held-out arm types. \plannednote{} The three
+representation settings appear with and without the consequence pretraining
+recipe of \tref{tab:data}, so the table separates what the coupling contributes
+from what the corpus contributes and exposes the interaction between them. The
+third row is the mainline arm of \tref{tab:mainline}.}
+\label{tab:ood}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrrrrrrrrrrr@{}}
+\toprule
+& & \textbf{ID} & \multicolumn{7}{c}{\textbf{Perturbation axes}} & \textbf{Pert.} & \multicolumn{2}{c}{\textbf{Bimanual}} & \textbf{Held-out} \\
+\cmidrule(lr){3-3} \cmidrule(lr){4-10} \cmidrule(lr){11-11} \cmidrule(lr){12-13} \cmidrule(lr){14-14}
+\textbf{Representation} & \textbf{Pretrain} & \textbf{avg} & \textbf{Cam} & \textbf{Robot} & \textbf{Lang} & \textbf{Light} & \textbf{Bkg} & \textbf{Noise} & \textbf{Layout} & \textbf{avg} & \textbf{Clean} & \textbf{Rand} & \textbf{arms} \\
+\midrule
+Passive plus readout & none & \pv{95.4} & \pv{21.4} & \pv{47.2} & \pv{76.8} & \pv{88.4} & \pv{71.2} & \pv{24.6} & \pv{56.1} & \pv{55.1} & \pv{84.0} & \pv{35.8} & \pv{9.4} \\
+\sys{}, \vnone{} & none & \pv{96.1} & \pv{24.6} & \pv{51.8} & \pv{79.2} & \pv{89.6} & \pv{73.8} & \pv{28.4} & \pv{61.4} & \pv{58.4} & \pv{86.1} & \pv{39.2} & \pv{12.6} \\
+\rowcolor{tabhl}
+\sys{}, \vbi{} & none & \pv{97.2} & \pv{31.2} & \pv{64.5} & \pv{85.4} & \pv{93.8} & \pv{80.6} & \pv{36.4} & \pv{73.6} & \pv{66.5} & \pv{87.2} & \pv{47.9} & \pv{18.3} \\
+\addlinespace[2pt]
+Passive plus readout & consequence & \pv{95.9} & \pv{25.8} & \pv{54.1} & \pv{79.8} & \pv{90.2} & \pv{75.4} & \pv{30.2} & \pv{63.1} & \pv{59.8} & \pv{85.2} & \pv{40.4} & \pv{13.1} \\
+\sys{}, \vnone{} & consequence & \pv{96.6} & \pv{29.4} & \pv{61.2} & \pv{83.6} & \pv{92.4} & \pv{78.9} & \pv{34.8} & \pv{72.6} & \pv{64.7} & \pv{87.0} & \pv{45.6} & \pv{17.5} \\
+\rowcolor{tabhl}
+\sys{}, \vbi{} & consequence & \pv{98.0} & \pv{44.6} & \pv{78.4} & \pv{91.2} & \pv{96.4} & \pv{88.1} & \pv{51.2} & \pv{90.5} & \pv{77.2} & \pv{89.1} & \pv{59.6} & \pv{27.4} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\FloatBarrier
+
+\subsection{Consequence Grounding}
+\label{sec:conseq}
+
+Three questions close the study, and all three run on one trained model. The
+first asks whether the two levels of grounding carry complementary information,
+which the clamped rays of \sref{sec:paths} answer by conditioning the world
+stream on the action chunk, on the consequence chunk, and on both, then measuring
+the fidelity of the generated future together with the follow rate of
+\tref{tab:counterfactual}. The second asks whether the consequence
+representation is shared across embodiments, which a probe trained on one
+embodiment and evaluated on a held-out one answers against a cross-embodiment
+mean floor. The third asks whether consequence prediction serves as a quality
+probe for the representation, which the ordering of arms in the consequence
+columns of \tref{tab:probe} already reports.
+
+\tref{tab:conseq} reports the conditioning comparison and the cross-embodiment
+probe, and \fref{fig:conseq} places the conditioning settings side by side.
+
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{Consequence grounding on one trained model. \plannednote{} The upper
+panel clamps different streams along the rays of \sref{sec:paths} and measures
+the generated future; the pre-registered criterion asks the consequence clamp to
+match or exceed the action clamp. The lower panel trains the consequence probe
+on one embodiment and evaluates it on a held-out one, which tests whether the
+consequence representation is shared rather than embodiment-specific.}
+\label{tab:conseq}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Setting} & \textbf{Future PSNR} $\uparrow$ & \textbf{Future LPIPS} $\downarrow$ & \textbf{Follow rate} $\uparrow$ \\
+\midrule
+\panel{4}{Conditioning comparison, \sys{} with \vbi{} coupling} \\
+Neither stream clamped & \pv{18.4} & \pv{0.312} & \pv{6.2} \\
+Action stream clamped & \pv{21.6} & \pv{0.241} & \pv{71.4} \\
+Consequence stream clamped & \pv{22.4} & \pv{0.218} & \pv{78.2} \\
+\rowcolor{tabhl}
+Both streams clamped & \pv{23.1} & \pv{0.204} & \pv{81.6} \\
+\midrule
+\textbf{Cross-embodiment consequence probe} & \multicolumn{2}{c}{\textbf{Held-out ADE} $\downarrow$} & \textbf{Direction} $\uparrow$ \\
+\midrule
+Cross-embodiment mean floor & \multicolumn{2}{c}{\pv{0.135}} & \pv{51.1} \\
+Passive world model & \multicolumn{2}{c}{\pv{0.132}} & \pv{54.7} \\
+\sys{}, \vbi{}, robot-only pretraining & \multicolumn{2}{c}{\pv{0.104}} & \pv{66.2} \\
+\rowcolor{tabhl}
+\sys{}, \vbi{}, consequence pretraining & \multicolumn{2}{c}{\pv{0.081}} & \pv{74.8} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\adjustbox{max width=\linewidth}{%
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+% PLANNED-VALUE
+\def\gs{40}   % group stride
+\def\sy{0.62} % mm per follow-rate point
+
+\draw[black!60] (-2,0) -- (-2,56);
+\draw[black!60] (-2,0) -- (156,0);
+\foreach \v in {0,20,40,60,80} {
+  \draw[black!16, line width=0.25pt] (-2,\v*\sy) -- (156,\v*\sy);
+  \node[anchor=east, font=\tiny] at (-3.5,\v*\sy) {\v};}
+\node[anchor=south, font=\tiny, rotate=90] at (-11,28) {follow rate (\%)};
+
+\foreach \g/\v/\nm in {0/6.2/{neither stream\\clamped}, 1/71.4/{action stream\\clamped},
+                       2/78.2/{consequence stream\\clamped}, 3/81.6/{both streams\\clamped}} {
+  \filldraw[fill=jampurple!35, draw=black!50, line width=0.25pt]
+    (\g*\gs+6,0) rectangle (\g*\gs+26,\v*\sy);
+  \node[anchor=south, font=\tiny] at (\g*\gs+16,\v*\sy+0.8) {\v};
+  \node[anchor=north, font=\tiny, align=center, text width=26mm] at (\g*\gs+16,-1.5) {\nm};}
+
+% schematic keypoint displacement fields
+\begin{scope}[shift={(0,62)}]
+  \foreach \g/\sc in {0/0.1, 1/0.8, 2/0.92, 3/1.0} {
+    \draw[black!45, line width=0.3pt] (\g*\gs+6,0) rectangle (\g*\gs+26,18);
+    \foreach \i in {0,1,2} {
+      \foreach \j in {0,1} {
+        \pgfmathsetmacro{\px}{\g*\gs+11+\i*5}
+        \pgfmathsetmacro{\py}{5+\j*7}
+        \filldraw[fill=black!35, draw=none] (\px,\py) circle (0.5);
+        \draw[-{Stealth[length=1.1mm]}, jampurple!70!black, line width=0.5pt]
+          (\px,\py) -- (\px+2.6*\sc,\py+1.5*\sc);}}}
+  \node[anchor=west, font=\tiny, text=black!60, align=left, text width=34mm] at (150,9) {arrows: generated keypoint displacement under each clamp};
+\end{scope}
+\end{tikzpicture}}
+\caption{Follow rate under the four clamping settings of \tref{tab:conseq}, with
+a schematic of the generated keypoint displacement field above each bar.
+\plannedfig{} The panel answers which level of grounding produces the more
+controllable future, and the leftmost setting shows what the model produces when
+neither stream is clamped.}
+\label{fig:conseq}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Failure Modes}
+\label{sec:failure}
+
+The study states in advance the conditions under which the coupling stops
+paying, and three stresses probe them. The first reduces the pretraining corpus
+along the ladder of \tref{tab:data}, which asks how much data the coupling needs
+before it separates from the independent-objective arm. The second restricts the
+corpus to a subset whose action space is joint angles and whose camera is fixed,
+which decouples the action from its visual effect and therefore removes the
+signal the coupling is supposed to exploit. The third restricts the exchange to
+one end of the backbone, which asks where in depth the grounding is formed. Each
+stress reports the coupling gain, defined as the gap between the bidirectional
+arm and the independent-objective arm on the shifted split, because that gap is
+the quantity the whole study is about.
+
+\tref{tab:failure} reports the three stresses.
+
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{Conditions under which the coupling stops paying. \plannednote{} The
+last column is the gap between the bidirectional arm and the
+independent-objective arm on the perturbation average, which is the quantity the
+study is about. A sign flip or a collapse of that gap under a stress retracts the
+corresponding statement of \tref{tab:plan} for that regime.}
+\label{tab:failure}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+\textbf{Stress} & \textbf{Setting} & \textbf{In-dist.\ avg} & \textbf{Perturbation avg} & \textbf{Coupling gain} \\
+\midrule
+\panel{5}{Corpus volume} \\
+& one tenth of the corpus & \pv{97.3} & \pv{69.4} & \pv{$+$3.1} \\
+& three tenths of the corpus & \pv{97.6} & \pv{73.1} & \pv{$+$6.8} \\
+\rowcolor{tabhl}
+& the whole corpus & \pv{98.0} & \pv{77.2} & \pv{$+$12.5} \\
+\addlinespace[2pt]
+\panel{5}{Action to visual coupling} \\
+\rowcolor{tabhl}
+& full corpus & \pv{98.0} & \pv{77.2} & \pv{$+$12.5} \\
+& joint-space subset with a fixed camera & \pv{96.9} & \pv{63.1} & \pv{$+$0.6} \\
+\addlinespace[2pt]
+\panel{5}{Coupling depth} \\
+& first ten layers & \pv{96.8} & \pv{61.4} & \pv{$+$3.0} \\
+& last ten layers & \pv{97.0} & \pv{64.2} & \pv{$+$5.8} \\
+\rowcolor{tabhl}
+& all thirty layers & \pv{97.2} & \pv{66.5} & \pv{$+$8.1} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\FloatBarrier

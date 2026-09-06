@@ -1,21 +1,17 @@
 {
-   "sources" : [
+   "sources": [
       {
-         "usage" : "toplevel",
-         "filename" : "colm2025_conference.tex"
+         "usage": "toplevel",
+         "filename": "main.tex"
       },
       {
-         "usage" : "ignore",
-         "filename" : "colm2025_conference.bib"
-      },
-      {
-         "usage" : "ignore",
-         "filename" : "colm2025_conference.bst"
+         "usage": "ignore",
+         "filename": "jam.bib"
       }
    ],
-   "spec_version" : 1,
-   "texlive_version" : "2025",
-   "process" : {
-      "compiler" : "pdflatex"
+   "spec_version": 1,
+   "texlive_version": "2025",
+   "process": {
+      "compiler": "pdflatex"
    }
 }
