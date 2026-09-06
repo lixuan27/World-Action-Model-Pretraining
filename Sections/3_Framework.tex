@@ -195,19 +195,19 @@ $(0,0)$, taking one Euler step per stream and per iteration,
 \STATE $z \leftarrow$ Gaussian noise; pin $z^{\text{cond}}$ into the conditioning prefix of $z$
 \STATE $a \leftarrow$ Gaussian noise; $\; j \leftarrow 0$
 \FOR{$k = 0$ \TO $K' - 1$}
-  \STATE $(\sigma_v, \sigma_a) \leftarrow \mathcal{S}[k]$; \;
+  \STATE $(\sigma_v, \sigma_a) \leftarrow \mathcal{S}[k]$;\enspace
          $(\sigma_v', \sigma_a') \leftarrow \mathcal{S}[k+1]$
   \IF{$k \geq 2$ \AND $j < m$ \AND
       $\cos\big(\hat{v}^{(k-1)}, \hat{v}^{(k-2)}\big) > \tau$}
-    \STATE $\hat{v}^{(k)} \leftarrow \hat{v}^{(k-1)}$; \;
-           run the action branch alone to obtain $\hat{a}^{(k)}$; \;
+    \STATE $\hat{v}^{(k)} \leftarrow \hat{v}^{(k-1)}$;\enspace
+           run the action branch alone to obtain $\hat{a}^{(k)}$;\enspace
            $j \leftarrow j + 1$
   \ELSE
     \STATE $\big(\hat{v}^{(k)}, \hat{a}^{(k)}\big) \leftarrow
-            F_\theta\big(z, a, z^{\text{cond}}, c, s, \sigma_v, \sigma_a; M\big)$; \;
+            F_\theta\big(z, a, z^{\text{cond}}, c, s, \sigma_v, \sigma_a; M\big)$;\enspace
            $j \leftarrow 0$
   \ENDIF
-  \STATE $z \leftarrow z + (\sigma_v' - \sigma_v)\, \hat{v}^{(k)}$; \;
+  \STATE $z \leftarrow z + (\sigma_v' - \sigma_v)\, \hat{v}^{(k)}$;\enspace
          restore $z^{\text{cond}}$ in the conditioning prefix
   \STATE $a \leftarrow a + (\sigma_a' - \sigma_a)\, \hat{a}^{(k)}$
 \ENDFOR
@@ -232,7 +232,7 @@ The action chunk is embedded into $S_A = H$ tokens of the backbone width $d_V$,
 the proprioceptive state is embedded into one token, and both are concatenated
 onto the video token sequence. The shared blocks process the concatenation and a
 small multilayer perceptron decodes the trailing action segment. The variant
-$\mathtt{vanilla}$ keeps the shared capacity as it stands. The variant $\mathtt{moe}$ adds a
+\texttt{vanilla} keeps the shared capacity as it stands. The variant \texttt{moe} adds a
 modality expert at selected layers,
 \begin{equation}
   h_A^{(\ell)} \;\leftarrow\; h_A^{(\ell)} \;+\; \mathrm{FFN}^{\text{exp}}_\ell\!\left(h_A^{(\ell)}\right),
@@ -397,10 +397,10 @@ the projector.
 \end{scope}
 
 % legend
-\node[vb, label={[font=\scriptsize, label distance=-1mm]right:{\;video expert}}] at (0.1,-9.0) {};
-\node[ab, label={[font=\scriptsize, label distance=-1mm]right:{\;action expert}}] at (3.4,-9.0) {};
-\node[ub, label={[font=\scriptsize, label distance=-1mm]right:{\;understanding expert}}] at (7.0,-9.0) {};
-\node[cb, label={[font=\scriptsize, label distance=-1mm]right:{\;conditioning branch}}] at (11.2,-9.0) {};
+\node[vb, label={[font=\scriptsize, label distance=-1mm]right:{\enspace video expert}}] at (0.1,-9.0) {};
+\node[ab, label={[font=\scriptsize, label distance=-1mm]right:{\enspace action expert}}] at (3.4,-9.0) {};
+\node[ub, label={[font=\scriptsize, label distance=-1mm]right:{\enspace understanding expert}}] at (7.0,-9.0) {};
+\node[cb, label={[font=\scriptsize, label distance=-1mm]right:{\enspace conditioning branch}}] at (11.2,-9.0) {};
 \end{tikzpicture}}
 \caption{The six coupling architectures \sys{} exposes. Panels (a) and (b) place
 action tokens inside the video sequence and reuse every video parameter. Panels
@@ -440,14 +440,14 @@ reads only itself, which keeps it a pure information source whose own
 representation stays fixed. The two remaining blocks are the design space.
 
 \Paragraph{Video self-visibility.}
-$M_{VV}$ takes three values. The mode $\mathtt{bidirectional}$ sets every entry
-to one. The mode $\mathtt{per\text{-}frame\ causal}$ builds a lower-triangular
+$M_{VV}$ takes three values. The mode \texttt{bidirectional} sets every entry
+to one. The mode \texttt{per-frame causal} builds a lower-triangular
 matrix at frame granularity and expands it by the token count of one frame, so a
-frame reads its own past. The mode $\mathtt{first\text{-}frame\ causal}$ sets
+frame reads its own past. The mode \texttt{first-frame causal} sets
 every entry to one and restricts the rows of the conditioning frame to
 conditioning-frame keys, which keeps the clean prefix a self-contained
 representation of the present observation. The reference configuration uses
-$\mathtt{first\text{-}frame\ causal}$.
+\texttt{first-frame causal}.
 
 \Paragraph{Cross-modal visibility.}
 Let $P$ index the tokens of the clean conditioning frame. The four modes assign
@@ -517,12 +517,12 @@ after pretraining. \sref{sec:q4} measures both halves of this prediction.
   ttl/.style={font=\scriptsize\bfseries, align=center},
   lbl/.style={font=\tiny, text=black!70}]
 
-\newcommand{\onst}{fill=tianzhegreen!45, draw=black!35, line width=0.15pt}
-\newcommand{\offst}{fill=black!6, draw=black!25, line width=0.15pt}
-\newcommand{\halfst}{fill=tianzheblue!32, draw=black!35, line width=0.15pt}
+\def\onst{fill=tianzhegreen!45, draw=black!35, line width=0.15pt}
+\def\offst{fill=black!6, draw=black!25, line width=0.15pt}
+\def\halfst{fill=tianzheblue!32, draw=black!35, line width=0.15pt}
 
 % ---- top row: the four cross-modal modes ----
-\newcommand{\maskmat}[7]{%
+\def\maskmat#1#2#3#4#5#6#7{%
   \begin{scope}[shift={(#1,#2)}]
     \fill[#3] (0,10) rectangle (20,20);
     \fill[#4] (20,10) rectangle (30,20);
@@ -574,10 +574,10 @@ after pretraining. \sref{sec:q4} measures both halves of this prediction.
 
 \node[anchor=north west, align=left, font=\scriptsize] at (112,-24)
   {rows are queries, columns are keys\\[1pt]
-   \textcolor{tianzhegreen!45}{$\blacksquare$}\; readable\\
-   \textcolor{tianzheblue!32}{$\blacksquare$}\; readable outside the\\
+   \textcolor{tianzhegreen!45}{$\blacksquare$}\enspace readable\\
+   \textcolor{tianzheblue!32}{$\blacksquare$}\enspace readable outside the\\
    \hspace{3mm} conditioning rows\\
-   \textcolor{black!12}{$\blacksquare$}\; withheld};
+   \textcolor{black!12}{$\blacksquare$}\enspace withheld};
 \end{tikzpicture}}
 \caption{Visibility patterns. Top row: the four cross-modal modes of
 \eqref{eq:modes} as block matrices over the video and action segments. Bottom
