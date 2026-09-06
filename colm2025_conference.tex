@@ -1,0 +1,134 @@
+\documentclass{cambrian}
+
+% ---------------------------------------------------------------
+% cambrian.cls already loads: microtype, inputenc, babel, amsmath,
+% amsfonts, amssymb, amsthm, cmap, fontenc, xurl, hyperref, pifont,
+% xcolor[table,dvipsnames], graphicx, colortbl, booktabs, tabularx,
+% enumitem, caption, authblk, titlesec, fancyhdr, lastpage, mathpazo,
+% newtxmath[xcharter], zlmtt, geometry, mdframed, needspace, datetime,
+% bibentry, textcomp, textcase, cleveref (via AtEndPreamble).
+% Do not reload any of the above.
+% ---------------------------------------------------------------
+
+% Author-year citations (kept from the previous template per request)
+\usepackage[round]{natbib}
+
+\usepackage{wrapfig}
+\usepackage{multirow}
+\usepackage{subcaption}
+\usepackage{placeins}
+\usepackage{fontawesome5} % small icons for the project-page / code footnote
+% Unnumbered footnote (no marker) for the project links on page 1.
+\newcommand\blfootnote[1]{%
+  \begingroup\renewcommand\thefootnote{}\footnotetext{#1}%
+  \addtocounter{footnote}{-1}\endgroup}
+\graphicspath{{Figures/}{./Figures/}{figures/}{./}}
+
+% Project-specific preamble and macros (RAEv2 style)
+\input{Sections/_preamble}
+\input{Sections/_macros}
+
+% Default finding box style: teal box with bookmark icon
+\findingstyle{finding}
+
+% Tighter paragraph spacing so the report fits the page budget.
+\setlength{\parskip}{0.15\baselineskip}
+
+% Override hyperref colors (keep TOC link colours unchanged: TOC stays
+% black per the previous template; citations stay author-year blue).
+\definecolor{scholarblue}{rgb}{0.21,0.49,0.74}
+\definecolor{cornellred}{rgb}{0.7, 0.11, 0.11}
+\definecolor{Blue9}{rgb}{0.098,0.3,0.9}
+\hypersetup{
+  pagebackref=true,
+  breaklinks=true,
+  linkcolor=cornellred,
+  citecolor=scholarblue,
+  colorlinks=true,
+  urlcolor=Blue9
+}
+
+% Single-argument convenience aliases for boxes so that the section
+% files can call \finding{body} and \suggestion{body} without having
+% to invent a finding number for every callout.
+\let\rawfinding\finding
+\renewcommand{\finding}[1]{\rawfinding{}{}{#1}}
+
+% Suggestion box (RAEv2 style: teal box with bookmark icon,
+% "Suggestion." label, drop shadow). Defined here because
+% _preamble.tex carries only the \finding implementation.
+\newcommand{\suggestion}[2]{%
+    \begin{tcolorbox}[
+        colback=white!90!gray,
+        colframe=teal!60!black,
+        arc=5pt,
+        boxsep=5pt,
+        left=10pt, right=10pt, top=2pt, bottom=2pt,
+        boxrule=0.8pt,
+        drop shadow=gray!50!white,
+        enhanced jigsaw,
+        before skip=8pt, after skip=8pt
+    ]
+    \noindent\faBookmark\hspace{0.5em}\textbf{Suggestion #1.} #2
+    \end{tcolorbox}
+}
+
+% Personalised palette colours used by the teaser and elsewhere.
+\definecolor{tianzhered}{HTML}{B85450}
+\definecolor{tianzheblue}{HTML}{6C8EBF}
+\definecolor{tianzhebrown}{HTML}{80461B}
+\definecolor{tianzhepurple}{HTML}{884EA0}
+\definecolor{tianzhegreen}{HTML}{5F8940}
+\definecolor{tianzheorange}{HTML}{FF7E79}
+
+% ---------------------------------------------------------------
+% Shared look for every result table: soft highlight for the row a
+% comparison selects, a star for pre-registered targets, and an
+% italic panel header that groups rows inside one tabular.
+\definecolor{tabhl}{HTML}{EDF2F8}
+\newcommand{\tgt}{\textcolor{tianzhered}{$\star$}}
+\newcommand{\panel}[2]{\multicolumn{#1}{l}{\itshape #2}}
+
+% ---------------------------------------------------------------
+% Title
+\title{\center{
+}}
+\author{Lixuan He}
+\date{September 2026}
+
+\begin{document}
+
+% Project page links as an unnumbered footnote on page 1.
+\blfootnote{\begin{tabular}{@{}l@{}}
+
+\end{tabular}}
+% This report carries no abstract, so the class hook that would render one is emptied.
+\renewcommand{\abscontent}{}
+\maketitle
+
+% Header on subsequent pages
+\fancyhead[C]{\footerfont Summer Research Report}
+
+% Page-1 teaser: pinned right below the abstract (no float environment
+% so it does not migrate to another page).
+% Table of contents (black links, unchanged style from the previous
+% template)
+
+
+\input{Sections/1_Introduction}
+
+
+
+
+
+% ---- Bibliography ----
+\clearpage
+{
+    \small
+    \bibliographystyle{plainnat}
+    \bibliography{colm2025_conference}
+}
+
+\input{Sections/A_Appendix}
+
+\end{document}

@@ -1,0 +1,178 @@
+%
+% --- inline annotations
+%
+% \newcommand{\red}[1]{{\color{red}#1}}
+% \newcommand{\todo}[1]{{\color{red}#1}}
+% \newcommand{\TODO}[1]{\textbf{\color{red}[TODO: #1]}}
+% --- disable by uncommenting  
+% \renewcommand{\TODO}[1]{}
+% \renewcommand{\todo}[1]{#1}
+
+% extra packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{makecell}
+% \usepackage{ulem}
+% \usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{pifont}
+\usepackage{graphicx}
+\graphicspath{{figures/}} %Setting the graphicspath
+
+\usepackage{pifont}
+% \newcommand{\cmark}{\ding{51}}
+% \newcommand{\xmark}{\ding{55}}
+
+\usepackage{bm}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\usepackage{soul}
+
+%colors
+% \definecolor{cornellred}{rgb}{0.7, 0.11, 0.11}
+% \definecolor{cadmiumgreen}{rgb}{0.0, 0.42, 0.24}
+% \definecolor{aliceblue}{rgb}{0.91, 0.94, 0.97}
+% \definecolor{darkblue}{rgb}{0.83, 0.89, 0.97}
+% \definecolor{Red7}{rgb}{0.941, 0.243, 0.243}
+% \definecolor{Green7}{RGB}{55, 178, 77}
+% \definecolor{Blue9}{rgb}{0.098,0.3,0.9}
+
+% \newcommand{\Sref}[1]{\S\ref{#1}}
+% \newcommand{\sref}[1]{\S\ref{#1}}
+% \newcommand{\fref}[1]{Fig.~\ref{#1}}
+% \newcommand{\tref}[1]{Tab.~\ref{#1}}
+
+
+% \usepackage{subcaption}
+% \usepackage{booktabs}
+% \usepackage{multirow}
+% \usepackage{caption}
+% \usepackage{url}
+% \usepackage{subfigure}
+
+
+% \usepackage{adjustbox}
+% \usepackage{threeparttable}
+\usepackage{enumitem}
+
+
+% \usepackage{pifont} %
+% \usepackage{xcolor} %
+% \usepackage{colortbl}
+
+% \usepackage[frozencache,cachedir=minted-cache]{minted}
+\usepackage{xspace}
+
+
+
+\definecolor{Orchid}{RGB}{218,112,214} %
+\definecolor{purple}{RGB}{230,70,151}
+\definecolor{lightgray}{gray}{0.9} %
+
+\definecolor{bad}{RGB}{220, 20, 60} 
+\definecolor{good}{RGB}{34, 139, 34} 
+\newcommand{\bad}[1]{\textcolor{bad}{#1}}
+\newcommand{\good}[1]{\textcolor{good}{#1}}
+
+\usepackage{adjustbox}
+
+% Make sure you install minted and run with -shell-escape
+% \usepackage{minted}
+\usepackage{caption}
+\usepackage{subcaption}
+\captionsetup[sub]{justification=centering,singlelinecheck=false}
+\usepackage{graphicx}
+\usepackage[dvipsnames]{xcolor} 
+% \usemintedstyle{manni}
+% \usemintedstyle{monokai}
+\definecolor{nicebg}{rgb}{0.98,0.98,0.98}
+\usepackage{bbm}
+
+% Required packages for block diagrams
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,fit,backgrounds,shadows}
+\usepackage{fontawesome5}
+\usepackage{tablefootnote}
+
+% extra packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage[table]{xcolor}
+\usepackage{graphicx}
+\graphicspath{{assets/}} %Setting the graphicspath
+\definecolor{lightblue}{rgb}{0.68, 0.85, 0.9}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}
+\newcommand{\xmark}{\ding{55}}
+
+\usepackage{enumitem}
+\usepackage{bm}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{wrapfig}
+
+\usepackage{soul}
+
+\newcommand{\Sref}[1]{\S\ref{#1}}
+\newcommand{\sref}[1]{\S\ref{#1}}
+\newcommand{\fref}[1]{Fig.~\ref{#1}}
+\newcommand{\tref}[1]{Tab.~\ref{#1}}
+
+\newcommand{\todo}[1]{
+{\colorbox{red}{\bfseries\sffamily\scriptsize\textcolor{white}{TODO}}}
+ {\textcolor{red}{\sf\small\textit{#1}}}
+}
+
+
+% Unified \finding{N}{key message}{body} — style controlled by \findingstyle in main.tex
+%   \findingstyle{finding} => teal box with bookmark icon (default)
+%   \findingstyle{takeaway} => blue box with lightbulb in title bar
+\newcommand{\findingstylename}{finding}
+\newcommand{\findingstyle}[1]{\renewcommand{\findingstylename}{#1}}
+
+\newcommand{\findingstylefinding}[3]{%
+    \begin{tcolorbox}[
+        colback=white!90!gray,
+        colframe=teal!60!black,
+        arc=5pt,
+        boxsep=5pt,
+        left=10pt, right=10pt, top=2pt, bottom=2pt,
+        boxrule=0.8pt,
+        drop shadow=gray!50!white,
+        enhanced jigsaw,
+        before skip=8pt, after skip=8pt
+    ]
+    \noindent\faBookmark\hspace{0.5em}\textbf{Finding #1: #2} #3
+    \end{tcolorbox}
+}
+
+\newcommand{\findingstyletakeaway}[3]{%
+    \begin{tcolorbox}[
+        colback=blue!3!white,
+        colframe=blue!40!black,
+        fonttitle=\bfseries,
+        title={\faLightbulb\hspace{0.3em}Finding #1: #2},
+        arc=2mm,
+        boxrule=0.5pt,
+        left=5pt, right=5pt, top=2pt, bottom=2pt,
+        before skip=10pt, after skip=10pt
+    ]
+    #3
+    \end{tcolorbox}
+}
+
+\newcommand{\finding}[3]{%
+    \ifx\findingstylename\findingstylefindingname\findingstylefinding{#1}{#2}{#3}%
+    \else\findingstyletakeaway{#1}{#2}{#3}\fi
+}
+\newcommand{\findingstylefindingname}{finding}
+
+\newcommand{\fancybreak}[0]{
+    \noindent~\hfill\noindent\rule{0.9\linewidth}{0.8pt}~\hfill~
+}
