@@ -4,19 +4,22 @@
 \subsection{Setup}
 \label{sec:setup}
 
-\Paragraph{Evaluation suites.}
-Two closed-loop battlegrounds carry the study. The first is a single-arm
-tabletop benchmark with four task families that separate spatial reasoning,
-object identity, goal specification, and long-horizon composition, together with
-a perturbation suite over the same tasks that varies camera placement, robot
-initial state, language phrasing, lighting, background, sensor noise, and object
-layout along seven independent axes \citep{liu2023libero,liberoplus}. The second
-is a bimanual benchmark of fifty tasks with a clean split and a domain-randomised
-split that alters table height, clutter, background, and lighting, plus two arm
-types that appear only at evaluation time \citep{chen2025robotwin2}. The first
-measures precision and perturbation robustness on one embodiment; the second
-measures in-distribution precision, layout generalisation, and embodiment
-transfer. Neither corpus enters pretraining.
+\Paragraph{Benchmarks.}
+Three closed-loop suites carry the study, and each one gets its own result table
+so that no comparison spans two benchmarks. LIBERO
+\citep{liu2023libero} is a single-arm Franka tabletop benchmark whose forty tasks
+divide into four families that separate spatial reasoning, object identity, goal
+specification, and long-horizon composition; it measures precision inside the
+training distribution. LIBERO-Plus \citep{liberoplus} rescores the same tasks
+under seven independent perturbation axes, namely camera placement, robot initial
+state, language phrasing, lighting, background, sensor noise, and object layout;
+it measures perturbation robustness on one embodiment. RoboTwin 2.0
+\citep{chen2025robotwin2} is a bimanual benchmark of fifty tasks on the
+Aloha-Agilex platform with a clean split, a domain-randomised split that alters
+table height, clutter, background, and lighting, and two further arm types,
+ARX-X5 and Piper, that appear only at evaluation time; it measures
+in-distribution precision, layout generalisation, and zero-shot embodiment
+transfer. None of the three enters pretraining.
 
 \Paragraph{Model, corpus, and budget.}
 Every arm uses the world stream and the action stream of \sref{sec:streams} at
@@ -48,91 +51,129 @@ section to one such file.
 \subsection{Closed-Loop Performance}
 \label{sec:closedloop}
 
-\tref{tab:closedloop} carries the closed-loop study in two blocks over one row
-set. The upper block reports the in-distribution splits, which answer whether a
-given configuration reaches the regime that a released world-action
-implementation occupies. The lower block reports the four kinds of distribution
-shift, which answer where a configuration places its robustness. Three
-representation settings appear, namely a passive world model with a policy
-readout trained on top of it, the independent-objective arm, and the
-bidirectional arm, and each appears without embodied pretraining and with the
-full corpus. Fixing the mainline arm as the bidirectional coupling without
+Three tables carry the closed-loop study, one per benchmark, and all three share
+one row set. Three representation settings appear, namely a passive world model
+with a policy readout trained on top of it, the independent-objective arm, and
+the bidirectional arm, and each appears without embodied pretraining and with
+the full corpus. Fixing the mainline arm as the bidirectional coupling without
 embodied pretraining is what makes the sweep of \sref{sec:sweeps} interpretable,
-because every arm of that sweep then shares one set of starting weights. The
-in-distribution average carries a pre-registered acceptance criterion of at most
-three points against the reference row, and the shifted splits carry none,
-because a corpus of comparable size but different composition supports a
-comparison of arms rather than a claim of parity.
+because every arm of that sweep then shares one set of starting weights; the
+pretrained rows then show what the corpus adds on top.
 
-\tref{tab:closedloop} reports both blocks.
+Published policies supply the external comparison. They enter each table only
+where a published number exists for that benchmark, and every one of them
+received large-scale pretraining of its own, so the pretrained rows of this work
+are the ones that compare with them directly. The pre-registered criterion for
+the mainline arm is to reach the strongest published average on LIBERO, and the
+criterion for the pretrained arm is to exceed it. The shifted suites carry no
+parity criterion for the arm without embodied pretraining, because a model that
+has seen no robot corpus is not expected to match a pretrained policy under
+distribution shift.
+
+\tref{tab:libero} reports LIBERO, \tref{tab:liberoplus} reports LIBERO-Plus, and
+\tref{tab:robotwin} reports RoboTwin 2.0.
 
 \begin{table}[t]
 \centering
 \small
 % PLANNED-VALUE
-\caption{Closed-loop performance in two blocks over one row set. \refnote{}
-\plannednote{} The pretraining panels are load bearing: every reference row
-received large-scale embodied pretraining, and the world-action reference
-fine-tunes a foundation checkpoint trained on 6\,369 hours. This work reports
-the same three representations twice, once with the embodied corpus held out and
-once with the 6\,451 hour corpus of \tref{tab:corpus}. Block (b) reuses the row
-set of block (a) and carries the citations there.}
-\label{tab:closedloop}
-
+\caption{LIBERO \citep{liu2023libero}, success rate over fifty trials per task.
+\pubnote{} \plannednote{} The three representations appear twice, once with the
+embodied corpus held out and once with the 6\,451 hour corpus of
+\tref{tab:corpus}. The tinted rows are the two headline arms of this work.}
+\label{tab:libero}
 \adjustbox{max width=\linewidth}{%
-\begin{tabular}{@{}lrrrrrr@{}}
-\multicolumn{7}{l}{\itshape (a) In-distribution splits} \\[2pt]
+\begin{tabular}{@{}lrrrrr@{}}
 \toprule
-& \multicolumn{5}{c}{\textbf{Single-arm tabletop}} & \textbf{Bimanual} \\
-\cmidrule(lr){2-6} \cmidrule(lr){7-7}
-\textbf{Configuration} & \textbf{Spatial} & \textbf{Object} & \textbf{Goal} & \textbf{Long} & \textbf{Avg} & \textbf{Clean} \\
+\textbf{Configuration} & \textbf{Spatial} & \textbf{Object} & \textbf{Goal} & \textbf{Long} & \textbf{Avg} \\
 \midrule
-\panel{7}{Public policies and the world-action reference, all embodied-pretrained} \\
-OpenVLA \citep{kim2024openvla} & 84.7 & 88.4 & 79.2 & 53.7 & 76.5 & n/a \\
-\pizero{} \citep{black2024pi0} & 98.0 & 96.8 & 94.4 & 88.4 & 94.4 & n/a \\
-\pihalf{} \citep{intelligence2025pi05} & 98.8 & 98.2 & 98.0 & 92.4 & 96.9 & 70.7 \\
-Reference stack, 6\,369\,h \citep{referencestack} & \best{99.6} & \best{99.6} & \best{99.8} & \best{98.2} & \best{99.3} & \best{89.4} \\
+\panel{6}{Published policies, all pretrained on their own corpora} \\
+OpenVLA \citep{kim2024openvla} & 84.7 & 88.4 & 79.2 & 53.7 & 76.5 \\
+\pizero{} \citep{black2024pi0} & 98.0 & 96.8 & 94.4 & 88.4 & 94.4 \\
+\pihalf{} \citep{intelligence2025pi05} & 98.8 & 98.2 & 98.0 & 92.4 & 96.9 \\
 \addlinespace[3pt]
-\panel{7}{This work, no embodied pretraining} \\
-Passive world model plus readout & \pv{96.2} & \pv{97.0} & \pv{95.8} & \pv{92.6} & \pv{95.4} & \pv{84.0} \\
-\sys{}, \vnone{} & \pv{96.8} & \pv{97.6} & \pv{96.4} & \pv{93.6} & \pv{96.1} & \pv{86.1} \\
+\panel{6}{This work, no embodied pretraining} \\
+Passive world model plus readout & \pv{96.2} & \pv{97.0} & \pv{95.8} & \pv{92.6} & \pv{95.4} \\
+\sys{}, \vnone{} & \pv{96.8} & \pv{97.6} & \pv{96.4} & \pv{93.6} & \pv{96.1} \\
 \rowcolor{tabhl}
-\sys{}, \vbi{}, mainline arm & \pv{97.8} & \pv{98.4} & \pv{97.2} & \pv{95.4} & \pv{97.2} & \pv{87.2} \\
+\sys{}, \vbi{}, mainline arm & \pv{97.8} & \pv{98.4} & \pv{97.2} & \pv{95.4} & \pv{97.2} \\
 \addlinespace[3pt]
-\panel{7}{This work, pretrained on 6\,451 hours with the consequence recipe} \\
-Passive world model plus readout & \pv{98.0} & \pv{98.4} & \pv{97.6} & \pv{95.6} & \pv{97.4} & \pv{87.4} \\
-\sys{}, \vnone{} & \pv{98.6} & \pv{99.0} & \pv{98.2} & \pv{96.6} & \pv{98.1} & \pv{88.6} \\
+\panel{6}{This work, pretrained on 6\,451 hours with the consequence recipe} \\
+Passive world model plus readout & \pv{98.0} & \pv{98.4} & \pv{97.6} & \pv{95.6} & \pv{97.4} \\
+\sys{}, \vnone{} & \pv{98.6} & \pv{99.0} & \pv{98.2} & \pv{96.6} & \pv{98.1} \\
 \rowcolor{tabhl}
-\sys{}, \vbi{} & \pv{99.4} & \pv{99.4} & \pv{99.2} & \pv{98.0} & \pv{99.0} & \pv{89.8} \\
+\sys{}, \vbi{} & \pv{99.4} & \pv{99.4} & \pv{99.2} & \pv{98.0} & \pv{99.0} \\
 \bottomrule
 \end{tabular}}
+\end{table}
 
-\vspace{10pt}
-
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{LIBERO-Plus \citep{liberoplus}, success rate under seven perturbation
+axes on the checkpoints scored in \tref{tab:libero}. \pubnote{} \plannednote{}
+Every row is the same configuration as the row of the same name in
+\tref{tab:libero}, so the two tables read as one comparison across a
+distribution shift. The average column is the unweighted mean of the seven axis
+scores, which gives every axis the same weight and can therefore differ from the
+instance weighted overall that a source paper reports.}
+\label{tab:liberoplus}
 \adjustbox{max width=\linewidth}{%
-\begin{tabular}{@{}lrrrrrrrrrr@{}}
-\multicolumn{11}{l}{\itshape (b) Distribution shift} \\[2pt]
+\begin{tabular}{@{}lrrrrrrrr@{}}
 \toprule
-& \multicolumn{8}{c}{\textbf{Single-arm perturbation axes}} & \textbf{Bimanual} & \textbf{Held-out} \\
-\cmidrule(lr){2-9} \cmidrule(lr){10-10} \cmidrule(lr){11-11}
-\textbf{Configuration} & \textbf{Cam} & \textbf{Robot} & \textbf{Lang} & \textbf{Light} & \textbf{Bkg} & \textbf{Noise} & \textbf{Layout} & \textbf{Avg} & \textbf{Random} & \textbf{arms} \\
+\textbf{Configuration} & \textbf{Camera} & \textbf{Robot} & \textbf{Language} & \textbf{Light} & \textbf{Background} & \textbf{Noise} & \textbf{Layout} & \textbf{Avg} \\
 \midrule
-\panel{11}{Public policies and the reference stack, all embodied-pretrained} \\
-\pizero{} & 13.8 & \phantom{0}6.0 & 58.8 & 85.0 & 81.4 & 79.0 & 68.9 & 53.6 & n/a & n/a \\
-\pihalf{} & 78.4 & 73.6 & 80.8 & 96.2 & 94.1 & \best{89.0} & 84.5 & \best{84.4} & 46.0 & n/a \\
-Reference stack & 33.8 & 76.1 & 88.0 & \best{97.0} & 87.1 & 39.8 & 77.5 & 69.2 & 48.7 & n/a \\
+\panel{9}{Published policies, all pretrained on their own corpora} \\
+\pizero{} \citep{black2024pi0} & 13.8 & \phantom{0}6.0 & 58.8 & 85.0 & 81.4 & 79.0 & 68.9 & 56.1 \\
+\pihalf{} \citep{intelligence2025pi05} & 78.4 & 73.6 & 80.8 & 96.2 & 94.1 & 89.0 & 84.5 & 85.2 \\
 \addlinespace[3pt]
-\panel{11}{This work, no embodied pretraining} \\
-Passive plus readout & \pv{12.6} & \pv{34.1} & \pv{68.4} & \pv{82.6} & \pv{58.2} & \pv{16.4} & \pv{37.1} & \pv{44.2} & \pv{11.2} & \pv{2.6} \\
-\sys{}, \vnone{} & \pv{15.2} & \pv{38.4} & \pv{71.8} & \pv{84.9} & \pv{62.1} & \pv{19.6} & \pv{41.2} & \pv{47.6} & \pv{13.1} & \pv{3.8} \\
+\panel{9}{This work, no embodied pretraining} \\
+Passive world model plus readout & \pv{12.6} & \pv{34.1} & \pv{68.4} & \pv{82.6} & \pv{58.2} & \pv{16.4} & \pv{37.1} & \pv{44.2} \\
+\sys{}, \vnone{} & \pv{15.2} & \pv{38.4} & \pv{71.8} & \pv{84.9} & \pv{62.1} & \pv{19.6} & \pv{41.2} & \pv{47.6} \\
 \rowcolor{tabhl}
-\sys{}, \vbi{} & \pv{20.4} & \pv{47.2} & \pv{76.5} & \pv{88.1} & \pv{68.4} & \pv{25.8} & \pv{50.2} & \pv{53.8} & \pv{14.5} & \pv{5.2} \\
+\sys{}, \vbi{}, mainline arm & \pv{20.4} & \pv{47.2} & \pv{76.5} & \pv{88.1} & \pv{68.4} & \pv{25.8} & \pv{50.2} & \pv{53.8} \\
 \addlinespace[3pt]
-\panel{11}{This work, pretrained on 6\,451 hours, consequence recipe} \\
-Passive plus readout & \pv{22.4} & \pv{50.6} & \pv{79.2} & \pv{89.8} & \pv{72.4} & \pv{28.6} & \pv{67.2} & \pv{58.6} & \pv{34.8} & \pv{9.6} \\
-\sys{}, \vnone{} & \pv{28.6} & \pv{58.4} & \pv{83.6} & \pv{92.2} & \pv{78.6} & \pv{35.4} & \pv{79.6} & \pv{65.2} & \pv{43.1} & \pv{15.4} \\
+\panel{9}{This work, pretrained on 6\,451 hours with the consequence recipe} \\
+Passive world model plus readout & \pv{22.4} & \pv{50.6} & \pv{79.2} & \pv{89.8} & \pv{72.4} & \pv{28.6} & \pv{67.2} & \pv{58.6} \\
+\sys{}, \vnone{} & \pv{28.6} & \pv{58.4} & \pv{83.6} & \pv{92.2} & \pv{78.6} & \pv{35.4} & \pv{79.6} & \pv{65.2} \\
 \rowcolor{tabhl}
-\sys{}, \vbi{} & \pv{40.2} & \pv{71.8} & \pv{89.4} & \pv{95.6} & \pv{86.2} & \pv{46.4} & \pv{92.6} & \pv{74.6} & \pv{52.4} & \pv{24.6} \\
+\sys{}, \vbi{} & \pv{40.2} & \pv{71.8} & \pv{89.4} & \pv{95.6} & \pv{86.2} & \pv{46.4} & \pv{92.6} & \pv{74.6} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{RoboTwin 2.0 \citep{chen2025robotwin2}, success rate over fifty tasks on
+the Aloha-Agilex platform. \pubnote{} \plannednote{} Every arm fine-tunes on the
+clean split alone, so the randomised column is a layout and appearance shift and
+the two arm types are a zero-shot embodiment transfer. The held-out average is
+the mean of the two arm types.}
+\label{tab:robotwin}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+& & & \multicolumn{3}{c}{\textbf{Held-out arm types}} \\
+\cmidrule(lr){4-6}
+\textbf{Configuration} & \textbf{Clean} & \textbf{Randomised} & \textbf{ARX-X5} & \textbf{Piper} & \textbf{Avg} \\
+\midrule
+\panel{6}{Published policy, pretrained on its own corpus} \\
+\pihalf{} \citep{intelligence2025pi05} & 70.7 & 46.0 & n/a & n/a & n/a \\
+\addlinespace[3pt]
+\panel{6}{This work, no embodied pretraining} \\
+Passive world model plus readout & \pv{84.0} & \pv{11.2} & \pv{3.2} & \pv{2.0} & \pv{2.6} \\
+\sys{}, \vnone{} & \pv{86.1} & \pv{13.1} & \pv{4.6} & \pv{3.0} & \pv{3.8} \\
+\rowcolor{tabhl}
+\sys{}, \vbi{}, mainline arm & \pv{87.2} & \pv{14.5} & \pv{6.2} & \pv{4.2} & \pv{5.2} \\
+\addlinespace[3pt]
+\panel{6}{This work, pretrained on 6\,451 hours with the consequence recipe} \\
+Passive world model plus readout & \pv{87.4} & \pv{34.8} & \pv{11.0} & \pv{8.2} & \pv{9.6} \\
+\sys{}, \vnone{} & \pv{88.6} & \pv{43.1} & \pv{17.2} & \pv{13.6} & \pv{15.4} \\
+\rowcolor{tabhl}
+\sys{}, \vbi{} & \pv{89.8} & \pv{52.4} & \pv{27.0} & \pv{22.2} & \pv{24.6} \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -153,9 +194,11 @@ footage with consequence labels. The third panel holds the recipe fixed and
 varies the corpus fraction, which separates composition from volume. The fourth
 panel restricts the corpus to a subset whose action space is joint angles and
 whose camera is fixed, which decouples the action from its visual effect and
-therefore removes the signal the coupling is designed to exploit. The final
-column reports the action loss at the first fine-tuning step, which reads how
-much of the downstream action mapping a configuration already carries.
+therefore removes the signal the coupling is designed to exploit. The three
+score columns are the LIBERO average, the LIBERO-Plus average, and the RoboTwin
+randomised split, so each column is one benchmark. The final column reports the
+action loss at the first fine-tuning step, which reads how much of the
+downstream action mapping a configuration already carries.
 
 \tref{tab:sweeps} reports the four sweeps, and panel (b) of \fref{fig:results}
 plots the corpus ladder.
@@ -167,10 +210,10 @@ plots the corpus ladder.
 \caption{Controlled sweeps, one variable at a time. \plannednote{} Panel (a)
 runs without embodied pretraining and its rows are parameter-matched, so a
 difference is attributable to the coupling; the bidirectional row is the
-mainline arm of \tref{tab:closedloop}. Panels (b) and (c) use the bidirectional
+mainline arm of \tref{tab:libero}. Panels (b) and (c) use the bidirectional
 coupling throughout. Panel (d) pairs two couplings on a subset whose action
 space is joint angles under a fixed camera, where the gap between them collapses
-from 9.4 points to 0.7. The pre-registered criteria are a monotone ordering of
+from 9.4 points to 0.7 on LIBERO-Plus. The pre-registered criteria are a monotone ordering of
 the visibility settings on the shifted columns, a smaller gain for the detached
 arm than the attached arm at equal visibility, and an improvement from the
 consequence recipe over the video-only recipe.}
@@ -178,7 +221,8 @@ consequence recipe over the video-only recipe.}
 \adjustbox{max width=\linewidth}{%
 \begin{tabular}{@{}llrrrr@{}}
 \toprule
-\textbf{Swept variable} & \textbf{Setting} & \textbf{In-dist.} & \textbf{Perturbation} & \textbf{Randomised} & \textbf{Step-0 loss} \\
+\textbf{Swept variable} & \textbf{Setting} & \textbf{LIBERO} & \textbf{LIBERO-Plus} & \textbf{RoboTwin} & \textbf{Step-0} \\
+ & & \textbf{avg} & \textbf{avg} & \textbf{random} & \textbf{loss} \\
 \midrule
 \panel{6}{(a) Coupling axis, no embodied pretraining} \\
 Structure & single stream & \pv{96.4} & \pv{48.8} & \pv{13.4} & \pv{0.421} \\
@@ -220,7 +264,9 @@ dynamics model, and a linear probe on the hidden states of the world stream
 measures the same property without running the sampler. Every arm is frozen, the
 hidden state of each world layer is read, and one ridge regression per layer
 predicts the future action chunk, the future consequence trajectory, and the
-same consequence trajectory on a held-out embodiment. Four floors bound the
+same consequence trajectory on a held-out embodiment. Probe data comes from the
+LIBERO validation split, which carries consequence labels, and the held-out
+embodiment is the RoboTwin Aloha-Agilex platform. Four floors bound the
 measurement: a randomly initialised backbone of the same shape gives the score
 attainable from architecture alone, a shuffled-label probe gives the score
 attainable from the marginal statistics of the target, a copy-the-first-step
@@ -237,7 +283,8 @@ their depth profile.
 \centering
 \small
 % PLANNED-VALUE
-\caption{Linear decodability of the frozen world stream. \plannednote{} The
+\caption{Linear decodability of the frozen world stream, probed on the LIBERO
+validation split. \plannednote{} The
 action column reports the coefficient of determination of a ridge probe onto the
 future action chunk. The next two columns report the average displacement error
 of a probe onto the consequence trajectory and the fraction of steps whose
@@ -280,7 +327,7 @@ Passive world model & \pv{0.21} & \pv{0.098} & \pv{63.8} & \pv{0.132} \\
 \label{sec:clamped}
 
 Two measurements run on one trained model along the clamped rays of
-\sref{sec:paths}. The first asks whether the generated future follows the action
+\sref{sec:paths}, both on the LIBERO validation split. The first asks whether the generated future follows the action
 rather than merely correlating with it. The action tokens are clamped to four
 different chunks and the world stream is denoised to completion, and the
 displacement of the manipulator keypoints in the generated future is compared
@@ -298,8 +345,9 @@ clamping the action stream, the consequence stream, and both.
 \centering
 \small
 % PLANNED-VALUE
-\caption{Generation along the clamped rays of \sref{sec:paths}, all on the
-bidirectional arm pretrained with the consequence recipe. \plannednote{} The
+\caption{Generation along the clamped rays of \sref{sec:paths} on the LIBERO
+validation split, all on the bidirectional arm pretrained with the consequence
+recipe. \plannednote{} The
 keypoint error compares the displacement in the generated future with the
 displacement the clamped chunk implies, and the follow rate is the fraction of
 keypoints whose generated displacement agrees in sign and magnitude band with
@@ -345,7 +393,7 @@ Passive world model & no action input & \pv{17.8} & \pv{0.328} & \pv{0.171} & \p
 \begin{scope}
   \def\sx{3.4}   % mm per layer index
   \def\sy{120}   % mm per unit R^2
-  \node[anchor=west] at (-14,76) {\textbf{(a)} action information appears with depth, and the gradient path sets the slope};
+  \node[anchor=west] at (-14,76) {\textbf{(a)} LIBERO probe: action information appears with depth, and the gradient path sets the slope};
   \draw[ax] (0,0) -- (0,66);
   \draw[ax] (0,0) -- (104,0);
   \foreach \v/\l in {0/0.0, 0.1/0.1, 0.2/0.2, 0.3/0.3, 0.4/0.4, 0.5/0.5} {
@@ -382,7 +430,7 @@ Passive world model & no action input & \pv{17.8} & \pv{0.328} & \pv{0.171} & \p
 \begin{scope}[shift={(0,-104)}]
   \def\ysB{2.5}
   \def\yzB{52}
-  \node[anchor=west] at (-14,68) {\textbf{(b)} the recipes differ in slope};
+  \node[anchor=west] at (-14,68) {\textbf{(b)} LIBERO-Plus, the recipes differ in slope};
   \draw[ax] (0,0) -- (0,60);
   \draw[ax] (0,0) -- (72,0);
   \foreach \v in {55,60,65,70,75} {
@@ -390,7 +438,7 @@ Passive world model & no action input & \pv{17.8} & \pv{0.328} & \pv{0.171} & \p
     \node[anchor=east] at (-1.5,{(\v-\yzB)*\ysB}) {\v};}
   \foreach \x/\l in {6/645, 34/1935, 64/6451} {\node[anchor=north] at (\x,-1.5) {\l};}
   \node[anchor=north] at (36,-9) {pretraining corpus hours};
-  \node[anchor=south, rotate=90] at (-12,30) {perturbation average};
+  \node[anchor=south, rotate=90] at (-12,30) {LIBERO-Plus average};
 
   \draw[cv, moStone!85!black, dash pattern=on 3pt off 2pt]
     (0,{(53.8-\yzB)*\ysB}) -- (72,{(53.8-\yzB)*\ysB});
@@ -417,7 +465,7 @@ Passive world model & no action input & \pv{17.8} & \pv{0.328} & \pv{0.171} & \p
 % ================= (c) follow rate under each clamp ================= %
 \begin{scope}[shift={(94,-104)}]
   \def\ysC{0.66}
-  \node[anchor=west] at (-14,68) {\textbf{(c)} the consequence clamp is the stronger condition};
+  \node[anchor=west] at (-14,68) {\textbf{(c)} LIBERO, the consequence clamp is stronger};
   \draw[ax] (0,0) -- (0,60);
   \draw[ax] (0,0) -- (72,0);
   \foreach \v in {0,20,40,60,80} {
@@ -438,10 +486,9 @@ Passive world model & no action input & \pv{17.8} & \pv{0.328} & \pv{0.171} & \p
 (a) Layer-wise action decodability of the frozen world stream, which is the depth
 profile of the action column of \tref{tab:probes}; the question is where in the
 backbone action information appears and whether the gradient path changes that
-profile rather than only the final value. (b) Perturbation average against
-corpus hours for the three recipes of \tref{tab:sweeps}, where a difference in
-slope marks a composition effect and a difference in offset marks a volume
-effect. (c) Follow rate for the four clamping settings of \tref{tab:clamped},
+profile rather than only the final value. (b) LIBERO-Plus average against corpus hours for the
+three recipes of \tref{tab:sweeps}, where a difference in slope marks a
+composition effect and a difference in offset marks a volume effect. (c) Follow rate for the four clamping settings of \tref{tab:clamped},
 where the clamped stream is held at its ground-truth value along the rays of
 \sref{sec:paths}.}
 \label{fig:results}

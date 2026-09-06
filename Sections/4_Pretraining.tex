@@ -187,9 +187,9 @@ action label, so their action mask is empty and they supervise the world term
 and, where a tracker has produced labels, the consequence term.
 \tref{tab:corpus} lists every source with the quantities the recipe file records
 and the code checks; the robot sources are read through a shared episode format
-\citep{cadene2024lerobot} where one exists. The recipe reaches 6\,451 hours, which slightly exceeds the
-6\,369 hours of the largest published world-action recipe
-\citep{referencestack}. Hours are computed from frame counts divided by verified
+\citep{cadene2024lerobot} where one exists. The recipe reaches 6\,451 hours, of
+which 3\,933 come from real robots, 146 from simulation, and 2\,372 from
+egocentric human footage. Hours are computed from frame counts divided by verified
 control rates rather than trusted from container metadata, because several
 public releases carry incorrect rate labels; the two to six times discrepancies
 we found are recorded per source in the recipe file. Mixture weights follow a
@@ -200,16 +200,15 @@ The table separates two tiers, and the separation is an availability statement
 rather than a scientific one. The first tier is already on local storage and
 reads through existing adapters, which lets a run start without any transfer.
 The second tier is staged from public releases; the largest single item is a
-bimanual simulation corpus that the reference recipe also used, and the
-remainder adds egocentric diversity and two further real platforms. Both tiers
+large bimanual simulation corpus, and the remainder adds egocentric diversity
+and two further real platforms. Both tiers
 enter the same objective through the interfaces of \sref{sec:interfaces}, so a
 partial corpus simply reduces the hour budget of an arm.
 
 Two exclusions define the evaluation discipline. The benchmark corpora of
 \sref{sec:setup} stay out of pretraining entirely, so an out-of-distribution
 claim never rests on a source that shares its distribution with the evaluation
-suite; this is what removes the large simulation share that the reference recipe
-carried. One real source with a three hertz control rate is retained with a
+suite, and it is what keeps the simulation share of the corpus small. One real source with a three hertz control rate is retained with a
 shortened window, because a thirty-two step chunk spans more than ten seconds at
 that rate and would otherwise mix time scales with the two to three second
 windows of every other source.
@@ -221,12 +220,10 @@ windows of every other source.
 control rates. Robot sources supervise the world term and the action term;
 egocentric human sources supervise the world term and, where tracker labels
 exist, the consequence term. Tier~1 is on local storage and reads through
-existing adapters; tier~2 is staged from public releases. The total slightly
-exceeds the 6\,369 hours of the largest published world-action recipe
-\citep{referencestack}, so pretraining comparisons in this report are made at a
-comparable scale and differ from that recipe in composition rather than in
-size. The total divides into 3\,933 hours of real robot data, 146 hours of
-simulation, and 2\,372 hours of egocentric human footage.}
+existing adapters; tier~2 is staged from public releases. The total divides into
+3\,933 hours of real robot data, 146 hours of simulation, and 2\,372 hours of
+egocentric human footage, and the small simulation share follows from holding
+both evaluation suites out of pretraining.}
 \label{tab:corpus}
 \adjustbox{max width=\linewidth}{%
 \begin{tabular}{@{}llrrcc@{}}

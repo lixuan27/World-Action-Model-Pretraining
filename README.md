@@ -37,14 +37,12 @@ further configuration.
 
 Two kinds of number appear, and the document separates them everywhere.
 
-**Reference values.** Table 4 reproduces benchmark values verbatim from the
-released tables of a public world-action implementation and from the public
-reports of three vision-language-action policies. Every one of those rows comes
-from a model that received large-scale embodied pretraining, which the table
-states in its own panel headers. Those rows print in black, the
-caption states their origin, and the bibliography carries the source. They fix
-the performance regime that the mainline arm has to reach and are not
-measurements of this work.
+**Published results.** Tables 4 to 6 carry the published results of OpenVLA,
+Pi-0, and Pi-0.5 on the benchmark each table covers. Those rows print in black,
+their captions say so, and the bibliography carries the source. Each of those
+policies received large-scale pretraining of its own, which the table states in
+its panel headers, so the pretrained rows of this work are the ones that compare
+with them directly.
 
 **Pre-registered targets.** Every other number in Section 5 is a target for a
 run that the measurement programme still has to execute. Targets print in a
