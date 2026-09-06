@@ -28,6 +28,11 @@
 \input{Sections/_preamble}
 \input{Sections/_macros}
 
+% Extra TikZ libraries used by the schematic and chart figures. Every
+% figure in this report is drawn with TikZ primitives, so the document
+% carries no external image dependency.
+\usetikzlibrary{calc,arrows.meta,decorations.pathreplacing,patterns}
+
 % Default finding box style: teal box with bookmark icon
 \findingstyle{finding}
 
@@ -90,8 +95,28 @@
 \newcommand{\panel}[2]{\multicolumn{#1}{l}{\itshape #2}}
 
 % ---------------------------------------------------------------
+% Theorem-like environments used by the derivations in Section 3.
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+
+% ---------------------------------------------------------------
+% Project-wide naming and notation macros.
+\newcommand{\sys}{\textsc{Jam}\xspace}          % framework name
+\newcommand{\sysa}{\textsc{Jam}-1\xspace} % pretrained foundation model
+\newcommand{\best}[1]{\textbf{#1}}
+\newcommand{\second}[1]{\underline{#1}}
+\newcommand{\pizero}{$\pi_{0}$\xspace}
+\newcommand{\pihalf}{$\pi_{0.5}$\xspace}
+\newcommand{\masksym}[1]{\ensuremath{\mathtt{#1}}}
+\newcommand{\AV}{\ensuremath{\mathrm{A}\!\leftarrow\!\mathrm{V}}}   % action reads video
+\newcommand{\VA}{\ensuremath{\mathrm{V}\!\leftarrow\!\mathrm{A}}}   % video reads action
+\newcommand{\VAV}{\ensuremath{\mathrm{V}\!\leftrightarrow\!\mathrm{A}}} % mutual
+\newcommand{\ISO}{\ensuremath{\mathrm{V}\,|\,\mathrm{A}}}           % isolated
+
+% ---------------------------------------------------------------
 % Title
 \title{\center{
+JAM: Action-Grounded World Pretraining
 }}
 \author{Lixuan He}
 \date{September 2026}
@@ -100,33 +125,29 @@
 
 % Project page links as an unnumbered footnote on page 1.
 \blfootnote{\begin{tabular}{@{}l@{}}
-
+\faGithub~The framework, the pretrained foundation model, every downstream variant, and every checkpoint \\
+of the design study described in this report are released together with the paper.
 \end{tabular}}
 % This report carries no abstract, so the class hook that would render one is emptied.
 \renewcommand{\abscontent}{}
 \maketitle
 
 % Header on subsequent pages
-\fancyhead[C]{\footerfont Summer Research Report}
-
-% Page-1 teaser: pinned right below the abstract (no float environment
-% so it does not migrate to another page).
-% Table of contents (black links, unchanged style from the previous
-% template)
-
+\fancyhead[C]{\footerfont JAM: Action-Grounded World Pretraining}
 
 \input{Sections/1_Introduction}
-
-
-
-
+\input{Sections/2_RelatedWork}
+\input{Sections/3_Framework}
+\input{Sections/4_Study}
+\input{Sections/5_JAM_Alpha}
+\input{Sections/6_Conclusion}
 
 % ---- Bibliography ----
 \clearpage
 {
     \small
     \bibliographystyle{plainnat}
-    \bibliography{colm2025_conference}
+    \bibliography{jam}
 }
 
 \input{Sections/A_Appendix}

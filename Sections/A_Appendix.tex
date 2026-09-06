@@ -1,0 +1,52 @@
+\appendix
+\section{Released Artifacts}
+\label{app:artifacts}
+
+\tref{tab:artifacts} indexes every checkpoint released with this report. The
+foundation checkpoint is the pretraining output and is intended as a
+fine-tuning start. Each downstream checkpoint is a self-contained directory
+carrying its resolved configuration, its weights, its component assets and its
+normalisation statistics, so a single deployment command serves any of them. The
+study checkpoints correspond one to one with the rows of
+\tref{tab:q1} through \tref{tab:q6}.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Index of released checkpoints. Downstream variants deploy directly and
+the foundation checkpoint is the start of a fine-tuning run.}
+\label{tab:artifacts}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llr@{}}
+\toprule
+\textbf{Group} & \textbf{Contents} & \textbf{Count} \\
+\midrule
+Foundation model & the pretraining output of \sref{sec:corpus} & 1 \\
+Simulated variants & LIBERO, RoboTwin Clean2Random, RoboTwin Full, RoboCasa365, & 8 \\
+ & RoboCasa GR1, VLABench, EBench, bimanual simulation & \\
+Physical variants & single-arm Franka, dexterous hand, three bimanual arm types & 5 \\
+Study, coupling & the seven configurations of \tref{tab:q1} & 7 \\
+Study, backbone & the five configurations of \tref{tab:q2} & 5 \\
+Study, representation & the six configurations of \tref{tab:q3} & 6 \\
+Study, visibility & the four modes of \tref{tab:q4} & 4 \\
+Study, pretraining recipe & four pretraining runs, one staged intermediate, seven fine-tuned outputs & 12 \\
+\midrule
+\textbf{Total} & & \textbf{48} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\section{Reproduction Interface}
+\label{app:repro}
+
+A run is fully specified by its configuration overrides, so every row of the
+study reduces to one command. Selecting the coupling family, the backbone, the
+visual encoder and the visibility mode happens on the command line, and the
+trainer records the resolved configuration next to the weights. Fine-tuning a
+released checkpoint requires the path of that checkpoint and the identifier of
+the target dataset. Deployment takes the checkpoint directory alone and starts a
+server that speaks the observation and action protocol of \sref{sec:corpus},
+after which each benchmark client runs inside its own environment. The
+denoising trajectory, the executor mode, the replanning horizon and the velocity
+cache are deployment-time settings, so reproducing any row of \tref{tab:q6} or
+\tref{tab:cost} reuses one checkpoint and changes only the server flags.

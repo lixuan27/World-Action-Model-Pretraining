@@ -1,0 +1,74 @@
+\section{Related Work}
+\label{sec:related}
+
+\Paragraph{Video generative models as control backbones.}
+Latent diffusion and flow matching turned video synthesis into a scalable
+sequence modelling problem, and the transformer denoisers that carry it
+\citep{peebles2023dit,esser2024sd3} now underpin open video generators such as
+the Wan family \citep{wan2025wan}, Cosmos \citep{nvidia2025cosmos}, CogVideoX
+\citep{yang2025cogvideox} and Stable Video Diffusion
+\citep{blattmann2023svd}. Robotics adopted these generators along two routes.
+The planning route generates a future observation and recovers the action with a
+separate inverse dynamics model or a goal-reaching controller
+\citep{du2023unipi,black2024susie,wu2024ivideogpt,bruce2024genie}. The joint
+route asks one network to denoise video and actions together, so a single
+forward pass produces both quantities \citep{zhu2025uwm}. Video pretraining on
+web footage followed by action fine-tuning also improves policies whose action
+head is conventional \citep{wu2024gr1,cheang2024gr2}. Latent action modelling
+extracts pseudo-action labels from unannotated video and pretrains a policy on
+them \citep{ye2025lapa}. \sys{} follows the joint route and treats the coupling
+between the two streams as a variable to be measured.
+
+\Paragraph{Vision-language-action policies.}
+The competing family attaches an action decoder to a pretrained
+vision-language model and supervises it on teleoperation data. Autoregressive
+action tokenisation \citep{brohan2023rt2,kim2024openvla}, optimised parallel
+decoding \citep{kim2025openvlaoft} and flow-matching action experts
+\citep{black2024pi0,intelligence2025pi05,bjorck2025groot,liu2025rdt} span the
+current design range, and earlier action-chunking policies established the
+supervised recipe these systems refine
+\citep{chi2023diffusionpolicy,zhao2023act,octo2024}. These policies inherit
+language grounding from the backbone and treat the observation stream purely as
+an input. \sys{} keeps the language pathway and adds a visual
+prediction target, and one variant of the framework restores an explicit
+understanding stream by attaching a frozen vision-language expert
+\citep{bai2025qwen25vl} to the joint attention.
+
+\Paragraph{Pretraining corpora and cross-embodiment action spaces.}
+Large-scale robot corpora now aggregate hundreds of embodiments and tasks
+\citep{oxe2024,khazatsky2024droid,agibot2025}, and human egocentric collections
+add orders of magnitude more footage at the cost of action labels
+\citep{grauman2022ego4d,hoque2025egodex}. Training one policy across such
+heterogeneous sources requires a shared action interface, which existing systems
+obtain either by tokenising per-embodiment action vectors or by learning a
+separate head for each platform. \sys{} adopts a fixed wide action layout with
+per-dimension supervision masks, so a gripper platform and a dexterous hand
+occupy disjoint slots of one head and every source contributes gradient only
+where it carries a measurement. This interface is what allows action-free
+egocentric footage to enter the same optimisation as fully labelled robot
+trajectories.
+
+\Paragraph{Representation choices for prediction.}
+Self-supervised image and video encoders produce features that predict semantics
+well \citep{oquab2024dinov2,simeoni2025dinov3,assran2025vjepa2}, and variational
+autoencoders produce compact reconstructive latents that generative models
+denoise efficiently \citep{kingma2014vae,rombach2022ldm}. World models for
+control have been built on both, and the two families differ in latent width by
+more than an order of magnitude. \sys{} isolates width from semantics by
+inserting a small frozen reducer that compresses a semantic latent to the channel
+count of the reconstructive latent, which turns the comparison into a controlled
+one.
+
+\Paragraph{Frameworks, controlled studies and evaluation harnesses.}
+Reproducible robot learning depends on shared data formats
+\citep{cadene2024lerobot}, composable configuration \citep{yadan2019hydra} and
+memory-efficient distributed training \citep{rajbhandari2020zero,paszke2019pytorch},
+and on benchmark suites that stress distinct competences
+\citep{liu2023libero,nasiriany2024robocasa,chen2025robotwin2,zhang2024vlabench}.
+Prior work releases a policy together with the harness that scored it. \sys{}
+releases the axes as well, so the framework exposes every architectural,
+representational and scheduling decision as a selectable component, and the
+study that follows reports each axis under one protocol. The sparse multi-expert
+attention pattern that one of our coupling variants uses is the mixture of
+transformers construction \citep{liang2024mot}, applied here across the video and
+action modalities.

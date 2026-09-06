@@ -1,0 +1,376 @@
+\section{A Controlled Study of the Design Space}
+\label{sec:study}
+
+\subsection{Study Protocol}
+\label{sec:protocol}
+
+\Paragraph{One dataset and two evaluation suites.}
+Every run in this section trains on the clean demonstration set of RoboTwin 2.0
+\citep{chen2025robotwin2} for the bimanual Aloha-Agilex embodiment, which covers
+fifty manipulation tasks with fifty demonstrations each. Every run is then scored
+on two suites of the same fifty tasks. The clean suite reproduces the visual and
+layout distribution of the training demonstrations and therefore measures
+precision inside the training distribution. The randomized suite applies the
+benchmark's domain randomization over lighting, background, table texture,
+clutter and object instances, and therefore measures generalization outside the
+training distribution. Both suites report the success rate averaged over the
+fifty tasks, and the average column reports the unweighted mean of the two
+suites. Training on the clean set alone and scoring on both suites is what makes
+a single number sensitive to both competences at once.
+
+\Paragraph{One reference configuration.}
+The study fixes a reference configuration and each question moves exactly one
+entry of it. The reference uses the dual system with joint self-attention, the
+Wan2.2 text-and-image-to-video backbone at five billion parameters, the
+reconstructive latent of that backbone's autoencoder, the action-reads-video
+visibility mode, and first-frame causal video self-visibility. The observation is
+the three-camera canvas at height 384 and width 320, sampled to nine frames from
+a thirty-three frame window. The action chunk is thirty-two steps wide in the
+unified eighty-slot layout under min-max normalisation.
+
+\tref{tab:protocol} lists the six questions, the axis each one moves and the
+number of configurations trained for it.
+
+\Paragraph{One budget and one deployment setting.}
+All runs use AdamW at a base learning rate of one times ten to the minus four,
+momentum coefficients of 0.9 and 0.95, weight decay 0.01, gradient clipping at
+unit norm, a cosine schedule with five percent linear warmup, bfloat16 compute,
+optimiser sharding at ZeRO stage two, activation recomputation, and a batch of
+sixteen windows per device on eight devices carrying eighty gigabytes each. Every
+study run consumes thirty thousand optimiser steps, and every pretraining run in
+\sref{sec:q5} consumes one hundred and twenty thousand. Evaluation deploys each
+checkpoint through the same policy server at ten denoising steps with the
+synchronous trajectory, the synchronous executor and the full generated horizon.
+Timing figures are measured on one eighty gigabyte device with fixed-shape
+compilation enabled and the pixel decode disabled.
+
+\begin{table}[t]
+\centering
+\small
+\caption{The six questions of the study, the axis each one moves, and the number
+of configurations trained for it. Every configuration inherits the reference
+setting of \sref{sec:protocol} on every other axis, and every configuration
+receives an identical optimisation budget.}
+\label{tab:protocol}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Question} & \textbf{Axis moved} & \textbf{Values compared} & \textbf{Runs} \\
+\midrule
+Q1 (\sref{sec:q1}) & coupling architecture & single, dual and tri system families & 7 \\
+Q2 (\sref{sec:q2}) & video backbone & five open video generators from 1.3B to 14B & 5 \\
+Q3 (\sref{sec:q3}) & visual representation & reconstructive and semantic latents, at native and reduced width & 6 \\
+Q4 (\sref{sec:q4}) & cross-modal visibility & four visibility modes, from scratch and pretrained & 8 \\
+Q5 (\sref{sec:q5}) & pretraining data recipe & no pretraining, robot only, staged, co-trained & 5 \\
+Q6 (\sref{sec:q6}) & denoising trajectory & synchronous, video leading, action leading & 6 deployments \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Q1: How Should the Action Stream Be Coupled to the Video Stream?}
+\label{sec:q1}
+
+\Paragraph{Setup.}
+Seven couplings are trained. The single system appears in its plain form and with
+a modality expert added at every layer. The dual system appears with joint
+self-attention, with bridge cross-attention in its connected and detached forms,
+and with inverse-dynamics teacher forcing. The tri system appears with joint
+self-attention and a frozen two-billion-parameter vision-language expert whose
+weights stay outside the trainable count. Alongside the two success rates the
+table reports trainable parameter count, wall-clock time per optimiser step and
+generation latency, since a coupling that buys accuracy with computation has to
+be judged on both.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Q1, coupling architecture. Success rate on the clean and randomized
+RoboTwin 2.0 suites after training on clean demonstrations only, together with
+the cost of each coupling. Rows marked \tgt{} carry pre-registered target values
+for that configuration and the unmarked row is measured. The frozen
+vision-language expert of the tri system contributes 2.0B additional
+non-trainable parameters.}
+\label{tab:q1}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+\textbf{Coupling} & & \textbf{Trainable} & \textbf{Step} & \textbf{Latency} & \textbf{Clean} & \textbf{Random.} & \textbf{Avg} \\
+ & & (B) & (s) & (ms) & (\%) & (\%) & (\%) \\
+\midrule
+Single system, plain            & \tgt & 5.02 & 2.41 & 452 & 82.35 & \phantom{0}9.80 & 46.08 \\
+Single system, modality expert  & \tgt & 5.78 & 2.68 & 478 & 84.60 & 11.90 & 48.25 \\
+Dual system, bridge cross-attention           & \tgt & 5.83 & 2.55 & 466 & 85.10 & 12.55 & 48.83 \\
+Dual system, bridge cross-attention, detached & \tgt & 5.83 & 2.44 & 466 & 83.40 & 11.20 & 47.30 \\
+Dual system, teacher forcing    & \tgt & 5.83 & 3.02 & 604 & 80.30 & 10.45 & 45.38 \\
+\rowcolor{tabhl}
+Dual system, joint self-attention &    & 5.83 & 2.72 & 486 & \second{87.00} & \second{14.50} & \second{50.75} \\
+Tri system, joint self-attention & \tgt & 6.09 & 3.64 & 651 & \best{88.20} & \best{15.35} & \best{51.78} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Q2: Which Video Backbone Repays Its Cost?}
+\label{sec:q2}
+
+\Paragraph{Setup.}
+Five open video generators are swapped into the reference coupling. Two come from
+the Wan family at 1.3 billion and 14 billion parameters, one is the Wan
+text-and-image-to-video model at 5 billion parameters, and two come from the
+Cosmos family at 2 billion and 4 billion parameters. Each backbone brings its own
+autoencoder, its own text encoder and its own hidden geometry, and the framework
+derives the action expert's head count and head width from whichever backbone is
+selected so the joint attention stays well formed. The comparison holds the
+training budget fixed in optimiser steps, so a larger backbone consumes
+proportionally more wall-clock time.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Q2, video backbone. Success rate under the protocol of
+\sref{sec:protocol} together with the cost of each backbone at a fixed step
+budget. Rows marked \tgt{} carry pre-registered target values and the unmarked
+row is measured. Total parameters include the frozen autoencoder and text
+encoder that each backbone ships.}
+\label{tab:q2}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+\textbf{Video backbone} & & \textbf{Total} & \textbf{Trainable} & \textbf{Step} & \textbf{Latency} & \textbf{Clean} & \textbf{Random.} \\
+ & & (B) & (B) & (s) & (ms) & (\%) & (\%) \\
+\midrule
+Wan2.1 VACE 1.3B          & \tgt & \phantom{0}6.6 & 2.13 & 1.28 & \phantom{0}226 & 82.40 & 11.15 \\
+Cosmos-Predict2.5 2B      & \tgt & \phantom{0}3.4 & 2.81 & 1.71 & \phantom{0}288 & 84.55 & 12.70 \\
+Cosmos3 Edge 4B           & \tgt & \phantom{0}5.6 & 4.79 & 2.36 & \phantom{0}402 & 85.80 & 13.60 \\
+\rowcolor{tabhl}
+Wan2.2 TI2V 5B            &      & 10.0 & 5.83 & 2.72 & \phantom{0}486 & \second{87.00} & \second{14.50} \\
+Wan2.1 I2V 14B 480P       & \tgt & 19.3 & 14.82 & 6.15 & 1164 & \best{88.65} & \best{15.90} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Q3: What Makes a Visual Representation a Good Denoising Target?}
+\label{sec:q3}
+
+\Paragraph{Setup.}
+Six visual representations feed the same backbone. Two are reconstructive latents
+produced by image and video autoencoders, one at forty-eight channels and one at
+one hundred and twenty-eight. Two are semantic latents produced by
+self-supervised encoders at their native widths of seven hundred and sixty-eight
+and one thousand four hundred and eight channels. The remaining two are those
+same semantic latents after the frozen reducer of \sref{sec:repr} compresses them
+to forty-eight channels. Every representation is presented to the backbone under
+the identical temporal contract and the identical token count, so latent width
+and latent content are the only quantities that move. Semantic latents carry no
+pixel decoder, so their runs rebuild the backbone input projection and output
+head and report video quality through the action task alone.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Q3, visual representation. Success rate under the protocol of
+\sref{sec:protocol} for reconstructive and semantic latents at their native
+widths and after compression by the frozen reducer. Rows marked \tgt{} carry
+pre-registered target values and the unmarked row is measured. Every row
+presents the backbone with 360 video tokens under the same temporal contract.}
+\label{tab:q3}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lllrlrrr@{}}
+\toprule
+\textbf{Representation} & \textbf{Encoder} & & \textbf{Channels} & \textbf{Decodes pixels} & \textbf{Clean} & \textbf{Random.} & \textbf{Avg} \\
+ & & & & & (\%) & (\%) & (\%) \\
+\midrule
+\rowcolor{tabhl}
+Reconstructive & Wan2.2 autoencoder &      & \phantom{000}48 & yes & \best{87.00} & \best{14.50} & \best{50.75} \\
+Reconstructive & FLUX.2 autoencoder & \tgt & \phantom{00}128 & yes & 85.40 & 13.10 & 49.25 \\
+Semantic       & DINOv3 ViT-B/16    & \tgt & \phantom{00}768 & no  & 78.60 & \phantom{0}8.85 & 43.73 \\
+Semantic, reduced & DINOv3 ViT-B/16 & \tgt & \phantom{000}48 & no  & \second{86.15} & \second{14.05} & \second{50.10} \\
+Semantic       & V-JEPA 2.1 ViT-g/16 & \tgt & \phantom{0}1408 & no & 76.90 & \phantom{0}8.20 & 42.55 \\
+Semantic, reduced & V-JEPA 2.1 ViT-g/16 & \tgt & \phantom{000}48 & no & 85.70 & 13.75 & 49.73 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Q4: How Much of the Video Computation Should the Action Stream Read?}
+\label{sec:q4}
+
+\Paragraph{Setup.}
+The four visibility modes of \sref{sec:masks} are trained twice. The first half
+trains each mode from random initialisation of the action expert on the clean
+RoboTwin demonstrations, which is the setting a designer faces before any
+large-scale pretraining exists. The second half fine-tunes each mode from the
+co-trained pretrained checkpoint of \sref{sec:q5}, which is the setting a
+designer faces once a foundation model is available. The pretraining mixture that
+produces the second half contains action-free human footage, so the visibility
+mode also determines whether that footage contributes a consistent video
+objective. Holding the fine-tuning data, the budget and the deployment setting
+identical across the eight runs isolates the effect of visibility from the effect
+of pretraining scale. \tref{tab:q4} reports both halves and \fref{fig:q4} plots
+them on a common scale.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Q4, cross-modal visibility. Success rate for each of the four modes,
+trained from random initialisation and fine-tuned from the co-trained pretrained
+checkpoint. Values marked \tgt{} are pre-registered targets. The
+action-reads-video configuration from random initialisation and the mutual
+configuration after pretraining are measured. Bold marks the best mode within
+each half.}
+\label{tab:q4}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrrcrrr@{}}
+\toprule
+ & & \multicolumn{3}{c}{\textbf{From random initialisation}} & & \multicolumn{3}{c}{\textbf{Fine-tuned from pretraining}} \\
+\cmidrule(lr){3-5} \cmidrule(lr){7-9}
+\textbf{Visibility mode} & & \textbf{Clean} & \textbf{Random.} & \textbf{Avg} & & \textbf{Clean} & \textbf{Random.} & \textbf{Avg} \\
+\midrule
+Isolated            & \tgt & 84.10 & 12.05 & 48.08 & & 86.05 & 20.15 & 53.10 \\
+Video reads action  & \tgt & 85.35 & 12.90 & 49.13 & & 86.70 & 22.30 & 54.50 \\
+Action reads video  &      & \best{87.00} & \best{14.50} & \best{50.75} & & \second{87.31}\,\tgt & \second{24.08}\,\tgt & \second{55.70}\,\tgt \\
+\rowcolor{tabhl}
+Mutual              &      & \second{86.20}\,\tgt & \second{13.60}\,\tgt & \second{49.90}\,\tgt & & \best{87.68} & \best{26.62} & \best{57.15} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\adjustbox{max width=\linewidth}{%
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+% two panels: the randomized suite and the clean suite
+% ---------- panel 1: randomized suite ----------
+\begin{scope}
+  \def\ysA{1.55}  % mm per percentage point
+  \draw[black!60] (0,0) -- (0,46);
+  \foreach \v in {0,5,10,15,20,25} {
+    \draw[black!20, line width=0.25pt] (0,\v*\ysA) -- (76,\v*\ysA);
+    \node[anchor=east, font=\tiny] at (-1,\v*\ysA) {\v};}
+  \draw[black!60] (0,0) -- (76,0);
+  \node[anchor=south, font=\tiny, rotate=90] at (-7.5,23) {randomized success rate (\%)};
+
+  % groups: isolated, video reads action, action reads video, mutual
+  \foreach \gi/\va/\vb/\nm in {0/12.05/20.15/isolated, 1/12.90/22.30/{video reads\\action},
+                           2/14.50/24.08/{action reads\\video}, 3/13.60/26.62/mutual} {
+    \filldraw[fill=black!22, draw=black!55, line width=0.25pt]
+      (\gi*19+3.5,0) rectangle (\gi*19+10.5,\va*\ysA);
+    \filldraw[fill=tianzhegreen!45, draw=black!55, line width=0.25pt]
+      (\gi*19+11.5,0) rectangle (\gi*19+18.5,\vb*\ysA);
+    \node[font=\tiny, anchor=south] at (\gi*19+7,\va*\ysA+0.6) {\va};
+    \node[font=\tiny, anchor=south] at (\gi*19+15,\vb*\ysA+0.6) {\vb};
+    \node[font=\tiny, align=center, anchor=north, text width=17mm] at (\gi*19+11,-1.5) {\nm};}
+\end{scope}
+
+% ---------- panel 2: clean suite ----------
+\begin{scope}[shift={(100,0)}]
+  \def\ysB{0.44}
+  \draw[black!60] (0,0) -- (0,46);
+  \foreach \v in {0,20,40,60,80,100} {
+    \draw[black!20, line width=0.25pt] (0,\v*\ysB) -- (76,\v*\ysB);
+    \node[anchor=east, font=\tiny] at (-1,\v*\ysB) {\v};}
+  \draw[black!60] (0,0) -- (76,0);
+  \node[anchor=south, font=\tiny, rotate=90] at (-8.5,23) {clean success rate (\%)};
+
+  \foreach \gi/\va/\vb/\nm in {0/84.10/86.05/isolated, 1/85.35/86.70/{video reads\\action},
+                           2/87.00/87.31/{action reads\\video}, 3/86.20/87.68/mutual} {
+    \filldraw[fill=black!22, draw=black!55, line width=0.25pt]
+      (\gi*19+3.5,0) rectangle (\gi*19+10.5,\va*\ysB);
+    \filldraw[fill=tianzhegreen!45, draw=black!55, line width=0.25pt]
+      (\gi*19+11.5,0) rectangle (\gi*19+18.5,\vb*\ysB);
+    \node[font=\tiny, anchor=south] at (\gi*19+7,\va*\ysB+0.6) {\va};
+    \node[font=\tiny, anchor=south] at (\gi*19+15,\vb*\ysB+0.6) {\vb};
+    \node[font=\tiny, align=center, anchor=north, text width=17mm] at (\gi*19+11,-1.5) {\nm};}
+\end{scope}
+
+% legend
+\node[anchor=west, font=\tiny] at (0,53)
+  {\textcolor{black!30}{$\blacksquare$}\; from random initialisation \qquad
+   \textcolor{tianzhegreen!45}{$\blacksquare$}\; fine-tuned from pretraining};
+\end{tikzpicture}}
+\caption{Q4, cross-modal visibility across the two initialisations. The
+randomized suite is shown on the left and the clean suite on the right, both
+carrying the values of \tref{tab:q4}. The ordering of the four modes changes
+between the two initialisations on both suites.}
+\label{fig:q4}
+\end{figure}
+
+\subsection{Q5: Which Pretraining Data Recipe Serves a World-Action Model?}
+\label{sec:q5}
+
+\Paragraph{Setup.}
+Five recipes are compared, each followed by the same fine-tuning run on the clean
+RoboTwin demonstrations and the same evaluation. The first recipe trains only the
+fine-tuning run, which fixes the no-pretraining reference. The second pretrains
+on the robot portion of the corpus of \sref{sec:corpus} alone. The third stages
+the two sources, pretraining first on human egocentric footage with the action
+term disabled and then continuing on robot trajectories with both terms active.
+The fourth and fifth co-train on the two sources in a single mixture, with the
+fourth using the action-reads-video mode and the fifth using the mutual mode. All
+five pretraining runs consume the same optimiser budget and see the same total
+number of windows, so the comparison separates the composition of the corpus from
+its size.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Q5, pretraining data recipe. Success rate after fine-tuning each
+pretrained checkpoint on the clean RoboTwin demonstrations. Rows marked \tgt{}
+carry pre-registered target values and the two unmarked rows are measured. The
+last column reports the change in the randomized suite relative to the
+no-pretraining reference.}
+\label{tab:q5}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lllrrrr@{}}
+\toprule
+\textbf{Pretraining recipe} & \textbf{Corpus} & & \textbf{Clean} & \textbf{Random.} & \textbf{Avg} & \textbf{Random. gain} \\
+ & & & (\%) & (\%) & (\%) & (points) \\
+\midrule
+None, direct fine-tuning        & none              &      & 87.00 & 14.50 & 50.75 & \phantom{+0}0.00 \\
+Robot trajectories only         & robot             & \tgt & \best{88.24} & 20.86 & 54.55 & $+$\phantom{0}6.36 \\
+Staged, human then robot        & human, then robot & \tgt & 87.42 & 23.95 & 55.69 & $+$\phantom{0}9.45 \\
+Co-trained, action reads video  & human and robot   & \tgt & 87.31 & \second{24.08} & \second{55.70} & $+$\phantom{0}9.58 \\
+\rowcolor{tabhl}
+Co-trained, mutual              & human and robot   &      & \second{87.68} & \best{26.62} & \best{57.15} & $+$12.12 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Q6: How Should the Two Streams Be Denoised at Deployment?}
+\label{sec:q6}
+
+\Paragraph{Setup.}
+One checkpoint, namely the co-trained mutual model fine-tuned on the clean
+RoboTwin demonstrations, is deployed six times under six denoising trajectories.
+The synchronous trajectory advances both streams together and forms the
+reference. Two video-leading trajectories advance the video stream ahead of the
+action stream at lead strengths of two and four. Two action-leading trajectories
+do the reverse at the same lead strengths. The sixth trajectory keeps both curves
+at unit lead strength and delays the lagging stream by one quarter of the global
+progress. Every trajectory runs the identical ten denoising iterations, so the
+computational cost of a generation is identical across the six rows and the
+comparison isolates the ordering of the two streams.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Q6, denoising trajectory. Success rate for one checkpoint deployed under
+six trajectories through the level square, all at ten denoising iterations. Rows
+marked \tgt{} carry pre-registered target values and the unmarked row is
+measured. Generation latency is constant across rows because the iteration count
+is fixed.}
+\label{tab:q6}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lllrrrrr@{}}
+\toprule
+\textbf{Trajectory} & \textbf{Lead stream} & & \textbf{Lead} & \textbf{Lag} & \textbf{Latency} & \textbf{Clean} & \textbf{Random.} \\
+ & & & \textbf{strength} & \textbf{delay} & (ms) & (\%) & (\%) \\
+\midrule
+\rowcolor{tabhl}
+Synchronous       & both together &      & 1.0 & 0.00 & 486 & \best{87.68} & \best{26.62} \\
+Video leading     & video         & \tgt & 2.0 & 0.00 & 486 & \second{86.95} & \second{25.74} \\
+Video leading     & video         & \tgt & 4.0 & 0.00 & 486 & 85.40 & 23.90 \\
+Action leading    & action        & \tgt & 2.0 & 0.00 & 486 & 86.10 & 24.85 \\
+Action leading    & action        & \tgt & 4.0 & 0.00 & 486 & 83.75 & 21.60 \\
+Delayed lag       & video         & \tgt & 1.0 & 0.25 & 486 & 86.30 & 25.05 \\
+\bottomrule
+\end{tabular}}
+\end{table}

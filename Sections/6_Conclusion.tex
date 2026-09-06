@@ -1,0 +1,53 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+This report treated the design of a world-action model as a space to be mapped
+and built the instrument that maps it. The framework of \sref{sec:framework}
+turns six independent decisions into interchangeable components behind one
+training, deployment and evaluation interface, and it states each decision
+formally, so a coupling architecture, a visibility pattern and a denoising
+trajectory become objects with definite semantics. Two derivations carried the
+design. Independent noise-level sampling across the two streams covers the whole
+level square, which makes the deployment-time trajectory a variable a practitioner
+selects after training. Cross-modal visibility determines whether an action-free
+mixture component contributes a consistent video objective, which predicts that
+the best visibility pattern changes once large-scale pretraining enters.
+
+The study of \sref{sec:study} moved one axis at a time under one dataset, one
+budget and one harness, and it selects a specific configuration. The action
+stream becomes its own transformer that meets the video backbone through one
+mixed attention at every layer. The backbone is the five-billion-parameter
+text-and-image-to-video model, which balances accuracy against the cost of a
+generation. The denoising target is a compact reconstructive latent, and a
+frozen reducer brings a semantic latent to comparable quality by matching its
+width, which identifies compactness as the property that matters. Visibility is
+mutual once pretraining is available and one-directional before it. The corpus
+co-trains human egocentric footage with robot trajectories in a single mixture,
+which raises out-of-distribution success far more than it raises
+in-distribution success. The two streams denoise together at deployment.
+
+\sysa{} is that configuration scaled to a corpus of six thousand hours and
+trained once, then fine-tuned per platform with nothing else changed. It reaches
+the strongest reported world-action result on five of the nine simulated suites
+in \sref{sec:sim}, and it operates three physical platforms including a
+dexterous hand and three bimanual arm types in \sref{sec:real}. The deployment
+stack of \sref{sec:cost} brings one generation into a range a thirty-hertz
+controller absorbs, and the asynchronous executor removes the replanning stall
+that a receding-horizon policy otherwise imposes on a physical loop.
+
+Three directions stay open. Robustness to camera placement and to sensor noise
+is the weakest axis of the current model, and the perturbation results of
+\tref{tab:liberoplus} locate the gap precisely enough to target it with
+viewpoint augmentation inside the pretraining mixture. Precision tasks remain
+harder for the model than generalization tasks, which points at the temporal
+resolution of the action chunk and at the granularity of the latent the video
+stream denoises. The tri-system coupling reaches a higher success rate than the
+selected one at a higher cost per generation, so a version of it that keeps the
+understanding expert active only when the instruction demands semantic
+disambiguation is worth building.
+
+Every element of this report is released: the framework, the pretrained
+checkpoint, the fine-tuned variant for each benchmark and each robot, and one
+checkpoint per point of the design study. A reader who disagrees with a
+conclusion can therefore reload the model that produced it and move the axis
+again.

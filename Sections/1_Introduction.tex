@@ -1,0 +1,77 @@
+\section{Introduction}
+\label{sec:intro}
+
+Robot manipulation policies are converging on two ways of turning pixels and
+language into motor commands. The first family starts from a vision-language
+model and attaches an action head to it, so the policy inherits semantic breadth
+from web-scale pretraining and learns the map from an instruction to a motion
+directly. The second family starts from a video generative model and asks a
+single network to produce the future the robot is about to see together with the
+actions that produce it, which places a model of the world inside the policy
+itself. This report studies the second family, which the literature calls
+world-action models. Two properties make that family compelling. A video
+objective supplies dense supervision from footage whose action labels are
+absent, so the policy acquires physical regularity from human activity and from
+unannotated robot logs. The predicted future then acts as an intermediate
+quantity that ties every candidate action to a visible consequence, which
+grounds control in the same representation that already carries scene dynamics.
+
+Building a world-action model requires a long sequence of independent decisions,
+and every published system settles all of them at once. A designer selects the
+video generator that supplies the backbone. The designer selects the visual
+representation that this generator denoises. The designer selects the way the
+action stream attaches to the video stream, and the amount of the video
+computation that the action stream is permitted to read. The designer selects
+the corpus the joint model is pretrained on and the order in which the two
+streams are denoised once the policy drives a robot. Each published result
+reports one point of this space together with one benchmark score. These
+decisions interact strongly, so the reasoning that justifies a choice inside one
+system loses its force inside another. A designer who sets out to build a new
+world-action model therefore inherits a collection of working systems together
+with an open question about which choice actually carries the performance.
+
+We address this by treating the design space itself as the object of study. The
+report contributes a framework in which each decision above becomes an
+independent component behind a fixed interface. One configuration file selects
+the video backbone and the visual representation it denoises. The same file
+selects how the action stream couples to that backbone and how much of the
+backbone the action stream reads. The same file selects the pretraining mixture
+and the schedule that drives the policy at run time. The framework is the
+instrument that makes measurement possible, because interchangeable components
+allow a study to hold an entire configuration fixed and move one axis at a time
+under one dataset, one optimisation budget, one evaluation harness and one
+metric. We name the framework and the model family it produces \sys, for joint
+action-world modelling. The pretraining it performs is action grounded in a
+precise sense, because one denoising process predicts the future observation and
+predicts the actions that bring that observation about, and the visibility
+pattern between the two streams sets how far each one informs the other.
+
+The study asks six questions in the order a designer meets them. It asks how the
+action stream should be coupled to the video stream. It asks which video
+generator repays its computational cost. It asks what property of a visual
+representation makes that representation a good denoising target for a policy.
+It asks how much of the video computation the action stream should read, and
+whether large-scale pretraining moves the answer. It asks which mixture of human
+egocentric footage and robot trajectories to pretrain on, and whether the two
+sources should be staged or combined. It asks how the two streams should be
+denoised once the policy controls a robot. We then compose the configuration
+that the study selects, pretrain it on a large mixture of human egocentric
+footage and robot trajectories spanning simulation and real hardware, and
+fine-tune the result for every benchmark and every physical platform we
+evaluate.
+
+The value of this report follows from the completeness of what it releases. Every
+point of the study corresponds to a checkpoint we publish, so a reader who
+doubts a conclusion can reload the exact model that produced it. The pretrained
+model demonstrates that the resulting map is actionable, because that model is
+precisely the configuration the study selected, scaled to a large corpus and
+trained once. A designer consequently gains a defensible default for every
+decision, an account of which decisions deserve additional capacity, and an open
+path that runs from raw footage to a policy executing on physical hardware. Our
+contributions follow this structure. We build a modular framework that turns the
+world-action design space into a set of interchangeable components sharing one
+training, deployment and evaluation interface (\sref{sec:framework}). We run a
+controlled six-axis study of that space under a single protocol
+(\sref{sec:study}). We release a pretrained foundation model together with
+fine-tuned variants covering a broad suite of simulated benchmarks and several
+real robots (\sref{sec:alpha}).

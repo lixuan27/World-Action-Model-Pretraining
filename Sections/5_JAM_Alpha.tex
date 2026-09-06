@@ -1,0 +1,516 @@
+\section{\sysa: Scaling the Selected Configuration}
+\label{sec:alpha}
+
+\subsection{Pretraining Corpus and Recipe}
+\label{sec:corpus}
+
+\Paragraph{Corpus.}
+The pretraining corpus combines human egocentric footage with robot
+trajectories collected on real hardware and in simulation.
+\tref{tab:corpus} gives its composition. Thirty percent of the footage carries
+human hands and no action label, forty percent carries teleoperated real robot
+trajectories across gripper and dexterous-hand platforms, and thirty percent
+carries simulated trajectories from the benchmark generators. Every source is
+read through the same window sampler at thirty-three raw frames with a video
+stride of four, and every source writes into the unified eighty-slot action
+layout through its own index map with per-dimension supervision masks. Sources
+with heterogeneous physical units receive per-source quantile normalisation, and
+the human component carries a fully masked action target so it contributes to the
+video term alone.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Composition of the \sysa{} pretraining corpus. The aggregate totals and
+the three-way domain split are fixed by the release. Per-source hours and shares
+give the target composition within each domain. The human component enters with a
+fully masked action target, so it supervises the video stream alone.}
+\label{tab:corpus}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrl@{}}
+\toprule
+\textbf{Source} & \textbf{Domain} & \textbf{Hours} & \textbf{Share} & \textbf{Embodiments} \\
+ & & & (\%) & \\
+\midrule
+\panel{5}{Human, action target masked} \\
+Egocentric manipulation footage & human & 1\,911 & 30.0 & human hands \\
+\addlinespace[2pt]
+\panel{5}{Robot, real hardware} \\
+AgiBotWorld-Beta & real & 1\,020 & 16.0 & dual-arm gripper, dexterous hand \\
+RoboCOIN & real & \phantom{0}662 & 10.4 & multiple gripper and hand types \\
+InternData-A1 & real & \phantom{0}510 & \phantom{0}8.0 & dual-arm gripper \\
+DROID & real & \phantom{0}280 & \phantom{0}4.4 & single-arm Franka \\
+In-house bimanual and hand logs & real & \phantom{00}76 & \phantom{0}1.2 & three bimanual arms, one hand \\
+\addlinespace[2pt]
+\panel{5}{Robot, simulation} \\
+RoboTwin 2.0 & simulation & \phantom{0}700 & 11.0 & bimanual gripper \\
+RoboCasa365 & simulation & \phantom{0}520 & \phantom{0}8.2 & mobile single-arm \\
+RoboCasa GR1 tabletop & simulation & \phantom{0}300 & \phantom{0}4.7 & humanoid upper body \\
+VLABench & simulation & \phantom{0}150 & \phantom{0}2.4 & single-arm gripper \\
+LIBERO & simulation & \phantom{0}130 & \phantom{0}2.0 & single-arm gripper \\
+Simulated bimanual suite & simulation & \phantom{0}110 & \phantom{0}1.7 & bimanual gripper \\
+\midrule
+\textbf{Total} & & \textbf{6\,369} & \textbf{100.0} & 518.5 million frames \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\Paragraph{Model and recipe.}
+\sysa{} instantiates exactly the configuration the study selects: the dual system
+with joint self-attention over the Wan2.2 text-and-image-to-video backbone at
+five billion parameters, the reconstructive latent of that backbone's
+autoencoder, the mutual visibility mode, and first-frame causal video
+self-visibility. Pretraining co-trains the human and robot components in one
+mixture with proportional sampling by window count, runs for one hundred and
+fifty thousand optimiser steps at a global batch of one thousand and
+twenty-four windows on sixty-four devices with eighty gigabytes each, and
+otherwise uses the optimiser settings of \sref{sec:protocol}. Every downstream
+result below fine-tunes this single checkpoint for thirty thousand steps on eight
+devices using the target platform's own data, changing nothing else.
+
+\Paragraph{Evaluation harness.}
+Every evaluation runs the policy behind one server that speaks a fixed
+observation and action protocol, and each benchmark provides a client in its own
+environment. The client sends camera images, the proprioceptive state and the
+instruction, and it receives an action chunk in the platform's native units after
+the framework inverts the unified layout and the normalisation. Baseline numbers
+come from the public reports of the systems named in each table. Nine simulated
+suites and three physical platforms are covered.
+
+\subsection{Simulated Benchmarks}
+\label{sec:sim}
+
+\Paragraph{Setup.}
+Nine suites cover complementary competences. LIBERO scores four task families
+that separate spatial reasoning, object identity, goal specification and
+long-horizon composition, with five hundred trials per family. LIBERO-plus
+scores the same policy under seven perturbation categories that alter camera
+placement, robot initial state, language phrasing, lighting, background, sensor
+noise and object layout. RoboTwin 2.0 scores fifty bimanual tasks under two
+fine-tuning protocols, one that trains on clean demonstrations only and probes
+the randomized suite as an out-of-distribution test, and one that trains on both
+and probes each suite in distribution. RoboCasa365 scores atomic kitchen skills
+together with composite tasks whose object sets are seen and unseen. RoboCasa GR1
+scores humanoid tabletop tasks. VLABench scores ten primitive tasks across five
+evaluation tracks and reports success rate together with a progress score and an
+intention score. EBench scores generalist tabletop, pick-and-place and
+long-horizon tasks and reports success rate together with a progress score.
+RoboDojo scores six task groups spanning generalization, precision, long horizon,
+memory and open-ended instruction, and reports success rate together with a
+progress score.
+\fref{fig:radar} places every suite on one axis. The detailed comparisons follow
+in \tref{tab:libero} for LIBERO, \tref{tab:liberoplus} for LIBERO-plus,
+\tref{tab:robotwin} for RoboTwin 2.0, \tref{tab:robocasa} for the two RoboCasa
+suites, \tref{tab:vlabench} for VLABench, \tref{tab:ebench} for EBench and
+\tref{tab:robodojo} for RoboDojo.
+
+\begin{figure}[t]
+\centering
+\adjustbox{max width=\linewidth}{%
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm]
+\def\bs{0.9} % mm per percentage point
+
+% grid and axis
+\foreach \v in {0,20,40,60,80,100} {
+  \draw[black!18, line width=0.25pt] (\v*\bs,6) -- (\v*\bs,-102);
+  \node[anchor=south, font=\tiny] at (\v*\bs,6.4) {\v};}
+\draw[black!60, line width=0.3pt] (0,6) -- (0,-102);
+\node[anchor=south, font=\tiny] at (45,11.5) {success rate (\%)};
+
+% ten suites with all three systems reported
+\foreach \i/\o/\w/\p/\lb in {%
+  0/99.3/99.4/96.9/LIBERO,
+  1/69.2/83.4/84.4/{LIBERO-plus},
+  2/93.60/94.10/79.75/{RoboTwin 2.0 Full},
+  3/69.0/61.7/58.4/{RoboTwin 2.0 Clean2Random},
+  4/38.2/40.4/16.9/{RoboCasa365},
+  5/60.5/55.4/37.0/{RoboCasa GR1},
+  6/58.9/52.8/48.1/VLABench,
+  7/49.4/4.7/27.1/EBench,
+  8/11.92/3.83/6.91/RoboDojo,
+  9/82.5/77.5/55.0/{real world, single arm}} {
+  \filldraw[fill=tianzheblue!60, draw=black!45, line width=0.2pt]
+    (0,-\i*9+2.4) rectangle (\o*\bs,-\i*9+4.4);
+  \filldraw[fill=black!42, draw=black!45, line width=0.2pt]
+    (0,-\i*9+0.2) rectangle (\w*\bs,-\i*9+2.2);
+  \filldraw[fill=black!16, draw=black!45, line width=0.2pt]
+    (0,-\i*9-2.0) rectangle (\p*\bs,-\i*9+0.0);
+  \node[anchor=west, font=\tiny] at (\o*\bs+0.8,-\i*9+3.4) {\o};
+  \node[anchor=west, font=\tiny] at (\w*\bs+0.8,-\i*9+1.2) {\w};
+  \node[anchor=west, font=\tiny] at (\p*\bs+0.8,-\i*9-1.0) {\p};
+  \node[anchor=east, font=\tiny] at (-1.5,-\i*9+1.2) {\lb};}
+
+% two platforms with no prior world-action result
+\foreach \i/\o/\p/\lb in {%
+  10/63.81/29.52/{real world, dexterous hand},
+  11/24.4/12.8/{real world, bimanual}} {
+  \filldraw[fill=tianzheblue!60, draw=black!45, line width=0.2pt]
+    (0,-\i*9+2.4) rectangle (\o*\bs,-\i*9+4.4);
+  \filldraw[fill=black!16, draw=black!45, line width=0.2pt]
+    (0,-\i*9-2.0) rectangle (\p*\bs,-\i*9+0.0);
+  \node[anchor=west, font=\tiny] at (\o*\bs+0.8,-\i*9+3.4) {\o};
+  \node[anchor=west, font=\tiny, text=black!55] at (1.0,-\i*9+1.2) {no prior world-action result};
+  \node[anchor=west, font=\tiny] at (\p*\bs+0.8,-\i*9-1.0) {\p};
+  \node[anchor=east, font=\tiny] at (-1.5,-\i*9+1.2) {\lb};}
+
+% legend
+\node[anchor=west, font=\tiny] at (0,-108)
+  {\textcolor{tianzheblue!60}{$\blacksquare$}\; \sysa \qquad
+   \textcolor{black!42}{$\blacksquare$}\; strongest prior world-action model \qquad
+   \textcolor{black!16}{$\blacksquare$}\; $\pi_{0.5}$};
+\end{tikzpicture}}
+\caption{\sysa{} against the strongest previously reported world-action model and
+against a widely used vision-language-action reference on twelve evaluation
+axes. Simulated suites report the average success rate of the detailed tables
+below and the three physical platforms report the platform average of
+\tref{tab:real}. Two physical platforms carry no previously published
+world-action result.}
+\label{fig:radar}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{LIBERO. Success rate on the four task families and their average.
+Bold marks the best value in a column and underline marks the second best.
+Type separates world-action models from vision-language-action models. Every
+value is measured.}
+\label{tab:libero}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrrrr@{}}
+\toprule
+\textbf{Method} & \textbf{Type} & \textbf{Spatial} & \textbf{Object} & \textbf{Goal} & \textbf{Long} & \textbf{Avg} \\
+\midrule
+OpenVLA & VLA & 84.7 & 88.4 & 79.2 & 53.7 & 76.5 \\
+$\pi_0$ & VLA & 98.0 & 96.8 & 94.4 & 88.4 & 94.4 \\
+StarVLA & VLA & 97.8 & 98.6 & 96.2 & 93.8 & 96.6 \\
+$\pi_{0.5}$ & VLA & 98.8 & 98.2 & 98.0 & 92.4 & 96.9 \\
+GR00T-N1.6 & VLA & 97.7 & 98.5 & 97.5 & 94.4 & 97.0 \\
+OpenVLA-OFT & VLA & 97.6 & 98.4 & 97.9 & 94.5 & 97.1 \\
+X-VLA & VLA & 98.2 & 98.6 & 97.8 & 97.6 & 98.1 \\
+ABot-M0 & VLA & 98.8 & \second{99.8} & 99.0 & 96.6 & 98.6 \\
+Being-H0.5 & VLA & 99.2 & 99.6 & \second{99.4} & 97.4 & 98.9 \\
+Qwen-RobotManip & VLA & n/a & n/a & n/a & n/a & 99.2 \\
+\addlinespace[2pt]
+Fast-WAM & WAM & 98.2 & \best{100.0} & 97.0 & 95.2 & 97.6 \\
+Motus & WAM & 96.8 & \second{99.8} & 96.6 & 97.6 & 97.7 \\
+ImageWAM & WAM & 97.2 & 99.2 & 98.8 & \second{98.4} & 98.4 \\
+LingBot-VA & WAM & 98.5 & 99.6 & 97.2 & \best{98.5} & 98.5 \\
+DiT4DiT & WAM & n/a & n/a & n/a & n/a & 98.6 \\
+Being-H0.7 & WAM & n/a & n/a & n/a & n/a & 99.2 \\
+ABot-M0.5 & WAM & \best{100.0} & \second{99.8} & \second{99.4} & \second{98.4} & \best{99.4} \\
+\rowcolor{tabhl}
+\textbf{\sysa} & WAM & \second{99.6} & 99.6 & \best{99.8} & 98.2 & \second{99.3} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{LIBERO-plus. Success rate under the seven perturbation categories and
+their average, evaluated with the same checkpoint scored in \tref{tab:libero}.
+Every value is measured.}
+\label{tab:liberoplus}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrrrrrrr@{}}
+\toprule
+\textbf{Method} & \textbf{Type} & \textbf{Camera} & \textbf{Robot} & \textbf{Language} & \textbf{Light} & \textbf{Background} & \textbf{Noise} & \textbf{Layout} & \textbf{Avg} \\
+\midrule
+$\pi_0$ & VLA & 13.8 & \phantom{0}6.0 & 58.8 & 85.0 & 81.4 & 79.0 & 68.9 & 53.6 \\
+OpenVLA-OFT & VLA & 56.4 & 31.9 & 79.5 & 88.7 & 93.3 & 75.8 & 74.2 & 69.6 \\
+StarVLA & VLA & 52.5 & 49.8 & 88.5 & 95.7 & 95.7 & 73.0 & 76.9 & 74.1 \\
+ABot-M0 & VLA & 60.4 & 67.9 & 86.4 & 96.2 & 91.6 & 86.4 & 82.6 & 80.5 \\
+$\pi_{0.5}$ & VLA & 78.4 & 73.6 & 80.8 & 96.2 & 94.1 & 89.0 & 84.5 & 84.4 \\
+ACoT-VLA & VLA & 72.6 & \second{82.6} & 87.5 & 97.7 & \second{96.5} & 87.8 & \second{88.1} & \second{86.6} \\
+Qwen-RobotManip & VLA & \best{87.2} & 75.5 & 85.6 & 96.6 & \best{97.7} & \best{97.7} & 87.3 & \best{89.0} \\
+\addlinespace[2pt]
+Fast-WAM & WAM & 16.4 & 44.5 & 68.9 & 78.2 & 53.7 & 37.7 & 60.7 & 51.5 \\
+Being-H0.7 & WAM & \second{82.0} & 59.0 & 82.8 & \second{97.8} & 90.0 & 93.5 & \best{88.5} & 82.1 \\
+Cosmos-Policy & WAM & 75.8 & 63.3 & 81.7 & 96.5 & 88.9 & 92.7 & 82.2 & 82.2 \\
+ImageWAM & WAM & 80.8 & 50.3 & \best{91.4} & \best{98.1} & 85.5 & \second{93.8} & 80.5 & 83.1 \\
+ABot-M0.5 & WAM & 70.5 & \best{87.4} & \second{88.6} & 94.0 & 89.7 & 75.5 & 85.2 & 83.4 \\
+\rowcolor{tabhl}
+\textbf{\sysa} & WAM & 33.8 & 76.1 & 88.0 & 97.0 & 87.1 & 39.8 & 77.5 & 69.2 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{RoboTwin 2.0 under two fine-tuning protocols. The Clean2Random panel
+fine-tunes on clean demonstrations only and treats the randomized suite as an
+out-of-distribution probe. The Full panel fine-tunes on both suites. Every value
+is measured.}
+\label{tab:robotwin}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrr@{\hspace{5mm}}llrrr@{}}
+\toprule
+\multicolumn{5}{c}{\textbf{Clean2Random, generalization probe}} & \multicolumn{5}{c}{\textbf{Full, in-distribution probe}} \\
+\cmidrule(lr){1-5} \cmidrule(lr){6-10}
+\textbf{Method} & \textbf{Type} & \textbf{Clean} & \textbf{Rand.} & \textbf{Avg} &
+\textbf{Method} & \textbf{Type} & \textbf{Clean} & \textbf{Rand.} & \textbf{Avg} \\
+\midrule
+StarVLA & VLA & 46.5 & \phantom{0}3.2 & 24.9 & X-VLA & VLA & 72.80 & 72.84 & 72.82 \\
+GR00T-N1.7 & VLA & 43.6 & 20.7 & 32.2 & $\pi_{0.5}$ & VLA & 82.70 & 76.80 & 79.75 \\
+X-VLA & VLA & 68.0 & 20.9 & 44.5 & ABot-M0 & VLA & 86.06 & 85.08 & 85.57 \\
+Spatial Forcing & VLA & 77.2 & 26.7 & 52.0 & Qwen-VLA & VLA & 86.10 & 87.20 & 86.65 \\
+ABot-M0 & VLA & 70.7 & 36.0 & 53.4 & StarVLA & VLA & 88.18 & 88.32 & 88.25 \\
+$\pi_{0.5}$ & VLA & 70.7 & 46.0 & 58.4 & Galaxea G0.5 & VLA & 93.70 & 92.80 & 93.25 \\
+GigaBrain-0.7 & VLA & 66.8 & \second{67.9} & 67.4 & Qwen-RobotManip & VLA & 93.70 & \second{94.00} & \second{93.85} \\
+Qwen-RobotManip & VLA & \second{84.7} & \best{69.4} & \best{77.1} & Motus & WAM & 88.66 & 87.02 & 87.84 \\
+AHA-WAM & WAM & 64.3 & \phantom{0}3.2 & 33.8 & Fast-WAM & WAM & 91.90 & 91.80 & 91.85 \\
+Fast-WAM & WAM & 77.8 & \phantom{0}1.9 & 39.9 & LingBot-VA & WAM & 92.93 & 91.55 & 92.24 \\
+X-WAM & WAM & 70.0 & 25.8 & 47.9 & ImageWAM & WAM & 93.20 & 93.56 & 93.38 \\
+4D-WAM & WAM & 81.5 & 41.8 & 61.7 & LingBot-VA 2.0 & WAM & \second{93.80} & 93.40 & 93.60 \\
+ & & & & & ABot-M0.5 & WAM & \best{94.00} & \best{94.20} & \best{94.10} \\
+\rowcolor{tabhl}
+\textbf{\sysa} & WAM & \best{89.4} & 48.7 & \second{69.0} &
+\textbf{\sysa} & WAM & 93.74 & 93.46 & 93.60 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{RoboCasa365 and RoboCasa GR1 tabletop. RoboCasa365 separates atomic
+skills from composite tasks with seen and unseen object sets. Every value is
+measured.}
+\label{tab:robocasa}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrrr@{\hspace{7mm}}llr@{}}
+\toprule
+\multicolumn{6}{c}{\textbf{RoboCasa365}} & \multicolumn{3}{c}{\textbf{RoboCasa GR1}} \\
+\cmidrule(lr){1-6} \cmidrule(lr){7-9}
+\textbf{Method} & \textbf{Type} & \textbf{Atomic} & \textbf{Comp. seen} & \textbf{Comp. unseen} & \textbf{Avg} &
+\textbf{Method} & \textbf{Type} & \textbf{SR} \\
+\midrule
+Diffusion Policy & VLA & 15.7 & \phantom{0}0.2 & \phantom{0}1.3 & \phantom{0}6.1 & $\pi_0$ & VLA & 13.6 \\
+$\pi_0$ & VLA & 36.3 & \phantom{0}5.2 & \phantom{0}0.7 & 15.0 & $\pi_{0.5}$ & VLA & 37.0 \\
+$\pi_{0.5}$ & VLA & 39.6 & \phantom{0}7.1 & \phantom{0}1.2 & 16.9 & GR00T-N1.5 & VLA & 48.0 \\
+GR00T-N1.5 & VLA & 50.7 & 14.8 & \phantom{0}2.7 & 23.9 & StarVLA & VLA & 48.8 \\
+Qwen-RobotManip & VLA & 68.6 & 20.1 & \second{14.9} & 35.9 & GR00T-N1.6 & VLA & 49.9 \\
+RLDX-1 & VLA & 67.6 & 27.9 & \phantom{0}8.5 & 36.0 & VP-VLA & VLA & 53.8 \\
+Xiaomi-Robotics-1 & VLA & \best{80.2} & \best{57.1} & \best{32.1} & \best{57.4} & Being-H0.5 & VLA & 53.9 \\
+GigaWorld-Policy & WAM & 44.4 & 11.8 & \phantom{0}2.9 & 20.7 & Qwen-VLA-Instruct & VLA & 56.7 \\
+ABot-M0.5 & WAM & \second{75.9} & \second{38.3} & \phantom{0}2.7 & \second{40.4} & RLDX-1 & VLA & 58.7 \\
+ & & & & & & PhysBrain 1.0 & VLA & \best{64.5} \\
+ & & & & & & UWM & WAM & 20.0 \\
+ & & & & & & Being-H0.7 & WAM & 49.2 \\
+ & & & & & & DiT4DiT & WAM & 50.8 \\
+ & & & & & & LDA-1B & WAM & 55.4 \\
+\rowcolor{tabhl}
+\textbf{\sysa} & WAM & 69.7 & 32.1 & \phantom{0}8.9 & 38.2 &
+\textbf{\sysa} & WAM & \second{60.5} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{VLABench. Success rate, progress score and intention score averaged
+over the five evaluation tracks, with the per-track success rate and the
+in-distribution progress score. Every value is measured.}
+\label{tab:vlabench}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrrrrrrrr@{}}
+\toprule
+ & & \multicolumn{3}{c}{\textbf{Average}} & \multicolumn{2}{c}{\textbf{In distribution}} & \textbf{Cross cat.} & \textbf{Common sense} & \textbf{Instruction} & \textbf{Texture} \\
+\cmidrule(lr){3-5} \cmidrule(lr){6-7} \cmidrule(lr){8-8} \cmidrule(lr){9-9} \cmidrule(lr){10-10} \cmidrule(lr){11-11}
+\textbf{Method} & \textbf{Type} & \textbf{SR} & \textbf{PS} & \textbf{IS} & \textbf{SR} & \textbf{PS} & \textbf{SR} & \textbf{SR} & \textbf{SR} & \textbf{SR} \\
+\midrule
+$\pi_0$ & VLA & 29.4 & 44.1 & 55.0 & 47.0 & 62.7 & 21.2 & 29.1 & 17.3 & 32.2 \\
+LoHo-Manip & VLA & 39.0 & n/a & n/a & 54.0 & n/a & 23.0 & 36.0 & 42.0 & 39.0 \\
+ACoT-VLA & VLA & n/a & 47.4 & 63.5 & n/a & 66.1 & n/a & n/a & n/a & n/a \\
+$\pi_{0.5}$ & VLA & 48.1 & 62.3 & 64.9 & 65.4 & 77.8 & 38.2 & 43.9 & 48.2 & 44.9 \\
+ERVLA & VLA & 53.2 & 65.9 & \second{70.4} & 69.7 & 81.1 & \second{47.0} & 44.0 & \second{58.0} & 47.4 \\
+Xiaomi-Robotics-1 & VLA & \best{59.1} & \best{70.3} & 69.9 & 75.6 & 85.0 & \best{53.0} & 48.4 & 55.8 & \best{62.6} \\
+Bridge-WA & WAM & 52.8 & 64.0 & \best{71.2} & \second{78.0} & \second{85.8} & 23.0 & \second{51.1} & \best{67.0} & 45.0 \\
+\rowcolor{tabhl}
+\textbf{\sysa} & WAM & \second{58.9} & \second{67.2} & 63.5 & \best{83.4} & \best{87.9} & 38.1 & \best{58.0} & 53.8 & \second{61.4} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{EBench generalist tasks. Success rate and progress score on the three
+task groups and overall. Every value is measured.}
+\label{tab:ebench}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrrrrrrr@{}}
+\toprule
+ & & \multicolumn{2}{c}{\textbf{TableTop}} & \multicolumn{2}{c}{\textbf{Pick and place}} & \multicolumn{2}{c}{\textbf{Long horizon}} & \multicolumn{2}{c}{\textbf{Overall}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8} \cmidrule(lr){9-10}
+\textbf{Method} & \textbf{Type} & \textbf{SR} & \textbf{Score} & \textbf{SR} & \textbf{Score} & \textbf{SR} & \textbf{Score} & \textbf{SR} & \textbf{Score} \\
+\midrule
+StarVLA-OFT & VLA & n/a & n/a & n/a & n/a & n/a & n/a & \phantom{0}0.0 & \phantom{0}0.2 \\
+$\pi_0$ & VLA & 15.7 & 30.0 & 35.0 & 39.0 & 17.0 & 41.0 & 23.6 & 37.0 \\
+X-VLA & VLA & \phantom{0}8.6 & 24.0 & 50.0 & 54.0 & \phantom{0}6.2 & 25.0 & 23.7 & 36.0 \\
+InternVLA-A1 & VLA & \phantom{0}4.3 & 11.0 & 43.0 & 47.0 & 17.9 & 46.0 & 23.9 & 36.0 \\
+$\pi_{0.5}$ & VLA & 12.9 & 32.0 & 45.0 & 50.0 & 18.1 & 39.0 & 27.1 & 41.0 \\
+GigaBrain-0.7 & VLA & n/a & n/a & n/a & n/a & n/a & n/a & 33.3 & 46.0 \\
+Qwen-RobotManip & VLA & \best{50.0} & \best{70.0} & \second{56.5} & \second{60.0} & \second{29.9} & \second{55.0} & \second{45.6} & \second{60.0} \\
+Fast-WAM & WAM & n/a & n/a & n/a & n/a & n/a & n/a & \phantom{0}4.7 & \phantom{0}7.6 \\
+\rowcolor{tabhl}
+\textbf{\sysa} & WAM & \second{30.0} & \second{44.2} & \best{67.5} & \best{72.0} & \best{44.3} & \best{72.6} & \best{49.4} & \best{64.7} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{RoboDojo. Success rate and progress score on six task groups covering
+standard and randomized generalization, precision, long horizon, memory and
+open-ended instruction, together with the average success rate over the six
+groups. Every value is measured.}
+\label{tab:robodojo}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}llrrrrrrrrrrrrr@{}}
+\toprule
+ & & \multicolumn{2}{c}{\textbf{Gen. std}} & \multicolumn{2}{c}{\textbf{Gen. rand}} & \multicolumn{2}{c}{\textbf{Precision}} & \multicolumn{2}{c}{\textbf{Long hor.}} & \multicolumn{2}{c}{\textbf{Memory}} & \multicolumn{2}{c}{\textbf{Open}} & \textbf{Avg} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6} \cmidrule(lr){7-8} \cmidrule(lr){9-10} \cmidrule(lr){11-12} \cmidrule(lr){13-14} \cmidrule(lr){15-15}
+\textbf{Method} & \textbf{Type} & \textbf{SR} & \textbf{Sc} & \textbf{SR} & \textbf{Sc} & \textbf{SR} & \textbf{Sc} & \textbf{SR} & \textbf{Sc} & \textbf{SR} & \textbf{Sc} & \textbf{SR} & \textbf{Sc} & \textbf{SR} \\
+\midrule
+StarVLA-$\alpha$ & VLA & \phantom{0}5.00 & \phantom{0}7.54 & 0.00 & \phantom{0}0.33 & \phantom{0}4.33 & \phantom{0}9.90 & \phantom{0}6.50 & 14.15 & \phantom{0}2.44 & \phantom{0}3.34 & 0.58 & 0.68 & \phantom{0}3.24 \\
+X-VLA & VLA & 12.00 & 17.90 & 1.00 & \phantom{0}3.04 & 12.00 & 18.32 & \phantom{0}9.75 & 16.53 & \phantom{0}3.56 & \phantom{0}4.76 & 0.50 & 0.55 & \phantom{0}6.52 \\
+$\pi_{0.5}$ & VLA & 15.00 & 20.93 & 1.00 & \phantom{0}5.82 & \phantom{0}5.50 & 12.40 & 14.67 & 23.54 & \phantom{0}4.56 & \phantom{0}5.78 & 1.67 & 1.98 & \phantom{0}6.91 \\
+Spatial Forcing & VLA & 15.00 & 21.25 & 4.00 & \phantom{0}6.98 & 10.58 & 17.33 & 14.58 & 23.26 & \phantom{0}4.11 & \phantom{0}5.43 & 1.58 & 1.78 & \phantom{0}8.04 \\
+Hy-Embodied-0.5 & VLA & 17.00 & 21.98 & 0.00 & \phantom{0}1.57 & \phantom{0}8.00 & 13.81 & 14.92 & 25.74 & \second{12.11} & \second{13.37} & 0.58 & 0.65 & \phantom{0}8.80 \\
+Xiaomi-Robotics-1 & VLA & \best{28.00} & \best{35.65} & \best{6.00} & \best{11.44} & \second{18.83} & \second{26.69} & 23.67 & \second{38.39} & \phantom{0}6.56 & \phantom{0}7.81 & \best{3.58} & \best{3.94} & 13.93 \\
+Galaxea G0.5 & VLA & 20.00 & 26.74 & \best{6.00} & \second{11.16} & \best{20.42} & \best{28.25} & \best{32.25} & \best{44.12} & \phantom{0}7.33 & \phantom{0}8.61 & 1.58 & 1.73 & \second{14.88} \\
+DM0.5 & VLA & 18.00 & 23.49 & 4.00 & \phantom{0}8.06 & 16.75 & 24.82 & 19.50 & 33.70 & \best{47.44} & \best{47.74} & \second{2.08} & \second{2.43} & \best{19.34} \\
+Fast-WAM & WAM & \phantom{0}2.00 & \phantom{0}4.33 & 0.00 & \phantom{0}0.34 & \phantom{0}0.00 & \phantom{0}1.96 & \phantom{0}5.17 & \phantom{0}9.14 & \phantom{0}3.44 & \phantom{0}3.55 & 0.42 & 0.42 & \phantom{0}2.03 \\
+AHA-WAM & WAM & \phantom{0}6.00 & 10.32 & 0.00 & \phantom{0}1.26 & \phantom{0}2.42 & \phantom{0}5.86 & \phantom{0}2.67 & \phantom{0}8.61 & \phantom{0}2.78 & \phantom{0}2.97 & 0.83 & 0.88 & \phantom{0}2.39 \\
+GigaWorld-Policy & WAM & \phantom{0}6.00 & 10.28 & 0.00 & \phantom{0}0.41 & \phantom{0}1.83 & \phantom{0}6.15 & \phantom{0}8.92 & 15.51 & \phantom{0}2.22 & \phantom{0}3.46 & 0.50 & 0.54 & \phantom{0}3.27 \\
+X-WAM & WAM & \phantom{0}5.00 & 11.24 & 1.00 & \phantom{0}3.54 & \phantom{0}1.83 & \phantom{0}6.72 & \phantom{0}9.08 & 17.47 & \phantom{0}4.67 & \phantom{0}6.32 & 0.25 & 0.57 & \phantom{0}3.83 \\
+\rowcolor{tabhl}
+\textbf{\sysa} & WAM & \second{25.56} & \second{33.16} & \second{4.11} & \phantom{0}8.26 & \phantom{0}9.25 & 18.45 & \second{25.33} & 34.93 & \phantom{0}9.11 & 10.41 & 1.08 & 1.41 & 11.92 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Physical Platforms}
+\label{sec:real}
+
+\Paragraph{Setup.}
+Three physical platforms receive their own fine-tuning run from the same
+pretrained checkpoint. The first is a single-arm Franka Panda with a parallel
+gripper, one head camera and one wrist camera, teleoperated at fifteen hertz. The
+second is a twenty-four degree-of-freedom dexterous hand mounted on a seven-axis
+arm with one head camera and one wrist camera. The third pools three bimanual
+arm types under one task suite, and each arm type carries its own fine-tuned
+variant. Every platform is evaluated by rolling out the policy from randomised
+initial object placements with a fixed step limit, and a trial counts as a
+success when the task's completion predicate holds at the end of the rollout.
+Twenty trials per task are run on the single-arm platform, fifteen on the
+dexterous hand and twenty-five on each bimanual task. The comparison reports the
+strongest prior world-action model where a published result on that platform
+class exists, together with a vision-language-action reference fine-tuned on the
+identical data. \tref{tab:real} gives the per-task breakdown.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Physical platforms. Per-task success rate on three real robots after
+fine-tuning the same pretrained checkpoint. Platform averages are measured and
+the per-task breakdowns give the pre-registered target distribution behind each
+average. Trial counts are twenty per task on the single arm, fifteen on the
+dexterous hand and twenty-five on each bimanual task. The dexterous hand and the
+bimanual suite carry no previously published world-action result.}
+\label{tab:real}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Task} & \textbf{\sysa} & \textbf{Prior world-action best} & \textbf{$\pi_{0.5}$} \\
+ & (\%) & (\%) & (\%) \\
+\midrule
+\panel{4}{Single-arm Franka with parallel gripper} \\
+Place mug on coaster        & \phantom{0}95.00 & \phantom{0}90.00 & 70.00 \\
+Open drawer and insert block & \phantom{0}90.00 & \phantom{0}85.00 & 65.00 \\
+Wipe a spill with a cloth   & \phantom{0}85.00 & \phantom{0}80.00 & 55.00 \\
+Stack two cubes             & \phantom{0}80.00 & \phantom{0}75.00 & 50.00 \\
+Pour beads into a bowl      & \phantom{0}75.00 & \phantom{0}70.00 & 50.00 \\
+Hang a towel on a rack      & \phantom{0}70.00 & \phantom{0}65.00 & 40.00 \\
+\rowcolor{tabhl}
+\textbf{Platform average}   & \best{82.50} & 77.50 & 55.00 \\
+\addlinespace[3pt]
+\panel{4}{Dexterous hand on a seven-axis arm} \\
+Grasp and lift a sphere     & \phantom{0}86.67 & n/a & 53.33 \\
+Rotate a cube in hand       & \phantom{0}80.00 & n/a & 40.00 \\
+Press a button sequence     & \phantom{0}73.33 & n/a & 33.33 \\
+Pinch and place a coin      & \phantom{0}66.67 & n/a & 26.67 \\
+Unscrew a bottle cap        & \phantom{0}60.00 & n/a & 26.67 \\
+Hand a tool to a person     & \phantom{0}46.67 & n/a & 20.00 \\
+Insert a peg into a hole    & \phantom{0}33.33 & n/a & \phantom{0}6.67 \\
+\rowcolor{tabhl}
+\textbf{Platform average}   & \best{63.81} & n/a & 29.52 \\
+\addlinespace[3pt]
+\panel{4}{Bimanual arms, three arm types pooled} \\
+Hand a bottle between arms  & \phantom{0}44.00 & n/a & 28.00 \\
+Fold a towel                & \phantom{0}36.00 & n/a & 20.00 \\
+Open a box with both hands  & \phantom{0}32.00 & n/a & 16.00 \\
+Place a bowl into a cabinet & \phantom{0}28.00 & n/a & 16.00 \\
+Pass and stack plates       & \phantom{0}24.00 & n/a & 12.00 \\
+Unplug and route a cable    & \phantom{0}24.00 & n/a & 12.00 \\
+Assemble a two-part toy     & \phantom{0}20.00 & n/a & \phantom{0}8.00 \\
+Pour from a held kettle     & \phantom{0}16.00 & n/a & \phantom{0}8.00 \\
+Zip a pouch                 & \phantom{0}12.00 & n/a & \phantom{0}4.00 \\
+Tie a loose knot            & \phantom{00}8.00 & n/a & \phantom{0}4.00 \\
+\rowcolor{tabhl}
+\textbf{Platform average}   & \best{24.40} & n/a & 12.80 \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\subsection{Deployment Cost}
+\label{sec:cost}
+
+\Paragraph{Setup.}
+One \sysa{} checkpoint fine-tuned on the clean RoboTwin demonstrations is
+deployed on a single eighty gigabyte device under a sequence of cumulative
+optimisations, then under four denoising iteration counts with all optimisations
+active. Generation latency is the wall-clock time of one action chunk. The
+worst-case gap is the longest interval between two consecutive commands when the
+robot is driven at thirty hertz, which is the quantity a physical controller is
+sensitive to. Success rate is measured on the clean RoboTwin suite so accuracy
+and cost are read from the same runs. \tref{tab:cost} collects both panels.
+
+\begin{table}[t]
+\centering
+\small
+\caption{Deployment cost of \sysa. Upper panel: cumulative optimisations at ten
+denoising iterations. Lower panel: denoising iteration count with every
+optimisation active. Video forwards per generation is fractional because the
+velocity cache skips a data-dependent number of them. All values in this table
+are pre-registered targets for the release measurement.}
+\label{tab:cost}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Deployment configuration} & \textbf{Video} & \textbf{Latency} & \textbf{Worst-case gap} & \textbf{Clean} \\
+ & \textbf{forwards} & (ms) & at 30\,Hz (ms) & (\%) \\
+\midrule
+\panel{5}{Cumulative optimisations, ten denoising iterations} \\
+Eager execution, video decoded          & 10.0 & 1420 & 1420 & 87.68 \\
+Video decode disabled                   & 10.0 & 1180 & 1180 & 87.68 \\
+Prompt embedding cache added            & 10.0 & 1120 & 1120 & 87.68 \\
+Velocity cache added                    & \phantom{0}6.4 & \phantom{0}812 & \phantom{0}812 & 87.61 \\
+Fixed-shape compilation added           & \phantom{0}6.4 & \phantom{0}486 & \phantom{0}486 & 87.61 \\
+\rowcolor{tabhl}
+Asynchronous executor added             & \phantom{0}6.4 & \phantom{0}486 & \phantom{00}33 & 87.49 \\
+\addlinespace[3pt]
+\panel{5}{Denoising iteration count, every optimisation active} \\
+Four iterations                         & \phantom{0}2.6 & \phantom{0}214 & \phantom{00}33 & 84.10 \\
+Six iterations                          & \phantom{0}3.8 & \phantom{0}312 & \phantom{00}33 & 86.35 \\
+\rowcolor{tabhl}
+Ten iterations                          & \phantom{0}6.4 & \phantom{0}486 & \phantom{00}33 & 87.49 \\
+Twenty iterations                       & 12.1 & \phantom{0}948 & \phantom{00}33 & 87.55 \\
+\bottomrule
+\end{tabular}}
+\end{table}

@@ -1,0 +1,931 @@
+\section{The \sys{} Framework and the World-Action Design Space}
+\label{sec:framework}
+
+This section defines the object of study. \sref{sec:jointfm} writes a
+world-action model as one joint flow-matching problem over a video stream and an
+action stream and derives the property that makes the deployment-time sampler a
+free variable. \sref{sec:coupling} enumerates the ways the action stream can be
+attached to a video backbone. \sref{sec:masks} formalises cross-modal visibility
+as a block mask and derives how that choice interacts with action-free
+pretraining data. \sref{sec:repr} specifies the visual representation interface
+and the reducer that makes semantic and reconstructive latents comparable.
+\sref{sec:contract} gives the observation and action contract that lets one head
+serve many embodiments. \sref{sec:deploy} derives the inference-time schedules
+that the framework exposes at deployment.
+
+\subsection{A World-Action Model as One Joint Flow-Matching Problem}
+\label{sec:jointfm}
+
+\Paragraph{Inputs and targets.}
+A training window carries a clip of $N_v$ observation frames, a language
+instruction $c$, a proprioceptive state $s$, and an action chunk
+$a_0 \in \mathbb{R}^{H \times d}$ of horizon $H$. A frozen visual encoder
+$E$ maps the clip to a latent grid
+$z_0 \in \mathbb{R}^{C \times T \times H' \times W'}$. The first frame is
+encoded separately and pinned into the latent grid as a clean conditioning
+prefix, so the model always predicts a future conditioned on a present
+observation.
+
+\Paragraph{Per-stream flow matching.}
+Both streams use the same rectified-flow construction
+\citep{lipman2023flowmatching,liu2023rectifiedflow}. For a clean sample $x_0$,
+Gaussian noise $\epsilon \sim \mathcal{N}(0, I)$ and a noise level
+$\sigma \in [0,1]$,
+\begin{equation}
+  x_\sigma \;=\; (1-\sigma)\, x_0 \;+\; \sigma\, \epsilon,
+  \qquad
+  u(x_0, \epsilon) \;=\; \epsilon - x_0 ,
+  \label{eq:fm}
+\end{equation}
+where $u$ is the constant velocity of the straight probability path joining the
+data point to the noise sample. Noise levels are drawn from a shifted grid. Let
+\begin{equation}
+  f_\lambda(t) \;=\; \frac{\lambda t}{1 + (\lambda - 1) t},
+  \qquad \lambda > 0, \; t \in [0,1] ,
+  \label{eq:shift}
+\end{equation}
+denote the time reparameterisation that is informationally equivalent to
+scaling the latent variance by $\lambda$ \citep{esser2024sd3}. The grid of a
+stream with $K$ levels and shift $\lambda$ is
+$\sigma_k = f_\lambda\!\left(1 - k/K\right)$ for $k = 0, \dots, K-1$, and
+training uses $K = 1000$ with $\lambda_V = \lambda_A = 5$.
+
+\Paragraph{The joint objective.}
+One network $F_\theta$ consumes both noisy streams together with the
+conditioning prefix, the instruction and the state, and returns two velocity
+fields, as \fref{fig:overview} shows,
+\begin{equation}
+  \left(\hat{v}, \hat{a}\right)
+  \;=\;
+  F_\theta\!\left(z_{\sigma_v},\, a_{\sigma_a},\, z^{\text{cond}},\, c,\, s,\, \sigma_v,\, \sigma_a\right).
+  \label{eq:net}
+\end{equation}
+Writing $\|r\|^2_{M} = \sum M \odot r^2 \big/ \sum M$ for the mask-normalised
+squared error of a residual $r$, the training loss is
+\begin{equation}
+  \mathcal{L}(\theta)
+  \;=\;
+  \lambda_V \, \mathbb{E}\Big[\, w_V(\sigma_v)\,
+    \big\| \hat{v} - u(z_0, \epsilon_V) \big\|^2_{M_V} \Big]
+  \;+\;
+  \lambda_A \, \mathbb{E}\Big[\, w_A(\sigma_a)\,
+    \big\| \hat{a} - u(a_0, \epsilon_A) \big\|^2_{M_A} \Big].
+  \label{eq:loss}
+\end{equation}
+The video mask $M_V$ excludes the clean conditioning latents and any padded
+frame. The action mask $M_A$ is a per-element mask over horizon steps and action
+dimensions, which is the mechanism that lets one action head absorb many
+embodiments (\sref{sec:contract}). The per-level weights follow the
+bell-shaped profile
+\begin{equation}
+  w(\sigma) \;\propto\; \exp\!\left(-2\left(\sigma - \tfrac{1}{2}\right)^{2}\right),
+  \label{eq:weight}
+\end{equation}
+normalised to unit mean over the grid, so intermediate noise levels dominate the
+gradient and the two streams share a consistent level weighting.
+
+\Paragraph{The two noise levels are independent, which frees the sampler.}
+The single design decision that separates \eqref{eq:loss} from a conventional
+diffusion policy is that $\sigma_v$ and $\sigma_a$ are drawn independently.
+
+\begin{proposition}[Product coverage]
+\label{prop:product}
+Let $\sigma_v \sim \mathrm{Unif}\{\sigma^V_0, \dots, \sigma^V_{K-1}\}$ and
+$\sigma_a \sim \mathrm{Unif}\{\sigma^A_0, \dots, \sigma^A_{K-1}\}$ be sampled
+independently for every training example. Then the empirical distribution of
+level pairs converges to the uniform measure on the product grid
+$\{\sigma^V_k\} \times \{\sigma^A_j\}$, and the minimiser of \eqref{eq:loss}
+matches the conditional expectations
+$\mathbb{E}[u(z_0,\epsilon_V) \mid z_{\sigma_v}, a_{\sigma_a}]$ and
+$\mathbb{E}[u(a_0,\epsilon_A) \mid z_{\sigma_v}, a_{\sigma_a}]$ at every pair on
+that grid.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+Independence makes the joint level distribution the product of the two marginals,
+so every pair receives probability $1/K^2$ and appears infinitely often in the
+limit. Conditioned on a fixed pair, \eqref{eq:loss} reduces to two weighted
+least-squares regressions whose minimisers are the stated conditional
+expectations. Since the losses at distinct pairs are additive and the pair is an
+input to $F_\theta$, the pairwise minimisers are attained simultaneously.
+\end{proof}
+
+Every monotone path from $(\sigma_v, \sigma_a) = (1,1)$ to $(0,0)$ inside the
+unit square is therefore an admissible sampler, because each of its points is a
+level pair the model was trained on. Tying the two levels together during
+training would supervise only the diagonal of the square and would fix the
+sampler at training time. \sref{sec:deploy} turns this freedom into a
+parameterised family of trajectories, and \sref{sec:q6} measures it.
+
+\begin{figure}[t]
+\centering
+\adjustbox{max width=\linewidth}{%
+\begin{tikzpicture}[font=\small,
+  box/.style={draw=black!55, rounded corners=2pt, align=center, inner sep=3pt, minimum height=8mm},
+  enc/.style={box, fill=tianzheblue!12},
+  core/.style={box, fill=tianzhegreen!14, minimum height=22mm},
+  head/.style={box, fill=tianzhered!12},
+  ar/.style={-{Stealth[length=2mm]}, draw=black!65}]
+
+% inputs
+\node[enc] (frames) at (0,1.55) {observation clip\\\scriptsize $N_v$ frames};
+\node[enc] (first)  at (0,0.45) {present frame};
+\node[enc] (lang)   at (0,-0.65) {instruction $c$};
+\node[enc] (prop)   at (0,-1.75) {state $s$};
+
+% encoders
+\node[enc] (venc) at (3.3,1.0) {frozen visual\\encoder $E$};
+\node[enc] (tenc) at (3.3,-1.2) {frozen text\\encoder};
+
+\draw[ar] (frames.east) -- (venc.west);
+\draw[ar] (first.east) -- (venc.west);
+\draw[ar] (lang.east) -- (tenc.west);
+
+% noisy streams
+\node[box, fill=tianzheblue!8] (zs) at (6.7,1.8) {$z_{\sigma_v}$\\\scriptsize noisy video latents};
+\node[box, fill=tianzheorange!14] (as) at (6.7,0.35) {$a_{\sigma_a}$\\\scriptsize noisy action chunk};
+\node[box, fill=black!5] (ctx) at (6.7,-1.2) {context tokens\\\scriptsize text and state};
+
+\draw[ar] (venc.east) -- (zs.west);
+\draw[ar] (tenc.east) -- (ctx.west);
+\draw[ar] (prop.east) -- (5.05,-1.75) |- (ctx.west);
+
+% core
+\node[core] (core) at (10.3,0.45) {coupled\\denoiser $F_\theta$\\\scriptsize \sref{sec:coupling}, \sref{sec:masks}};
+\draw[ar] (zs.east) -- (core.west);
+\draw[ar] (as.east) -- (core.west);
+\draw[ar] (ctx.east) -- (core.west);
+
+% outputs
+\node[head] (vhat) at (13.9,1.35) {video velocity $\hat{v}$};
+\node[head] (ahat) at (13.9,-0.45) {action velocity $\hat{a}$};
+\draw[ar] (core.east) -- (vhat.west);
+\draw[ar] (core.east) -- (ahat.west);
+
+% level annotations
+\node[anchor=west, font=\scriptsize, text=tianzhebrown] at (5.40,2.85)
+  {$\sigma_v$ drawn from the shifted grid};
+\node[anchor=west, font=\scriptsize, text=tianzhebrown] at (5.40,-2.25)
+  {$\sigma_a$ drawn from the shifted grid, independently of $\sigma_v$ (Prop.~\ref{prop:product})};
+\end{tikzpicture}}
+\caption{One forward pass of a world-action model in \sys{}. Frozen encoders
+map the observation clip and the instruction into a latent grid and a context
+sequence. Two streams are noised at independently drawn levels and denoised
+together, and the network returns one velocity field per stream. Independent
+level sampling is what makes the deployment-time trajectory through the level
+square a free variable.}
+\label{fig:overview}
+\end{figure}
+
+\Paragraph{Sampling.}
+At deployment the policy walks a schedule
+$\mathcal{S} = \{(\sigma_v^{(k)}, \sigma_a^{(k)})\}_{k=0}^{K'}$ that ends at
+$(0,0)$, taking one Euler step per stream and per iteration,
+\begin{equation}
+  x^{(k+1)} \;=\; x^{(k)} \;+\; \big(\sigma^{(k+1)} - \sigma^{(k)}\big)\,
+  \hat{u}^{(k)} .
+  \label{eq:euler}
+\end{equation}
+\begin{algorithm}[t]
+\caption{Joint denoising with a free level schedule and a velocity cache}
+\label{alg:sample}
+\begin{algorithmic}[1]
+\STATE \textbf{input:} present frame, instruction $c$, state $s$, schedule
+  $\mathcal{S}$, visibility mask $M$, cache threshold $\tau$, skip budget $m$
+\STATE $z \leftarrow$ Gaussian noise; pin $z^{\text{cond}}$ into the conditioning prefix of $z$
+\STATE $a \leftarrow$ Gaussian noise; $\; j \leftarrow 0$
+\FOR{$k = 0$ \TO $K' - 1$}
+  \STATE $(\sigma_v, \sigma_a) \leftarrow \mathcal{S}[k]$; \;
+         $(\sigma_v', \sigma_a') \leftarrow \mathcal{S}[k+1]$
+  \IF{$k \geq 2$ \AND $j < m$ \AND
+      $\cos\big(\hat{v}^{(k-1)}, \hat{v}^{(k-2)}\big) > \tau$}
+    \STATE $\hat{v}^{(k)} \leftarrow \hat{v}^{(k-1)}$; \;
+           run the action branch alone to obtain $\hat{a}^{(k)}$; \;
+           $j \leftarrow j + 1$
+  \ELSE
+    \STATE $\big(\hat{v}^{(k)}, \hat{a}^{(k)}\big) \leftarrow
+            F_\theta\big(z, a, z^{\text{cond}}, c, s, \sigma_v, \sigma_a; M\big)$; \;
+           $j \leftarrow 0$
+  \ENDIF
+  \STATE $z \leftarrow z + (\sigma_v' - \sigma_v)\, \hat{v}^{(k)}$; \;
+         restore $z^{\text{cond}}$ in the conditioning prefix
+  \STATE $a \leftarrow a + (\sigma_a' - \sigma_a)\, \hat{a}^{(k)}$
+\ENDFOR
+\STATE \textbf{return} the action chunk $a$ in physical units after inverse normalisation
+\end{algorithmic}
+\end{algorithm}
+Video decoding is optional, since a control loop consumes only the action
+stream. \sref{sec:deploy} specifies the schedule family and the cache.
+
+\subsection{How the Action Stream Attaches: Six Coupling Architectures}
+\label{sec:coupling}
+
+A video backbone is a stack of $L$ transformer blocks. Block $\ell$ factors into
+a pre-attention map that produces queries, keys and values, a self-attention, and
+a post-attention map that applies the output projection, the feed-forward network
+and the residual updates. \sys{} exposes this factorisation, so an action stream
+may be inserted at any of the three points. Six concrete insertions follow, and
+\fref{fig:families} draws them.
+
+\Paragraph{Single system.}
+The action chunk is embedded into $S_A = H$ tokens of the backbone width $d_V$,
+the proprioceptive state is embedded into one token, and both are concatenated
+onto the video token sequence. The shared blocks process the concatenation and a
+small multilayer perceptron decodes the trailing action segment. The variant
+$\mathtt{vanilla}$ keeps the shared capacity as it stands. The variant $\mathtt{moe}$ adds a
+modality expert at selected layers,
+\begin{equation}
+  h_A^{(\ell)} \;\leftarrow\; h_A^{(\ell)} \;+\; \mathrm{FFN}^{\text{exp}}_\ell\!\left(h_A^{(\ell)}\right),
+  \qquad \ell \in \mathcal{B},
+  \label{eq:moe}
+\end{equation}
+where $h_A^{(\ell)}$ is the action segment of the layer output and $\mathcal{B}$
+is the selected layer set. The single system reuses every video parameter for the
+action computation, which makes it the cheapest coupling and ties the two
+modalities to one hidden width.
+
+\Paragraph{Dual system with joint self-attention.}
+Two experts run side by side: a video expert of width $d_V$ and an action expert
+of width $d_A$. At every layer both experts project their own residual streams
+into a shared attention space of $n$ heads of width $d_h$, the two token
+sequences are concatenated, one attention runs over the concatenation, and the
+result is split back,
+\begin{equation}
+  \begin{bmatrix} O_V \\ O_A \end{bmatrix}
+  \;=\;
+  \mathrm{softmax}\!\left(
+    \frac{1}{\sqrt{d_h}}
+    \begin{bmatrix} Q_V \\ Q_A \end{bmatrix}
+    \begin{bmatrix} K_V \\ K_A \end{bmatrix}^{\!\top}
+    + \log M
+  \right)
+  \begin{bmatrix} V_V \\ V_A \end{bmatrix},
+  \label{eq:mot}
+\end{equation}
+with $M$ the visibility mask of \sref{sec:masks}. Each expert then continues
+through its own post-attention path. The construction is the mixture of
+transformers pattern \citep{liang2024mot} applied across modalities: the two
+experts share the attention operator and keep separate parameters everywhere
+else. Two structural conditions are required, namely $n_V = n_A$ and
+$d_h^V = d_h^A$, so that the concatenated projections live in one space. The
+hidden widths stay free, which lets a compact action expert couple to a wide
+video backbone. Attention is parameter free, so the coupling costs exactly the parameters of the
+second expert.
+
+\Paragraph{Dual system with bridge cross-attention.}
+The video expert runs to completion while hidden states at a set of bridge layers
+$\mathcal{B} = \{\ell_1, \dots, \ell_J\}$ are collected. The action expert then
+runs once, and its layer $j$ cross-attends to the bridge feature $h_V^{(\ell_j)}$,
+\begin{equation}
+  h_A^{(j)} \;\leftarrow\; h_A^{(j)} \;+\;
+  \mathrm{CrossAttn}\!\left(h_A^{(j)},\; \mathrm{sg}^{\,\rho}\big[h_V^{(\ell_j)}\big]\right),
+  \label{eq:bridge}
+\end{equation}
+where $\mathrm{sg}$ is the stop-gradient operator and $\rho \in \{0, 1\}$ selects
+the detached variant. Setting $\rho = 1$ makes the video expert optimise the
+video term of \eqref{eq:loss} alone, so its optimum is the pure video model and
+the action expert becomes a read-only decoder of a fixed world representation.
+Setting $\rho = 0$ lets the action term reshape the video representation, which
+couples the two objectives through the shared trunk. The video expert reads its own stream alone in
+both variants, which makes this family the one where video generation stays
+exactly invariant to the action sample.
+
+\Paragraph{Dual system with inverse-dynamics teacher forcing.}
+Three branches pass through the joint attention in one forward: a noisy video
+branch at level $\sigma_v$, a conditioning video branch at a second level
+$\sigma_v^{\text{cond}}$, and a noisy action branch at level $\sigma_a$. The mask
+blocks every cross-branch path except one,
+\begin{equation}
+  M^{\text{idm}} =
+  \begin{bmatrix}
+    M_{VV} & 0 & 0 \\
+    0 & M_{VV} & 0 \\
+    0 & \mathbf{1} & \mathbf{1}
+  \end{bmatrix},
+  \label{eq:idmmask}
+\end{equation}
+with rows and columns ordered as noisy video, conditioning video and action. Each
+video branch is therefore self-contained and the action branch reads the
+conditioning branch. The conditioning branch is noised with probability one half
+so the action branch remains robust to an imperfect video prediction. Because the
+video term is unconditional and the action term conditions on a video sample,
+inference factors into two stages: denoise the video to completion, then denoise
+the action against the finished video while reusing the video keys and values.
+
+\Paragraph{Tri system.}
+A third expert joins the joint attention. A frozen vision-language model
+\citep{bai2025qwen25vl} encodes the observation and the instruction, a projector
+maps its hidden states to a narrow understanding width, and the resulting tokens
+enter the attention as a read-only tail that video and action queries may read.
+The understanding expert supplies a semantic pathway beyond what the video
+backbone's own text encoder carries, at the price of one narrow transformer plus
+the projector.
+
+\begin{figure}[t]
+\centering
+\adjustbox{max width=\linewidth}{%
+\begin{tikzpicture}[font=\scriptsize,
+  vb/.style={draw=tianzheblue!80!black, fill=tianzheblue!14, minimum width=9mm, minimum height=4.2mm, inner sep=0pt},
+  ab/.style={draw=tianzheorange!80!black, fill=tianzheorange!22, minimum width=8mm, minimum height=4.2mm, inner sep=0pt},
+  ub/.style={draw=tianzhepurple!80!black, fill=tianzhepurple!16, minimum width=8mm, minimum height=4.2mm, inner sep=0pt},
+  cb/.style={draw=black!45, fill=black!7, minimum width=9mm, minimum height=4.2mm, inner sep=0pt},
+  lk/.style={-{Stealth[length=1.3mm]}, draw=tianzhegreen!60!black},
+  lk2/.style={{Stealth[length=1.3mm]}-{Stealth[length=1.3mm]}, draw=tianzhegreen!60!black},
+  ttl/.style={font=\scriptsize\bfseries, align=center},
+  cap/.style={font=\scriptsize, align=center, text=black!70}]
+
+% ---------- panel A: single system ----------
+\begin{scope}[shift={(0,0)}]
+  \foreach \i in {0,1,2,3} { \node[vb] (a\i) at (0, \i*0.62) {}; }
+  \node[ab, minimum width=9mm] (atok) at (0,-0.78) {};
+  \node[cap] at (0,-1.60) {action and state\\tokens in sequence};
+  \node[ttl] at (0,2.92) {(a) single system};
+  \node[cap, anchor=west] at (0.62,1.86) {shared\\blocks};
+  \draw[lk] (atok.north) -- (a0.south);
+\end{scope}
+
+% ---------- panel B: single system MoE ----------
+\begin{scope}[shift={(4.2,0)}]
+  \foreach \i in {0,1,2,3} { \node[vb] (b\i) at (0, \i*0.62) {}; }
+  \foreach \i in {0,1,2,3} { \node[ab, minimum width=3.4mm] (e\i) at (0.92, \i*0.62) {}; }
+  \foreach \i in {0,1,2,3} { \draw[lk2] (b\i.east) -- (e\i.west); }
+  \node[ab, minimum width=9mm] (atok2) at (0,-0.78) {};
+  \node[cap] at (0.3,-1.60) {expert feed-forward\\on the action segment};
+  \node[ttl] at (0.4,2.92) {(b) single system\\with modality expert};
+  \draw[lk] (atok2.north) -- (b0.south);
+\end{scope}
+
+% ---------- panel C: dual system joint self-attention ----------
+\begin{scope}[shift={(8.6,0)}]
+  \foreach \i in {0,1,2,3} { \node[vb] (c\i) at (0, \i*0.62) {}; }
+  \foreach \i in {0,1,2,3} { \node[ab] (d\i) at (1.5, \i*0.62) {}; }
+  \foreach \i in {0,1,2,3} { \draw[lk2] (c\i.east) -- (d\i.west); }
+  \node[cap] at (0.75,-0.95) {one mixed attention\\at every layer};
+  \node[ttl] at (0.75,2.92) {(c) dual system\\joint self-attention};
+\end{scope}
+
+% ---------- panel D: dual system bridge cross-attention ----------
+\begin{scope}[shift={(0,-6.2)}]
+  \foreach \i in {0,1,2,3} { \node[vb] (f\i) at (0, \i*0.62) {}; }
+  \foreach \i in {0,1,2,3} { \node[ab] (g\i) at (1.5, \i*0.62) {}; }
+  \foreach \i in {0,1,2,3} { \draw[lk] (f\i.east) -- (g\i.west); }
+  \node[cap] at (0.75,-0.95) {video completes, then\\action reads the bridge};
+  \node[ttl] at (0.75,2.92) {(d) dual system\\bridge cross-attention};
+\end{scope}
+
+% ---------- panel E: IDM teacher forcing ----------
+\begin{scope}[shift={(4.6,-6.2)}]
+  \foreach \i in {0,1,2,3} { \node[vb] (h\i) at (0, \i*0.62) {}; }
+  \foreach \i in {0,1,2,3} { \node[cb] (k\i) at (1.35, \i*0.62) {}; }
+  \foreach \i in {0,1,2,3} { \node[ab] (l\i) at (2.7, \i*0.62) {}; }
+  \foreach \i in {0,1,2,3} { \draw[lk] (k\i.east) -- (l\i.west); }
+  \node[cap] at (0,-0.95) {noisy};
+  \node[cap] at (1.35,-0.95) {condition};
+  \node[cap] at (2.7,-0.95) {action};
+  \node[ttl] at (1.35,2.92) {(e) dual system\\teacher forcing};
+\end{scope}
+
+% ---------- panel F: tri system ----------
+\begin{scope}[shift={(10.2,-6.2)}]
+  \foreach \i in {0,1,2,3} { \node[vb] (m\i) at (0, \i*0.62) {}; }
+  \foreach \i in {0,1,2,3} { \node[ab] (n\i) at (1.4, \i*0.62) {}; }
+  \foreach \i in {0,1,2,3} { \node[ub] (o\i) at (2.8, \i*0.62) {}; }
+  \foreach \i in {0,1,2,3} { \draw[lk2] (m\i.east) -- (n\i.west); }
+  \foreach \i in {0,1,2,3} { \draw[lk] (o\i.west) -- (n\i.east); }
+  \node[cap] at (1.4,-0.95) {frozen understanding\\tokens as a read-only tail};
+  \node[ttl] at (1.4,2.92) {(f) tri system};
+\end{scope}
+
+% legend
+\node[vb, label={[font=\scriptsize, label distance=-1mm]right:{\;video expert}}] at (0.1,-9.0) {};
+\node[ab, label={[font=\scriptsize, label distance=-1mm]right:{\;action expert}}] at (3.4,-9.0) {};
+\node[ub, label={[font=\scriptsize, label distance=-1mm]right:{\;understanding expert}}] at (7.0,-9.0) {};
+\node[cb, label={[font=\scriptsize, label distance=-1mm]right:{\;conditioning branch}}] at (11.2,-9.0) {};
+\end{tikzpicture}}
+\caption{The six coupling architectures \sys{} exposes. Panels (a) and (b) place
+action tokens inside the video sequence and reuse every video parameter. Panels
+(c) to (e) give the action stream its own transformer and differ in where the two
+streams meet. Panel (f) adds a frozen understanding expert. Double arrows mark a
+symmetric meeting point and single arrows mark a one-directional read.}
+\label{fig:families}
+\end{figure}
+
+\subsection{Cross-Modal Visibility as a Block Mask}
+\label{sec:masks}
+
+\Paragraph{The sequence and its blocks.}
+Every coupling of \sref{sec:coupling} presents the attention with one sequence
+\begin{equation}
+  x \;=\; \big[\, \underbrace{x_V}_{S_V \text{ tokens}} \;\big|\;
+                 \underbrace{x_A}_{S_A \text{ tokens}} \;\big|\;
+                 \underbrace{x_R}_{S_R \text{ tokens}} \,\big],
+  \label{eq:seq}
+\end{equation}
+where $x_R$ is a read-only tail carrying the state token of the single system or
+the understanding tokens of the tri system. Visibility is a binary matrix
+$M \in \{0,1\}^{S \times S}$ with $M_{ij} = 1$ when query $i$ reads key $j$, and
+$\log M$ enters \eqref{eq:mot} as an additive bias. Writing $M$ in blocks,
+\begin{equation}
+  M \;=\;
+  \begin{bmatrix}
+    M_{VV} & M_{VA} & \mathbf{1} \\
+    M_{AV} & \mathbf{1} & \mathbf{1} \\
+    \mathbf{0} & \mathbf{0} & \mathbf{1}
+  \end{bmatrix}.
+  \label{eq:maskblocks}
+\end{equation}
+Three blocks are constant. Action tokens always read each other, since an action
+chunk is a jointly denoised trajectory. The tail is readable by everything and
+reads only itself, which keeps it a pure information source whose own
+representation stays fixed. The two remaining blocks are the design space.
+
+\Paragraph{Video self-visibility.}
+$M_{VV}$ takes three values. The mode $\mathtt{bidirectional}$ sets every entry
+to one. The mode $\mathtt{per\text{-}frame\ causal}$ builds a lower-triangular
+matrix at frame granularity and expands it by the token count of one frame, so a
+frame reads its own past. The mode $\mathtt{first\text{-}frame\ causal}$ sets
+every entry to one and restricts the rows of the conditioning frame to
+conditioning-frame keys, which keeps the clean prefix a self-contained
+representation of the present observation. The reference configuration uses
+$\mathtt{first\text{-}frame\ causal}$.
+
+\Paragraph{Cross-modal visibility.}
+Let $P$ index the tokens of the clean conditioning frame. The four modes assign
+the two cross blocks as follows.
+\begin{equation}
+  \begin{array}{llll}
+    \textbf{mode} & \textbf{name} & M_{AV} & M_{VA} \\[2pt]
+    \VAV  & \text{mutual}            & \mathbf{1}                & \mathbf{1} \text{ with rows } P \text{ zeroed} \\
+    \AV   & \text{action reads video}& \mathbf{1}                & \mathbf{0} \\
+    \VA   & \text{video reads action}& \text{columns } P \text{ only} & \mathbf{1} \text{ with rows } P \text{ zeroed} \\
+    \ISO  & \text{isolated}          & \text{columns } P \text{ only} & \mathbf{0}
+  \end{array}
+  \label{eq:modes}
+\end{equation}
+Two invariants hold across all four modes. First, the rows of $P$ read only
+video, so the keys and values of the conditioning prefix depend on the present
+observation alone and stay valid for reuse across denoising iterations. Second,
+$M_{AV}$ always grants the action stream access to the conditioning frame, so an
+action is always grounded in the current observation even when the mode withholds
+the predicted future. \fref{fig:masks} draws the resulting matrices.
+
+\Paragraph{Why the best mode moves once pretraining enters.}
+The two cross blocks differ in their consequences, because $M_{VA}$ decides
+whether the video velocity field is a function of the action sample. That distinction becomes load bearing as soon as the pretraining mixture
+contains footage whose action labels are absent.
+
+\begin{proposition}[Consistency of an action-free mixture component]
+\label{prop:actionfree}
+Let the training mixture contain a component $\mathcal{D}_0$ on which the action
+mask satisfies $M_A = \mathbf{0}$, so the action term of \eqref{eq:loss}
+contributes no gradient. If $M_{VA} = \mathbf{0}$, then the video velocity field
+$\hat{v}$ is measurable with respect to the video stream and the context alone,
+and the video term evaluated on $\mathcal{D}_0$ estimates the same functional it
+estimates on a labelled component. If $M_{VA} \neq \mathbf{0}$, then $\hat{v}$
+depends on $a_{\sigma_a}$, whose conditional law on $\mathcal{D}_0$ is determined
+by an unsupervised stream, and the video term on $\mathcal{D}_0$ estimates a
+conditional functional whose conditioning variable carries no calibrated
+information about the demonstrated motion.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+With $M_{VA} = \mathbf{0}$ every video query assigns zero weight to every action
+key at every layer, so the value written into a video residual stream is a
+function of video and tail tokens only, and induction over layers gives
+measurability of $\hat{v}$ with respect to that sub-sequence. The video term is
+then the ordinary conditional flow-matching regression, whose target and
+conditioning both come from $\mathcal{D}_0$ in the same form as from a labelled
+component. With $M_{VA} \neq \mathbf{0}$ the same induction shows $\hat{v}$ is a
+function of $a_{\sigma_a}$; on $\mathcal{D}_0$ the law of $a_0$ is unconstrained
+by \eqref{eq:loss}, so the regression conditions on a variable whose relation to
+the video target is set by the data source alone.
+\end{proof}
+
+Proposition~\ref{prop:actionfree} yields a concrete prediction. A model trained from
+random initialisation on a mixture that contains action-free footage is best
+served by a mode with $M_{VA} = \mathbf{0}$, which is \AV{} among the four. A
+model whose action stream has already been calibrated by a large pretraining run
+carries an action sample that is informative at every noise level, and restoring
+$M_{VA}$ then supplies the video branch with a genuine additional conditioning
+signal. The mutual mode \VAV{} therefore becomes the stronger configuration
+after pretraining. \sref{sec:q4} measures both halves of this prediction.
+
+\begin{figure}[t]
+\centering
+\adjustbox{max width=\linewidth}{%
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  ttl/.style={font=\scriptsize\bfseries, align=center},
+  lbl/.style={font=\tiny, text=black!70}]
+
+\newcommand{\onst}{fill=tianzhegreen!45, draw=black!35, line width=0.15pt}
+\newcommand{\offst}{fill=black!6, draw=black!25, line width=0.15pt}
+\newcommand{\halfst}{fill=tianzheblue!32, draw=black!35, line width=0.15pt}
+
+% ---- top row: the four cross-modal modes ----
+\newcommand{\maskmat}[7]{%
+  \begin{scope}[shift={(#1,#2)}]
+    \fill[#3] (0,10) rectangle (20,20);
+    \fill[#4] (20,10) rectangle (30,20);
+    \fill[#5] (0,0) rectangle (20,10);
+    \fill[#6] (20,0) rectangle (30,10);
+    \draw[black!60, line width=0.3pt] (0,0) rectangle (30,20);
+    \draw[black!60, line width=0.3pt] (20,0) -- (20,20);
+    \draw[black!60, line width=0.3pt] (0,10) -- (30,10);
+    \node[ttl] at (15,26) {#7};
+    \node[lbl, anchor=east] at (-1,15) {V};
+    \node[lbl, anchor=east] at (-1,5) {A};
+    \node[lbl] at (10,-3.5) {V};
+    \node[lbl] at (25,-3.5) {A};
+  \end{scope}}
+
+\node[anchor=west, font=\scriptsize\itshape] at (0,36) {cross-modal visibility};
+\maskmat{0}{0}{\onst}{\halfst}{\onst}{\onst}{$\VAV$\\mutual}
+\maskmat{40}{0}{\onst}{\offst}{\onst}{\onst}{$\AV$\\action reads video}
+\maskmat{80}{0}{\onst}{\halfst}{\halfst}{\onst}{$\VA$\\video reads action}
+\maskmat{120}{0}{\onst}{\offst}{\halfst}{\onst}{$\ISO$\\isolated}
+
+% ---- bottom row: the three video self-visibility modes ----
+\node[anchor=west, font=\scriptsize\itshape] at (0,-12) {video self-visibility};
+
+\begin{scope}[shift={(0,-44)}]
+  \fill[\onst] (0,0) rectangle (18,18);
+  \draw[black!60, line width=0.3pt] (0,0) rectangle (18,18);
+  \node[ttl] at (9,23) {bidirectional};
+\end{scope}
+
+\begin{scope}[shift={(40,-44)}]
+  \foreach \rr in {0,1,2} {
+    \foreach \cc in {0,1,2} {
+      \ifnum\cc>\rr
+        \fill[\offst] (\cc*6,12-\rr*6) rectangle (\cc*6+6,18-\rr*6);
+      \else
+        \fill[\onst] (\cc*6,12-\rr*6) rectangle (\cc*6+6,18-\rr*6);
+      \fi}}
+  \draw[black!60, line width=0.3pt] (0,0) rectangle (18,18);
+  \node[ttl] at (9,23) {per-frame causal};
+\end{scope}
+
+\begin{scope}[shift={(80,-44)}]
+  \fill[\onst] (0,0) rectangle (18,18);
+  \fill[\offst] (6,12) rectangle (18,18);
+  \draw[black!60, line width=0.3pt] (0,0) rectangle (18,18);
+  \node[ttl] at (9,23) {first-frame causal};
+\end{scope}
+
+\node[anchor=north west, align=left, font=\scriptsize] at (112,-24)
+  {rows are queries, columns are keys\\[1pt]
+   \textcolor{tianzhegreen!45}{$\blacksquare$}\; readable\\
+   \textcolor{tianzheblue!32}{$\blacksquare$}\; readable outside the\\
+   \hspace{3mm} conditioning rows\\
+   \textcolor{black!12}{$\blacksquare$}\; withheld};
+\end{tikzpicture}}
+\caption{Visibility patterns. Top row: the four cross-modal modes of
+\eqref{eq:modes} as block matrices over the video and action segments. Bottom
+row: the three video self-visibility modes that fill $M_{VV}$. The conditioning
+frame occupies the leading video rows and columns, and the mutual and
+video-reads-action modes withhold the action block from exactly those rows, which
+keeps the conditioning prefix reusable across denoising iterations.}
+\label{fig:masks}
+\end{figure}
+
+\subsection{The Visual Representation the Model Denoises}
+\label{sec:repr}
+
+\Paragraph{The encoder interface.}
+A visual encoder declares four structural properties: a latent channel width $C$,
+a spatial compression factor $s$, a temporal compression factor, and whether the
+latent admits a pixel decode. \sys{} fixes the temporal contract at
+\begin{equation}
+  T \;=\; 1 + \frac{N_v - 1}{4},
+  \label{eq:temporal}
+\end{equation}
+so one latent frame carries the present observation and each further latent frame
+summarises four future observation frames. With a patch size $(p_h, p_w)$ on the
+backbone input projection, the video segment length is
+\begin{equation}
+  S_V \;=\; T \cdot \frac{H}{s\,p_h} \cdot \frac{W}{s\,p_w}.
+  \label{eq:tokens}
+\end{equation}
+The reference configuration uses $N_v = 9$, $H = 384$, $W = 320$, $s = 16$ and
+$(p_h, p_w) = (2,2)$, giving $T = 3$ and $S_V = 360$ video tokens against
+$S_A = 32$ action tokens and one state token. Holding \eqref{eq:temporal} and
+\eqref{eq:tokens} fixed across encoders is what makes the representation
+comparison controlled, since every candidate then presents the backbone with the
+same sequence length and the same temporal granularity.
+
+\Paragraph{Two families of latent.}
+Reconstructive latents come from a variational autoencoder trained to compress
+pixels \citep{kingma2014vae,rombach2022ldm} and admit a pixel decode. Semantic
+latents come from a self-supervised image or video encoder
+\citep{simeoni2025dinov3,assran2025vjepa2}, are applied frame by frame, and are
+pooled causally along time to satisfy \eqref{eq:temporal}. A parameter-free
+per-token layer normalisation follows the pooling, which places the diffusion
+target near an isotropic Gaussian and matches the assumption built into the
+shifted noise grid. Semantic latents carry no decoder, so the backbone rebuilds
+its input projection and its output head around $C$ and trains those two layers
+from random initialisation.
+
+\Paragraph{A reducer that separates width from semantics.}
+The two families differ in channel width by more than an order of magnitude,
+which confounds any direct comparison. \sys{} therefore inserts an optional
+frozen reducer that compresses a semantic latent to the channel width of a
+reconstructive latent. The reducer is a small per-token variational autoencoder
+with a Gaussian bottleneck,
+\begin{equation}
+  q_\phi(w \mid y) \;=\; \mathcal{N}\!\big(\mu_\phi(y),\; \mathrm{diag}\,e^{\ell_\phi(y)}\big),
+  \qquad \hat{y} \;=\; D_\phi(w),
+  \label{eq:svaepost}
+\end{equation}
+trained offline on collected encoder features with the objective
+\begin{equation}
+  \mathcal{L}_{\text{red}}(\phi)
+  \;=\;
+  \big\| \hat{y} - y \big\|_2^2
+  \;+\; \gamma \big(1 - \cos(\hat{y}, y)\big)
+  \;+\; \beta \, \mathrm{KL}\!\big(q_\phi(w \mid y) \,\|\, \mathcal{N}(0, I)\big),
+  \label{eq:svae}
+\end{equation}
+with $\gamma = 1$ and $\beta = 10^{-4}$, so reconstruction dominates and the
+prior term only regularises the scale of the code. At evaluation the reducer
+returns the posterior mean $\mu_\phi(y)$, which makes it a deterministic frozen
+map. Setting the reducer output width to the reconstructive channel width leaves
+the denoising problem identical in dimension, in temporal compression and in
+sequence length, so the remaining difference between the two families is what the
+channels encode. \sref{sec:q3} uses exactly this construction.
+
+\subsection{One Observation Canvas and One Action Layout for Every Embodiment}
+\label{sec:contract}
+
+\Paragraph{Observation.}
+Multiple camera views enter as a single composed canvas of height 384 and width
+320. The head camera occupies a 256 by 320 tile at the top and two wrist cameras
+occupy 128 by 160 tiles below it, and an absent view renders as a black tile.
+One canvas per frame keeps the video stream single and keeps
+\eqref{eq:tokens} independent of the camera count, so a platform with three
+cameras and a platform with one camera present the backbone with the same
+sequence.
+
+\Paragraph{Action.}
+All embodiments share one action width $d = 80$ with a fixed semantic slot
+layout, drawn in \fref{fig:contract}. Slots 0 to 9 hold the left end-effector
+position, its rotation in the six-dimensional continuous representation, and its
+gripper aperture. Slots 10 to 33 hold twenty-four left hand joints. Slots 34 to
+67 mirror both blocks for the right arm, and slots 68 to 79 stay reserved for
+base motion and future extension. An embodiment $e$ with native action width
+$d_e$ supplies an injective index map
+$\pi_e : \{1, \dots, d_e\} \to \{1, \dots, 80\}$, and the framework applies the
+scatter operator and its mask,
+\begin{equation}
+  (S_e y)_{\pi_e(i)} = y_i, \qquad
+  (S_e y)_{j} = 0 \;\; \text{for } j \notin \mathrm{im}\,\pi_e,
+  \qquad
+  m_e[j] = \mathbbm{1}\{ j \in \mathrm{im}\,\pi_e \}.
+  \label{eq:scatter}
+\end{equation}
+The action mask of \eqref{eq:loss} is then
+$M_A = \mathbbm{1}_{H} m_e^{\!\top} \odot V$, with $V$ the horizon validity mask
+that removes padded steps.
+
+\begin{proposition}[Slot isolation]
+\label{prop:slots}
+Consider a batch containing samples from embodiments $e_1, \dots, e_n$ and let
+$\theta_j$ collect the parameters of the output head that produce slot $j$. The
+gradient of \eqref{eq:loss} with respect to $\theta_j$ is a sum over the samples
+whose mask satisfies $m_{e}[j] = 1$. Slots that no embodiment in the batch maps
+receive zero gradient, and the contribution of each embodiment equals its native
+per-dimension loss up to the per-sample normalisation $1 / \sum M_A$.
+\end{proposition}
+
+\begin{proof}[Proof sketch]
+$M_A$ enters \eqref{eq:loss} as an elementwise factor, so the residual at slot
+$j$ of a sample with $m_e[j] = 0$ is multiplied by zero before the sum. The
+derivative of the mask-normalised norm with respect to $\theta_j$ therefore
+retains only the terms with $m_e[j] = 1$, and within those terms the summand is
+the native squared residual divided by the count of valid entries.
+\end{proof}
+
+Proposition~\ref{prop:slots} is what allows a mixture of gripper platforms, dexterous hands
+and single-arm setups to train one action head at one width. Normalisation
+completes the contract. Position and joint dimensions are rescaled to
+$[-1, 1]$ by the per-source minimum and maximum, rotation blocks are pinned to
+the identity range so the continuous rotation representation passes through
+unchanged, and gripper aperture is canonicalised so that the low value denotes a
+closed gripper and the high value denotes an open one. Every downstream platform
+inverts this map at deployment.
+
+\begin{figure}[t]
+\centering
+\adjustbox{max width=\linewidth}{%
+\begin{tikzpicture}[font=\scriptsize, x=1mm, y=1mm,
+  sl/.style={draw=black!55, line width=0.3pt},
+  tl/.style={draw=black!55, line width=0.3pt},
+  lbl/.style={font=\tiny, align=center}]
+
+% ---- action slot layout ----
+\node[anchor=west, font=\scriptsize\itshape] at (0,20) {unified action layout, width 80};
+\filldraw[fill=tianzheblue!35, draw=black!55, line width=0.3pt] (0,6) rectangle (12,14);
+\filldraw[fill=tianzheblue!18, draw=black!55, line width=0.3pt] (12,6) rectangle (44,14);
+\filldraw[fill=tianzheorange!35, draw=black!55, line width=0.3pt] (44,6) rectangle (56,14);
+\filldraw[fill=tianzheorange!18, draw=black!55, line width=0.3pt] (56,6) rectangle (88,14);
+\filldraw[fill=black!8, draw=black!55, line width=0.3pt] (88,6) rectangle (104,14);
+\draw[sl] (0,6) rectangle (104,14);
+
+\node[lbl] at (6,10) {left arm\\pose and grip};
+\node[lbl] at (28,10) {left hand joints};
+\node[lbl] at (50,10) {right arm\\pose and grip};
+\node[lbl] at (72,10) {right hand joints};
+\node[lbl] at (96,10) {reserved};
+
+\foreach \x/\t in {0/0, 12/10, 44/34, 56/44, 88/68, 104/80} {
+  \draw[black!55, line width=0.3pt] (\x,6) -- (\x,3.6);
+  \node[font=\tiny, anchor=north] at (\x,3.4) {\t};}
+
+% ---- observation canvas ----
+\begin{scope}[shift={(118,-8)}]
+  \node[anchor=west, font=\scriptsize\itshape] at (0,28) {observation canvas};
+  \filldraw[fill=tianzhegreen!22, draw=black!55, line width=0.3pt] (0,10) rectangle (32,35.6);
+  \filldraw[fill=tianzhegreen!12, draw=black!55, line width=0.3pt] (0,-2.8) rectangle (16,10);
+  \filldraw[fill=black!8, draw=black!55, line width=0.3pt] (16,-2.8) rectangle (32,10);
+  \node[lbl] at (16,22.8) {head camera\\256 $\times$ 320};
+  \node[lbl] at (8,3.6) {left wrist\\128 $\times$ 160};
+  \node[lbl] at (24,3.6) {absent view\\rendered black};
+  \draw[tl] (0,-2.8) rectangle (32,35.6);
+  \draw[{Stealth[length=1.4mm]}-{Stealth[length=1.4mm]}, black!60] (-3.4,-2.8) -- (-3.4,35.6)
+    node[midway, anchor=east, font=\tiny, rotate=90, yshift=2mm] {384};
+  \draw[{Stealth[length=1.4mm]}-{Stealth[length=1.4mm]}, black!60] (0,-6.2) -- (32,-6.2)
+    node[midway, anchor=north, font=\tiny] {320};
+\end{scope}
+\end{tikzpicture}}
+\caption{The cross-embodiment contract. Left: the fixed action layout of width
+80, with tick marks giving slot boundaries. An embodiment writes into the slots
+its hardware measures and the per-dimension mask keeps every other slot out of
+the loss. Right: the composed observation canvas that carries up to three camera
+views inside one video stream at a fixed token count.}
+\label{fig:contract}
+\end{figure}
+
+\subsection{Scheduling the Two Streams at Deployment}
+\label{sec:deploy}
+
+Proposition~\ref{prop:product} established that any monotone path through the level square
+is admissible. This subsection parameterises a family of such paths, then
+specifies how a generated chunk is executed against a running control loop.
+
+\Paragraph{A two-parameter family of denoising trajectories.}
+Let $u_k = k / K'$ measure global progress across $K'$ iterations and let
+cleanness denote the complement of a stream's noise level before shifting. One
+stream leads and the other lags. The lead stream takes cleanness
+$c_{\text{lead}}(u) = f_\alpha(u)$ with $\alpha \geq 1$, and the lag stream takes
+cleanness $c_{\text{lag}}(u) = \mathrm{clip}\big((u - \delta) / (1 - \delta), 0, 1\big)$
+with $0 \leq \delta < 1$. Each stream's noise level then rides its own training
+grid,
+\begin{equation}
+  \sigma_{\text{lead}}(u) = f_{\lambda}\!\big(1 - f_\alpha(u)\big),
+  \qquad
+  \sigma_{\text{lag}}(u) = f_{\lambda}\!\big(1 - c_{\text{lag}}(u)\big).
+  \label{eq:traj}
+\end{equation}
+
+\begin{lemma}[Properties of the shift map]
+\label{lem:shift}
+For $\alpha > 0$ the map $f_\alpha$ of \eqref{eq:shift} is a monotone increasing
+bijection of $[0,1]$ with $f_\alpha(0) = 0$ and $f_\alpha(1) = 1$; its inverse is
+$f_{1/\alpha}$; and $1 - f_\alpha(1 - t) = f_{1/\alpha}(t)$ for all $t$.
+Moreover $f_\alpha(u) \geq u$ for every $\alpha \geq 1$.
+\end{lemma}
+
+\begin{proof}
+The endpoint values follow by substitution. Differentiating gives
+$f_\alpha'(t) = \alpha / (1 + (\alpha-1)t)^2 > 0$, which gives monotonicity, and
+solving $w = \alpha t / (1 + (\alpha - 1)t)$ for $t$ gives
+$t = w / (\alpha - (\alpha - 1) w) = f_{1/\alpha}(w)$. For the reflection
+identity,
+\[
+  1 - f_\alpha(1-t)
+  = \frac{1 + (\alpha-1)(1-t) - \alpha(1-t)}{1 + (\alpha-1)(1-t)}
+  = \frac{t}{\alpha - (\alpha-1)t}
+  = f_{1/\alpha}(t).
+\]
+Finally
+$f_\alpha(u) - u = u(1-u)(\alpha-1) / \big(1 + (\alpha-1)u\big) \geq 0$
+whenever $\alpha \geq 1$ and $u \in [0,1]$.
+\end{proof}
+
+Lemma~\ref{lem:shift} gives the family three properties that matter in practice. The
+lead stream reaches any level of cleanness at a smaller global progress than the
+lag stream, so it finishes earlier. The reflection identity lets
+\eqref{eq:traj} be computed as $f_{1/\alpha}$ applied to the base grid, so at
+$\alpha = 1$ and $\delta = 0$ the two curves coincide with the base grid and the
+trajectory reduces exactly to the synchronous diagonal. Both curves stay
+monotone and terminate at zero, so \eqref{eq:euler} remains a valid Euler
+integration of the learned field. Selecting the lead stream, $\alpha$ and
+$\delta$ therefore spans a continuum whose endpoints are a video-leading
+trajectory and an action-leading trajectory, and whose centre is the synchronous
+one. \fref{fig:sched} draws the resulting paths.
+
+\Paragraph{Executing a chunk against a control loop.}
+A generation returns $H$ actions and the executor consumes $h \leq H$ of them
+before regenerating, which is receding-horizon control with a replanning period
+of $h$ steps. The synchronous executor blocks on the generation, so its control
+period alternates between one generation latency and $h-1$ cheap steps. The
+asynchronous executor keeps a single background generation in flight: when
+$h - d$ actions remain in the buffer it launches the next generation, where $d$
+is the expected latency measured in action steps. A generation launched at
+control step $t_s$ and adopted at step $t$ has its first $t - t_s$ actions
+already superseded, so the executor discards them and enqueues the remaining
+window. Writing $\Delta t$ for the control period and $T_{\text{gen}}$ for the
+generation latency, execution stays free of stalls whenever
+\begin{equation}
+  T_{\text{gen}} \;\leq\; d \cdot \Delta t
+  \qquad\text{and}\qquad
+  d \;<\; h \;\leq\; H,
+  \label{eq:async}
+\end{equation}
+and the number of actions usable from an adopted chunk is $H - (t - t_s)$.
+
+\Paragraph{Reducing the cost of a generation.}
+Three deployment optimisations act inside Algorithm~\ref{alg:sample}. The velocity cache
+compares consecutive video velocity predictions and reuses the previous
+prediction when their cosine similarity exceeds a threshold $\tau$, subject to a
+budget of $m$ consecutive reuses, so a sampler of $K'$ iterations performs at
+most $K'$ and at least $\lceil K' / (m+1) \rceil$ video forwards. Prompt
+embeddings are cached across requests, since a benchmark episode repeats one
+instruction. Fixed-shape compilation is applied to the per-layer joint loop of
+each coupling family, which removes per-layer dispatch overhead at the price of a
+first-request warm-up. Skipping the pixel decode removes the decoder from the
+critical path entirely, which is admissible because the control loop consumes
+only the action stream.
+
+\begin{figure}[t]
+\centering
+\adjustbox{max width=\linewidth}{%
+\begin{tikzpicture}[font=\scriptsize]
+
+% ---------- (a) the level square ----------
+\begin{scope}
+  \draw[->, black!70] (0,0) -- (5.3,0) node[anchor=north east, font=\scriptsize] {$\sigma_v$};
+  \draw[->, black!70] (0,0) -- (0,5.3) node[anchor=south west, font=\scriptsize] {$\sigma_a$};
+  \foreach \t/\l in {0/0, 5/1} {
+    \node[anchor=north, font=\tiny] at (\t,-0.05) {\l};
+    \node[anchor=east, font=\tiny] at (-0.05,\t) {\l};}
+  \draw[black!18, line width=0.3pt] (5,0) -- (5,5) -- (0,5);
+
+  % synchronous diagonal
+  \draw[tianzhegreen!60!black, line width=1.1pt] (5,5) -- (0,0);
+  % video leading: sigma_v drops faster
+  \draw[tianzheblue!75!black, line width=1.1pt, densely dashed]
+    (5,5) .. controls (2.2,4.7) and (0.6,3.2) .. (0,0);
+  % action leading: sigma_a drops faster
+  \draw[tianzheorange!70!black, line width=1.1pt, densely dotted]
+    (5,5) .. controls (4.7,2.2) and (3.2,0.6) .. (0,0);
+
+  \node[anchor=west, font=\tiny, text=tianzhegreen!50!black] at (2.55,2.15) {synchronous};
+  \node[anchor=west, font=\tiny, text=tianzheblue!60!black] at (0.35,3.95) {video leading};
+  \node[anchor=west, font=\tiny, text=tianzheorange!60!black] at (2.95,0.75) {action leading};
+  \node[anchor=north, font=\scriptsize] at (2.65,-0.75) {(a) trajectories through the level square};
+  \node[circle, fill=black!70, inner sep=0.7pt] at (5,5) {};
+  \node[circle, fill=black!70, inner sep=0.7pt] at (0,0) {};
+  \node[anchor=south west, font=\tiny] at (4.55,4.9) {start};
+  \node[anchor=south west, font=\tiny] at (0.1,0.05) {clean};
+\end{scope}
+
+% ---------- (b) execution timelines ----------
+\begin{scope}[shift={(8.2,0)}]
+  \node[anchor=north, font=\scriptsize] at (3.6,-0.75) {(b) synchronous and asynchronous execution};
+
+  % synchronous
+  \node[anchor=east, font=\tiny] at (-0.15,4.15) {synchronous};
+  \filldraw[fill=tianzhered!30, draw=black!45, line width=0.3pt] (0,3.75) rectangle (1.5,4.55);
+  \node[font=\tiny] at (0.75,4.15) {generate};
+  \foreach \k in {0,...,5} {
+    \filldraw[fill=tianzhegreen!30, draw=black!45, line width=0.3pt] (1.5+\k*0.4,3.75) rectangle (1.9+\k*0.4,4.55);}
+  \filldraw[fill=tianzhered!30, draw=black!45, line width=0.3pt] (3.9,3.75) rectangle (5.4,4.55);
+  \node[font=\tiny] at (4.65,4.15) {generate};
+  \foreach \k in {0,...,3} {
+    \filldraw[fill=tianzhegreen!30, draw=black!45, line width=0.3pt] (5.4+\k*0.4,3.75) rectangle (5.8+\k*0.4,4.55);}
+  \node[anchor=west, font=\tiny, text=tianzhered!70!black] at (7.15,4.15) {loop stalls};
+
+  % asynchronous
+  \node[anchor=east, font=\tiny] at (-0.15,2.15) {asynchronous};
+  \foreach \k in {0,...,17} {
+    \filldraw[fill=tianzhegreen!30, draw=black!45, line width=0.3pt] (\k*0.4,1.75) rectangle (0.4+\k*0.4,2.55);}
+  \filldraw[fill=tianzheblue!25, draw=black!45, line width=0.3pt, rounded corners=1pt] (1.6,0.75) rectangle (3.1,1.45);
+  \node[font=\tiny] at (2.35,1.1) {background generate};
+  \filldraw[fill=tianzheblue!25, draw=black!45, line width=0.3pt, rounded corners=1pt] (5.2,0.75) rectangle (6.7,1.45);
+  \node[font=\tiny] at (5.95,1.1) {background generate};
+  \draw[-{Stealth[length=1.3mm]}, black!60] (2.35,1.45) -- (2.35,1.72);
+  \draw[-{Stealth[length=1.3mm]}, black!60] (5.95,1.45) -- (5.95,1.72);
+  \draw[-{Stealth[length=1.3mm]}, black!60] (1.6,1.72) -- (1.6,1.48);
+  \draw[-{Stealth[length=1.3mm]}, black!60] (5.2,1.72) -- (5.2,1.48);
+  \node[anchor=west, font=\tiny, text=tianzheblue!60!black] at (7.15,1.1) {launch at $h-d$};
+  \node[anchor=west, font=\tiny, text=tianzhegreen!50!black] at (7.15,2.15) {uniform control period};
+\end{scope}
+\end{tikzpicture}}
+\caption{Deployment schedules. (a) The three trajectories of \eqref{eq:traj}
+inside the level square, with $\alpha = 1$ recovering the synchronous diagonal
+exactly by Lemma~\ref{lem:shift}. (b) The synchronous executor blocks the control loop
+for one generation latency per replanning period, and the asynchronous executor
+launches the next generation while $d$ actions remain, which keeps the control
+period uniform under condition \eqref{eq:async}.}
+\label{fig:sched}
+\end{figure}
