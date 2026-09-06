@@ -2,9 +2,10 @@
 \label{sec:related}
 
 \Paragraph{Video generative models as control backbones.}
-Latent diffusion and flow matching turned video synthesis into a scalable
-sequence modelling problem, and the transformer denoisers that carry it
-\citep{peebles2023dit,esser2024sd3} now underpin open video generators such as
+Denoising generative models turned video synthesis into a scalable sequence
+modelling problem \citep{ho2020ddpm,rombach2022ldm}, and the transformer
+denoisers that carry it \citep{peebles2023dit,esser2024sd3} now underpin open
+video generators such as
 the Wan family \citep{wan2025wan}, Cosmos \citep{nvidia2025cosmos}, CogVideoX
 \citep{yang2025cogvideox} and Stable Video Diffusion
 \citep{blattmann2023svd}. Robotics adopted these generators along two routes.
@@ -12,7 +13,10 @@ The planning route generates a future observation and recovers the action with a
 separate inverse dynamics model or a goal-reaching controller
 \citep{du2023unipi,black2024susie,wu2024ivideogpt,bruce2024genie}. The joint
 route asks one network to denoise video and actions together, so a single
-forward pass produces both quantities \citep{zhu2025uwm}. Video pretraining on
+forward pass produces both quantities \citep{zhu2025uwm}. Both routes descend
+from latent world models that learn a compact transition function and plan
+inside it \citep{hafner2023dreamerv3}, and they replace that compact latent with
+the observation space itself. Video pretraining on
 web footage followed by action fine-tuning also improves policies whose action
 head is conventional \citep{wu2024gr1,cheang2024gr2}. Latent action modelling
 extracts pseudo-action labels from unannotated video and pretrains a policy on
