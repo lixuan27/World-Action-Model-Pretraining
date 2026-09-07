@@ -1,55 +1,155 @@
-\appendix
-\section{Implementation Status}
-\label{app:status}
+\section*{Appendix}
+\addcontentsline{toc}{section}{Appendix}
+\renewcommand{\thesubsection}{\Alph{subsection}}\setcounter{subsection}{0}
 
-\tref{tab:status} records what the released code has verified and what the
-measurement programme still has to run. The distinction matters because the
-report prints target values, and a reader needs to know exactly which parts of
-the pipeline those targets depend on. Every row corresponds to an entry of the
-released experiment ledger, which binds a scientific question to a
-configuration, a command, a result file, and a conclusion.
+\subsection{Implementation and training details}
+\label{app:details}
+\textbf{Prediction horizons and coordinates.}
+The current model predicts 32 action steps in an 80-dimensional typed layout. Consequences use 16
+steps with 48 available keypoint slots, each containing two displacement coordinates and one
+observability coordinate. The agent sequence therefore contains 49 tokens: one state token, 32
+action tokens, and 16 consequence tokens. Slots are shared storage positions with source-specific
+validity masks. The current LIBERO adapter fills 39 consequence slots; EgoDex fills 14 hand-point
+slots. Unused slots carry a false mask.
 
-\begin{table}[h]
-\centering
-\small
-\caption{Verification status of the released implementation. A conclusion in
-this report may cite a row only when that row holds a result file, which is the
-rule the experiment ledger enforces.}
-\label{tab:status}
-\adjustbox{max width=\linewidth}{%
-\begin{tabular}{@{}llll@{}}
-\toprule
-\textbf{Component} & \textbf{Check} & \textbf{Status} & \textbf{Evidence} \\
-\midrule
-Joint model & uncoupled forward matches the official backbone bitwise & verified & unit test \\
-Coupling & gradients blocked exactly where the specification says & verified & unit test \\
-Training loop & a resumed run repeats no optimiser step & verified & unit test \\
-Data layer & window, canvas, layout, and mask contracts on real sources & verified & unit test \\
-Normalisation & per-source statistics computed and frozen into the cache key & complete & statistics files \\
-Encoder cache & latent shards and deduplicated text embeddings & in progress & cache manifests \\
-Backbone throughput & step time and utilisation at production shapes & pending & smoke run \\
-Closed-loop arms & every arm of \sref{sec:exp} & pending & experiment ledger \\
-\bottomrule
-\end{tabular}}
-\end{table}
+Actions use source adapters that preserve the physical meaning of pose, aperture, and joint
+coordinates. Rotation is represented by the first two columns of its rotation matrix, concatenated
+in column order, and bypasses statistical scaling. Gripper aperture is first expressed from closed
+to open in the interval $[0,1]$ and then mapped to $[-1,1]$. The active robot recipe uses per-source
+first and ninety-ninth percentiles for the remaining valid coordinates, with clipping to $[-1,1]$.
+Min--max and standard-score normalization are supported alternatives; the archived runs identify the
+active choice. Displacement uses image-normalized coordinates with gain 4. Observability remains a
+separate target, including for occluded points whose displacement is masked.
 
-\section{Reproduction Interface}
-\label{app:repro}
+\textbf{Temporal and visual inputs.}
+A window selects nine frames at a stride of four source steps, spanning 33 time indices. The video
+autoencoder produces a clean observation latent followed by future latents. The image canvas is
+$384\times256$ pixels for the two-view template and $384\times320$ for the three-view template. The
+template reserves positions for unavailable views rather than inventing additional observations.
+DROID, Bridge, and EgoDex retain native frame rates of 15, 5, and 30 Hz in the resolved recipe.
+Consequently, a step horizon corresponds to different elapsed durations across sources.
+Duration-matched comparisons are a separate control for cross-source transfer.
 
-A run is fully specified by its configuration, so every arm of \sref{sec:exp}
-reduces to one command. A structured base configuration holds every default, a
-data recipe file adds the sources with their hours, cameras, bindings, and
-weights, a model preset selects the coupling, and one experiment file per arm
-overlays the remainder; command-line overrides address any field by its dotted
-path. The resolved configuration, the commit, and the data fingerprint are
-written next to the weights, so the arm that produced a number is recoverable
-from that number alone.
+\textbf{Noise sampling and weighting.}
+For a uniform random variable $u$ and shift $r$, the implemented level is $\tau=ru/(1+(r-1)u)$. The
+world and action shifts are 5 in the archived runs; the independent consequence draw uses the action
+shift. The bell-shaped weight is proportional to $\exp[-2(\tau-1/2)^2]-\exp(-1/2)$, normalized by
+its mean under the shifted sampling distribution. World, action, and consequence levels are
+independent during training. The default sampling path decreases all three levels together with 10
+Euler steps. Current training uses no additional probability mass on clamped boundary conditions. A
+boundary-mixture comparison is planned independently of the primary coupling comparison.
 
-Three properties keep the arms comparable. The coupling axis changes one
-attention mask and one stop-gradient, so its arms are parameter-matched without
-further care. The cache key includes the source, the canvas, the window, the
-normalisation, the codec, and the consequence layout, so an arm that changes any
-of those rebuilds its cache, which keeps every arm bound to its own
-preprocessing. Evaluation runs against a published checkpoint directory through
-a standard client protocol, so the analysis code and the benchmark clients stay
-independent of the training code.
+\textbf{Completed adaptation and active pretraining.}
+The completed LIBERO run uses 20,000 optimizer updates, batch 16 per device on four H200
+accelerators, one accumulation step, and seed 0. World and agent learning rates both start at 0.0001
+with 1,000 warmup updates and cosine decay to 0.01 of the peak. The foundation run uses the settings
+in Section~\ref{sec:experiments}, with a warmup--stable--decay schedule ending at 0.05 of the peak.
+Training uses bfloat16 computation, float32 gradient reduction, and activation checkpointing.
+Foundation training uses hybrid sharding across two nodes of four accelerators. The video backbone
+is initialized from released video weights; embodied foundation training is performed within JAM.
+
+The archived foundation configuration contains DROID, Bridge, and full EgoDex from its first
+optimizer update. An earlier robot-only stage pointer was replaced before training began.
+Checkpoints are saved every 300 updates. The first retained milestone release is at update 5,100,
+and the archived log extends to \FoundationSteps{}. The intended downstream launch point is the
+15,000-update foundation milestone. These milestones describe training duration rather than
+completed scaling comparisons. The completed LIBERO adaptation has 401 logged points; its
+final-window summary averages the last 10\% of those points. A zero consequence loss in a robot-only
+microbatch indicates absent supervision, so foundation summaries condition on the recorded
+supervised fraction.
+
+\subsection{Controls required by the scientific question}
+\label{app:controls}
+\textbf{Separating information and gradients.}
+World-only pretraining supervises future video. Action-only pretraining supervises commands.
+Independent multitask pretraining supervises both with separate generated-stream computations.
+Auxiliary supervision reads detached world features. The attached one-way arm uses the same
+visibility while allowing action gradients through world keys and values. Reciprocal JAM
+additionally exposes agent keys and values to world queries. Each pretraining arm receives the same
+source sequence and then the same downstream adaptation procedure. Direct adaptation from public
+video weights supplies the separate baseline for the value of embodied pretraining.
+
+Strict isolation of coupling requires identical clean conditions in every arm. In the audited
+implementation, disabling agent visibility also removes the state token from the world stream's
+attention. The existing visibility switches therefore change both generated-token exchange and part
+of the conditioning interface. The planned comparison routes equivalent static state and
+current-observation information to every arm before interpreting a performance difference as an
+effect of coupling. The paper's target table describes this stricter protocol, whose results remain
+awaiting measurement. It does not treat the existing switches as an already completed controlled
+experiment.
+
+\textbf{Representation probes and interventions.}
+A world probe freezes the pretrained parameters and reads the same selected layer and pooling rule
+in every arm. Generated action and consequence tokens are fully corrupted during feature extraction;
+their clean targets are used only to train or evaluate the probe on separate episodes. A linear
+probe tests accessible information, while a capacity-matched nonlinear probe checks dependence on
+readout capacity. Observation-only and shuffled-label predictors provide reference levels. World
+features are compared at fixed noise levels and matched visible context.
+
+Action shuffling tests sensitivity to the action input. Counterfactual prediction additionally
+requires a target future obtained by executing the alternative action from the same simulator state.
+The intervention protocol therefore saves a reset state, executes each admissible command sequence,
+and scores each generated future against its matching rollout. Corruption tests vary timing and
+command magnitude within valid control limits. This distinguishes sensitivity from correct
+prediction of an intervention.
+
+Consequence conditioning compares commands alone, observed consequences alone, and both together on
+the same test windows. Predicted consequences form a separate condition that retains their model
+error. The resulting gap measures the cost of prediction and any distribution shift at the
+conditioning interface. A held-out-embodiment study excludes the target platform from pretraining
+and fixes its downstream demonstration budget. Camera configuration, temporal duration, and
+available keypoint groups accompany each result.
+
+\textbf{Conditional sampling checks.}
+Every conditional use specifies all generated variables. For action-conditioned world generation, an
+unobserved consequence stream remains latent and must be denoised on its own schedule. The audited
+action-clamped sampler couples its default consequence schedule to the action schedule; supplying
+only actions can therefore leave an initialized consequence latent unchanged. Conditional benchmark
+measurements require this behavior to be resolved or all clamped variables to be supplied
+explicitly. The manuscript consequently treats policy sampling as the primary implementation and
+conditional comparisons as pending validation. Independent training levels define the corruption
+family; each deployment sampler still requires its own correctness and fidelity check.
+
+\input{Tables/scale_controls}
+\FloatBarrier
+
+\subsection{Evidence boundaries and failure analysis}
+\label{app:evidence}
+The evidence package contains the completed adaptation log, its result summary, a fixed prefix of
+the ongoing foundation log, and sanitized resolved configurations. The public manifest records
+source paths, file hashes, the audit revision, and the status of each artifact. Local asset paths
+are replaced by logical references in the published configurations; original-file hashes preserve
+the connection to the inspected source. These configuration snapshots document the runs and are not
+standalone launch configurations.
+
+The LIBERO closed-loop evaluation was interrupted before a complete suite result file was produced.
+Partial rollout videos therefore contribute neither success rates nor selected qualitative evidence
+to the paper. Foundation transfer, coupling ablations, and consequence probes await completed runs.
+External reference results retain their own provenance and evaluation scope. The planned tables and
+scaling figure use design values inherited or extended from the working manuscript; they are layout
+targets rather than preregistered outcomes or model predictions.
+
+The data audit identified extreme displacement labels in a subset of human-video windows. A
+subsequently added displacement mask is configured to reject values beyond magnitude 8; the first
+archived training segment precedes activation of this correction. Its losses retain the original
+label distribution. Evaluating the filter requires a separately identified segment and comparison.
+This example motivates tracking label confidence and projection failure alongside prediction error.
+Camera motion, occlusion, and the mismatch between observed and predicted consequence distributions
+are additional failure settings in the evaluation design.
+
+\subsection{External reference results}
+\label{app:reference}
+Table~\ref{tab:reference} reorganizes source-reported results around the capabilities they evaluate.
+The linked source identifies the external method and retains its original table entries. R1 is a
+provenance identifier used to distinguish that system from JAM; the artifact includes an immutable
+source URL and an exact source pointer for every copied row.
+\input{Tables/reference}
+\FloatBarrier
+
+\subsection{Reproduction and experiment ledger}
+Measured logs, external references, and layout targets occupy separate artifact files. The README gives the complete build procedure. The commands \texttt{python3} \path{scripts/build_artifacts.py} and \texttt{python3} \path{scripts/validate.py} regenerate the numerical displays and check evidence consistency, respectively.
+
+The protocol ledger links each scientific question to inspected source configurations and required
+result artifacts. It identifies controls that still require implementation changes. Promoting a
+target to a measurement requires its result file, checkpoint, evaluation manifest, and aggregation
+command; the corresponding scientific claim is then reviewed against that evidence.

@@ -1,55 +1,28 @@
 \section{Related Work}
-\label{sec:related}
+\textbf{Video priors for embodied learning.}
+Video generation learns temporal structure from visual data \citep{wan}. UniPi uses generated videos
+as plans from which actions are recovered \citep{unipi}. Cosmos Policy incorporates actions, future
+observations, and values into a pretrained video model through latent frames \citep{cosmos}. These
+approaches establish practical routes from generative priors to control. JAM focuses on how action
+learning influences the video representation during embodied pretraining, with explicit controls
+over the connections carrying information and gradients.
 
-\Paragraph{World and video pretraining.}
-Denoising generative models made video synthesis a scalable sequence modelling
-problem \citep{ho2020ddpm,rombach2022ldm,esser2024sd3}, and open video
-generators such as the Wan family \citep{wan2025wan} now supply a transferable
-prior over scene dynamics. Robotics consumes that prior along two routes. The
-planning route generates a future observation and recovers a command from it
-with a separate inverse dynamics module or a goal-reaching controller
-\citep{du2023unipi,black2024susie,wu2024ivideogpt}. The pretrain-then-attach
-route trains on web video and then fine-tunes an action head on teleoperation
-data \citep{wu2024gr1,cheang2024gr2}. Latent world models compress dynamics into
-a learned transition function and plan inside it \citep{hafner2023dreamerv3}.
-Each route optimises a model of observation dynamics during pretraining, so the
-action that produced the observed change is marginalised out of the objective.
-\sys{} keeps the video prior and makes the action a generated variable of the
-pretraining objective itself, so the pretrained representation is shaped by the
-mapping from an action to its visual effect.
+\textbf{Joint action and world prediction.}
+Unified World Models (UWM) jointly diffuse actions and observations, sample their noise levels
+independently, and obtain policies and dynamics models through conditioning \citep{uwm}. JAM builds
+on this joint-distribution perspective and uses rectified-flow training
+\citep{flowmatching,rectifiedflow}. Its study centers on a pretrained video stream coupled
+throughout its depth to an agent stream. Separating visibility from gradient routing permits
+comparisons between reading world features and updating those features through action supervision.
+Conditional sampling provides an additional use of the learned distribution; the representation
+question motivates the experimental design.
 
-\Paragraph{Action-conditioned world modelling.}
-Conditioning a video model on an action sequence gives a simulator that scores a
-proposed command, and pairing it with a policy gives a planner. Joint diffusion
-over video and action moves closer to the present formulation by placing both
-quantities in one denoising process \citep{zhu2025uwm}. \sys{} differs in three
-respects that the experiments isolate. The two noise levels are drawn
-independently, so the training distribution covers a plane of noise-level pairs
-and the action-conditioned model, the inverse dynamics model, and the policy
-become three paths through one trained network rather than three training
-recipes. The exchange between streams happens at every backbone layer inside one
-shared attention space and carries gradient in both directions, so the action
-objective shapes the world representation as well as reading it. Coupling is exposed as an axis with declared
-degrees of freedom, which distinguishes joint modelling from an auxiliary action
-prediction task attached to a frozen trunk under matched parameters and data.
-
-\Paragraph{Action representation for embodied learning.}
-Vision-language-action policies attach an action decoder to a pretrained
-backbone and supervise it on demonstrations, using autoregressive action tokens
-\citep{brohan2023rt2,kim2024openvla}, flow-matching action experts
-\citep{black2024pi0,intelligence2025pi05,bjorck2025groot,liu2025rdt}, or action
-chunking \citep{chi2023diffusionpolicy,zhao2023act,octo2024}. Training one such
-policy across many platforms requires a shared action interface, and large
-cross-embodiment corpora make that interface a practical necessity
-\citep{oxe2024,khazatsky2024droid,agibot2025}. Motor commands remain
-embodiment-specific even after such an interface is imposed, which motivates
-representations defined directly in the image: point trajectories predicted from
-video supply an embodiment-independent intermediate for policy learning
-\citep{wen2024atm,bharadhwaj2024track2act}, and modern trackers make such labels
-cheap to produce at scale \citep{doersch2023tapir,karaev2024cotracker}. Latent
-action pretraining takes the complementary route of inferring pseudo-commands
-from unlabelled video \citep{ye2025lapa}. \sys{} places both levels inside one
-joint process: the command stream carries the platform-specific control signal,
-and the consequence stream carries the displacement that the command produces in
-the image, which supplies grounding on egocentric human footage and gives a
-probe of representation content that transfers across embodiments.
+\textbf{Action representations across embodiments.}
+Robot policy pretraining aligns observations and language with commands across datasets and
+platforms \citep{openvla,droid,bridge}. Visual trajectories offer another interface to interaction:
+Any-point Trajectory Modeling learns motion representations for policies, and Track2Act converts
+predicted point tracks into executable motion \citep{atm,track2act}. EgoDex supplies human
+manipulation video with tracked hand poses \citep{egodex}. JAM incorporates image-space consequences
+into its joint generative objective, alongside motor commands where available. The corresponding
+experiments examine command--consequence complementarity and transfer across embodiments under
+explicitly matched observation and annotation conditions.

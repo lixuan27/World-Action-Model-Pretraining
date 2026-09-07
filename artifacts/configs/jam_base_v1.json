@@ -1,0 +1,243 @@
+{
+  "include": [],
+  "run": {
+    "name": "jam_base_v1",
+    "out_root": "runs",
+    "results_root": "results",
+    "notes": "foundation pretraining, recipe v1 (DROID + Bridge + EgoDex); WSD schedule for staged data"
+  },
+  "data": {
+    "layout": "bimanual_80",
+    "window": {
+      "frames": 9,
+      "frame_stride": 4,
+      "action_steps": 32,
+      "train_start_stride": 4,
+      "min_valid_actions": 1
+    },
+    "canvases": {
+      "libero_2cam": {
+        "height": 384,
+        "width": 256,
+        "slots": [
+          {
+            "camera": "head",
+            "row": 0,
+            "col": 0,
+            "height": 256,
+            "width": 256
+          },
+          {
+            "camera": "wrist",
+            "row": 256,
+            "col": 0,
+            "height": 128,
+            "width": 128
+          }
+        ],
+        "background": 0
+      },
+      "bimanual_3cam": {
+        "height": 384,
+        "width": 320,
+        "slots": [
+          {
+            "camera": "head",
+            "row": 0,
+            "col": 0,
+            "height": 256,
+            "width": 320
+          },
+          {
+            "camera": "left_wrist",
+            "row": 256,
+            "col": 0,
+            "height": 128,
+            "width": 160
+          },
+          {
+            "camera": "right_wrist",
+            "row": 256,
+            "col": 160,
+            "height": 128,
+            "width": 160
+          }
+        ],
+        "background": 0
+      }
+    },
+    "sources": [
+      {
+        "name": "droid",
+        "kind": "droid_lerobot",
+        "root": "LOCAL_ASSET/dreamzero_droid",
+        "binding": "single_arm_pose10",
+        "embodiment": "franka_panda",
+        "cameras": {
+          "head": "exterior_image_1_left",
+          "left_wrist": "wrist_image_left",
+          "right_wrist": "exterior_image_2_left"
+        },
+        "canvas": "bimanual_3cam",
+        "split": "train",
+        "normalization": "quantile",
+        "stats_path": "LOCAL_ASSET/droid.json",
+        "hours_budget": null,
+        "weight": null,
+        "has_actions": true,
+        "consequence_path": "",
+        "fps": 15.0,
+        "extra": {
+          "require_language": true,
+          "start_stride": 8
+        }
+      },
+      {
+        "name": "bridge",
+        "kind": "bridge_lerobot",
+        "root": "LOCAL_ASSET/bridge_orig_lerobot",
+        "binding": "single_arm_pose10",
+        "embodiment": "widowx_250",
+        "cameras": {
+          "head": "image_0"
+        },
+        "canvas": "libero_2cam",
+        "split": "train",
+        "normalization": "quantile",
+        "stats_path": "LOCAL_ASSET/bridge.json",
+        "hours_budget": null,
+        "weight": null,
+        "has_actions": true,
+        "consequence_path": "",
+        "fps": 5.0,
+        "extra": {
+          "start_stride": 4
+        }
+      },
+      {
+        "name": "egodex",
+        "kind": "egodex_rlds",
+        "root": "LOCAL_ASSET/egodex_rlds",
+        "binding": "single_arm_pose10",
+        "embodiment": "human_hands",
+        "cameras": {
+          "head": "image"
+        },
+        "canvas": "libero_2cam",
+        "split": "train",
+        "normalization": "none",
+        "stats_path": "",
+        "hours_budget": null,
+        "weight": null,
+        "has_actions": false,
+        "consequence_path": "",
+        "fps": 30.0,
+        "extra": {
+          "consequence_layout": "egodex_14",
+          "parts": [
+            "part1",
+            "part2",
+            "part3",
+            "part4",
+            "part5"
+          ],
+          "shards_per_part": 1024,
+          "start_stride": 32,
+          "index_path": "LOCAL_ASSET/egodex_train.jsonl",
+          "episode_stride": 1
+        }
+      }
+    ],
+    "mixture_temperature": 0.7,
+    "cache_root": "LOCAL_ASSET/cache",
+    "use_cache": true,
+    "num_workers": 8,
+    "prefetch_factor": 4,
+    "consequence_slots": 48,
+    "holdout_mod": 10,
+    "consequence_horizon": 16
+  },
+  "model": {
+    "world": {
+      "backbone_path": "LOCAL_ASSET/Wan2.2-TI2V-5B-Diffusers",
+      "pretrained": true,
+      "self_mask": "clean_prefix_causal",
+      "dtype": "bfloat16",
+      "tiny": null
+    },
+    "agent": {
+      "width": 1024,
+      "layers": 30,
+      "ffn_mult": 4,
+      "zero_init_heads": true
+    },
+    "coupling": {
+      "visibility": "bidirectional",
+      "detach_world_kv": false,
+      "layers": null,
+      "consequence_visibility": null
+    },
+    "gradient_checkpointing": true,
+    "clean_frames": 1
+  },
+  "train": {
+    "steps": 60000,
+    "batch_size": 16,
+    "grad_accum": 4,
+    "seed": 0,
+    "log_every": 50,
+    "save_every": 300,
+    "keep_last": 2,
+    "milestones": [
+      5000,
+      15000,
+      30000,
+      45000,
+      60000
+    ],
+    "ema_decay": null,
+    "fsdp": true,
+    "fsdp_strategy": "hybrid",
+    "fsdp_reduce_dtype": "fp32",
+    "compile": false,
+    "resume": "auto",
+    "init_from": "",
+    "freeze_world": false,
+    "optim": {
+      "lr": 5e-05,
+      "lr_agent": 0.0001,
+      "betas": [
+        0.9,
+        0.95
+      ],
+      "weight_decay": 0.01,
+      "grad_clip": 1.0,
+      "warmup_steps": 1500,
+      "schedule": "wsd",
+      "min_lr_ratio": 0.05,
+      "decay_steps": 6000
+    },
+    "objective": {
+      "lambda_world": 1.0,
+      "lambda_action": 1.0,
+      "lambda_consequence": 1.0,
+      "world_shift": 5.0,
+      "action_shift": 5.0,
+      "weighting": "bell",
+      "plane_mode": "independent",
+      "p_boundary": 0.0,
+      "consequence_level": "independent"
+    },
+    "wandb_project": "jam",
+    "wandb": true
+  },
+  "infer": {
+    "steps": 10,
+    "path": "diagonal",
+    "seed": 0,
+    "execute_steps": null,
+    "checkpoint": "",
+    "binding": "",
+    "ema": true
+  }
+}

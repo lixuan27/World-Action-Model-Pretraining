@@ -1,0 +1,29 @@
+{
+ "run": "e0_libero_bi",
+ "steps": 20000,
+ "n_log_points": 401,
+ "loss/world": {
+  "final_mean_last10pct": 0.057327618915587665,
+  "min_smoothed": 0.05583726343576166,
+  "first": 0.42211732268333435
+ },
+ "loss/action": {
+  "final_mean_last10pct": 0.010755737428553402,
+  "min_smoothed": 0.01074514462953345,
+  "first": 1.3281980752944946
+ },
+ "loss/consequence": {
+  "final_mean_last10pct": 0.030456380918622017,
+  "min_smoothed": 0.03005740110107278,
+  "first": 1.7037804126739502
+ },
+ "loss/total": {
+  "final_mean_last10pct": 0.09853973742574454,
+  "min_smoothed": 0.09855509558768483,
+  "first": 3.4540958404541016
+ },
+ "samples_per_s_median": 60.56287180837618,
+ "grad_norm_median": 0.26004698872566223,
+ "peak_mem_gb": 43.698940416,
+ "curves_png": "results/e0_libero_bi/train_curves.png"
+}

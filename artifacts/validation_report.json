@@ -1,0 +1,22 @@
+{
+  "compiler": "Tectonic 0.17.0",
+  "command": "tectonic -X compile main.tex --keep-logs --keep-intermediates",
+  "pages": 13,
+  "main_sections": 6,
+  "introduction_paragraphs": 5,
+  "related_work_paragraphs": 3,
+  "figures": 4,
+  "tables": 9,
+  "bibliography_entries": 19,
+  "unique_labels": 25,
+  "undefined_references": 0,
+  "undefined_citations": 0,
+  "overfull_boxes": 0,
+  "missing_glyph_warnings": 0,
+  "external_reference_source_hash_verified": true,
+  "external_row_pointers_verified": 14,
+  "measurement_hashes_verified": true,
+  "training_summary_recomputed_from_log": true,
+  "visual_review": "All pages rendered and inspected; framework labels, final-page spill, command wrapping and bibliography overflow corrected.",
+  "pdf_sha256": "144a508c702b404532def149b7d01d1b40b9ca4997e30b591635bac3b81f7096"
+}

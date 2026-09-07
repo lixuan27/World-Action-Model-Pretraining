@@ -1,72 +1,40 @@
 \section{Introduction}
-\label{sec:intro}
+Video models learn regularities in appearance, motion, and scene evolution from visual sequences.
+These regularities provide useful starting points for embodied learning: a robot must anticipate how
+objects move, how contact changes a scene, and which futures are consistent with its observations.
+Recent work transfers video generation to control by extracting actions from imagined trajectories
+or adapting video models to generate actions directly \citep{unipi,cosmos}. This progress motivates
+a question about the pretraining process itself: \emph{how should learning to act influence the
+representation used to predict the world?}
 
-Large-scale video pretraining has become the standard way to give an embodied
-agent prior knowledge about the physical world. A video generative model learns
-the statistics of how scenes evolve, so it acquires object permanence, contact
-events, and the temporal regularity of everyday manipulation from footage that
-needs no action annotation. Robot learning takes that prior in two ways. One way
-generates a future observation and recovers a control command from it with a
-separate module. The other way attaches an action decoder to the pretrained
-backbone and fine-tunes both on teleoperation data. Both ways treat the
-pretraining stage as a model of observation dynamics, which is a model of what
-usually happens next in the world.
+A manipulation video records an interaction through its visible outcome. Robot demonstrations
+additionally record the commands that accompanied it. These two descriptions constrain each other.
+The same scene can evolve differently under different commands, and a desired change in the scene
+can admit several feasible actions. A representation for embodied interaction should preserve these
+dependencies. Action grounding, in this work, refers to the extent to which a world representation
+retains information useful for relating commands to their visual consequences. We examine this
+property through prediction, controlled changes to the inputs, and transfer to new conditions.
 
-Embodied interaction places a further requirement on that prior. An agent has to
-know how its own actions participate in the evolution it observes, because
-control requires selecting among the futures the agent can actually bring about.
-A model of observation dynamics marginalises the causal variable it needs, since
-the actions that produced the training footage are integrated out. The resulting
-representation supports prediction of the likely future and leaves the mapping
-from an intervention to its visual effect unconstrained. This is the gap the
-paper addresses, and we refer to closing it as action grounding, meaning that the
-pretrained representation encodes how actions constrain and produce changes in
-the world rather than encoding the changes alone.
+We introduce JAM, Joint Action--World Modeling, as a way to expose the world representation to
+action supervision during pretraining. JAM generates actions and future observations within a shared
+denoising computation. A pretrained video stream and an agent stream exchange information throughout
+their depth. Their attention connections also carry gradients, so learning to predict actions can
+update the features used for world prediction. The central hypothesis is that this reciprocal
+computation encourages a representation of interaction that remains useful when the environment or
+task changes. The model makes this hypothesis experimentally accessible through separate controls
+over information visibility and gradient flow.
 
-We formulate action grounding as a joint generative problem and call the
-formulation Joint Action-World Modeling, abbreviated \sys{}. A single continuous
-flow-matching process generates the future observation and the future action
-chunk together, and the two token streams exchange information through one
-shared attention space at every layer of the backbone. Two properties make this a
-pretraining principle rather than an added prediction head. The two streams carry
-independently drawn noise levels, so the training distribution covers a whole
-plane of noise-level pairs and every monotone path through that plane is a valid
-sampler of the trained model; one model therefore instantiates a policy, an
-action-conditioned world model, and an inverse dynamics model as three
-conditional slices of the same learned distribution. The exchange is
-bidirectional and carries gradient in both directions, so the action objective
-shapes the world representation as well as reading it. Those two properties turn coupling into a
-single experimental axis with three degrees of freedom, namely cross-stream
-visibility, gradient flow, and coupling depth, and the axis separates joint
-modelling from an auxiliary action head under matched parameters, data, and
-optimisation.
+The relationship between commands and visible change also offers a route to human video. A motor
+command is specific to an embodiment and its controller. A visual action consequence describes where
+tracked points move in the image and whether they remain observable. JAM represents these
+consequences as generated tokens within the agent stream. Robot and human demonstrations can
+therefore supervise a common motion interface while retaining their own available annotations. This
+construction also provides a diagnostic: consequence prediction tests which aspects of interaction
+are accessible from the learned world representation.
 
-The formulation extends one step further, from the command an agent issues to the
-change that command produces. A motor command specifies how the actuators move
-and leaves the resulting change in the world implicit. The consequence of an
-action, defined here as the displacement of a set of world keypoints over the
-next few control steps together with their observability, specifies the change
-directly in image coordinates. Consequence supervision therefore reaches data
-that carries no action label, because egocentric human footage shows the effect
-of a manipulation even when the underlying commands are unavailable. Consequence
-also gives a probe of representation content that does not depend on the action
-space of any single embodiment, so the same measurement applies across robots
-with different kinematics. We treat consequence as a third generated stream
-inside the same joint process, which keeps one formulation, one objective, and
-one model tree.
-
-This paper delivers the formulation, its implementation, the pretraining corpus
-that mixes robot trajectories with egocentric human footage, and a
-pre-registered measurement programme built around one question: whether
-structurally coupling action generation to world generation changes measurable
-properties of the world representation, and whether those changes explain
-downstream control behaviour. The programme declares its floors, its criteria,
-and the conditions under which the coupling stops paying, so a negative outcome
-is recorded rather than absorbed. Published policies supply the external
-comparison on each of the nine benchmarks the study uses, and every value the
-programme still has to measure is marked as a target in the text and in the
-source. \sref{sec:joint} develops the
-formulation and the measurement instruments it implies. \sref{sec:pretrain}
-gives the realisation, the interfaces that let heterogeneous sources enter one
-objective, and the pretraining procedure. \sref{sec:exp} states the programme
-and its result tables.
+Our study follows the influence of action supervision from the training computation to its
+downstream use. We first formulate the joint prediction problem and explain how the streams
+interact. We then describe pretraining with heterogeneous supervision and adaptation for control.
+The experiments connect optimization evidence to controlled tests of coupling, data composition, and
+transfer. Together, this organization asks when learning actions and visual consequences changes
+what a world model represents, and how that change can be measured.

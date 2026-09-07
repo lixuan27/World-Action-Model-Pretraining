@@ -1,0 +1,17 @@
+% PLANNED-VALUE: every JAM score in this table is a layout target.
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lrr}
+\toprule
+Diagnostic & Comparison A & Comparison B \\
+\midrule
+World action probe, R-squared & \target{0.4} & \target{0.52} \\
+World consequence probe, ADE & \target{0.12} & \target{0.08} \\
+Paired action intervention, ADE & \target{0.18} & \target{0.1} \\
+World prediction, perceptual distance & \target{0.24} & \target{0.2} \\
+Predicted-consequence condition, ADE & \target{0.1} & \target{0.13} \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Which interaction information is represented?} Layout targets. Rows 1--3 compare detached auxiliary supervision (A) with reciprocal coupling (B). Row 4 compares action conditioning (A) with action plus observed consequence conditioning (B). Row 5 compares observed (A) with predicted (B) consequences, retaining a possible degradation in the planned display. ADE denotes average displacement error. Probes fully corrupt generated inputs; interventions pair alternative commands with simulator rollouts from the same initial state. \targetnote}
+\label{tab:mechanism}
+\end{table}

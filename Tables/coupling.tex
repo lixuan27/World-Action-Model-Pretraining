@@ -1,0 +1,18 @@
+% PLANNED-VALUE: every JAM score in this table is a layout target.
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lrrr}
+\toprule
+Pretraining computation & LIBERO & LIBERO-Plus & Action probe \\
+\midrule
+World-only pretraining & \target{94.0} & \target{42.0} & \target{0.3} \\
+Action-only pretraining & \target{95.0} & \target{45.0} & \target{0.32} \\
+Independent multitask & \target{96.1} & \target{47.6} & \target{0.38} \\
+Auxiliary, detached world features & \target{96.8} & \target{49.4} & \target{0.4} \\
+World-to-agent, attached & \target{97.0} & \target{51.7} & \target{0.46} \\
+JAM, reciprocal and attached & \target{97.2} & \target{53.8} & \target{0.52} \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{What does reciprocal learning add?} Planned comparison after the same downstream adaptation. The first two columns are success percentages; the probe reports R-squared. All arms receive matched clean conditions and data. Auxiliary supervision reads detached world features; the attached one-way arm permits action gradients into the world stream. Reciprocal coupling adds agent information to world queries. Appendix~\ref{app:controls} specifies the condition-matching requirement. \targetnote}
+\label{tab:coupling}
+\end{table}

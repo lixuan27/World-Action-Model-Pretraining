@@ -1,0 +1,17 @@
+% PLANNED-VALUE: every JAM score in this table is a layout target.
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lrrrr}
+\toprule
+Initialization & LIBERO & RoboTwin & VLABench & RoboCasa365 \\
+\midrule
+\multicolumn{5}{l}{\emph{External results, verbatim from R1; source protocols}} \\
+R1 & 99.3 & 93.60 & 58.9 & 38.2 \\
+\midrule\multicolumn{5}{l}{\emph{Planned paired comparison; JAM values are layout targets}} \\
+Direct adaptation & \target{97.2} & \target{74.5} & \target{24.8} & \target{12.4} \\
+JAM pretraining + adaptation & \target{99.4} & \target{94.6} & \target{59.8} & \target{39.6} \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Does embodied pretraining improve downstream control?} Success percentages. The R1 row reproduces the source averages of \refsource{} exactly; these are measurements of that external system. JAM rows are planned layout targets. The external RoboCasa365 value is a full source average, whereas the current JAM protocol targets 50 tasks; protocol alignment is required for a direct comparison. The reference row therefore supplies context rather than a matched ranking. \targetnote}
+\label{tab:main}
+\end{table}

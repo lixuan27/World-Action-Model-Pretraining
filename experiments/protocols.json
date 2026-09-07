@@ -1,0 +1,380 @@
+{
+  "snapshot": "2026-09-07",
+  "source_project": "/public/home/lixuan/lixuan/JAM",
+  "experiments": [
+    {
+      "id": "optimization",
+      "question": "Does the implementation optimize world, action, and consequence prediction together?",
+      "status": "measured_training",
+      "source_configs": [
+        "configs/experiments/e0_libero_bi.yaml"
+      ],
+      "published_artifacts": [
+        "artifacts/measurements/e0_libero_bi.jsonl",
+        "artifacts/measurements/e0_libero_bi_summary.json"
+      ],
+      "pending_requirements": [],
+      "paper_reproduction_command": "python3 scripts/build_artifacts.py",
+      "launch_status": "reference_only; cluster launch parameters belong to source project and require its current resource policy",
+      "completion_evidence": [
+        "resolved config and source revision",
+        "checkpoint identity",
+        "log and result artifact",
+        "training summary"
+      ],
+      "source_training_arguments": [
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e0_libero_bi.yaml"
+        ]
+      ]
+    },
+    {
+      "id": "foundation",
+      "question": "What is learned as embodied pretraining proceeds?",
+      "status": "running",
+      "source_configs": [
+        "configs/experiments/jam_base_v1.yaml"
+      ],
+      "published_artifacts": [
+        "artifacts/measurements/jam_base_v1.jsonl"
+      ],
+      "pending_requirements": [
+        "Complete foundation training; archive each recipe segment and milestone hash."
+      ],
+      "paper_reproduction_command": "python3 scripts/build_artifacts.py",
+      "launch_status": "reference_only; cluster launch parameters belong to source project and require its current resource policy",
+      "completion_evidence": [
+        "resolved config and source revision",
+        "checkpoint identity",
+        "log and result artifact",
+        "evaluation protocol and per-episode records"
+      ],
+      "source_training_arguments": [
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/jam_base_v1.yaml"
+        ]
+      ]
+    },
+    {
+      "id": "downstream",
+      "question": "Does foundation initialization improve matched downstream control?",
+      "status": "planned",
+      "source_configs": [
+        "configs/experiments/e0_libero_bi.yaml",
+        "configs/experiments/post_libero_base_v1.yaml",
+        "configs/experiments/e0_robotwin_full_bi.yaml",
+        "configs/experiments/post_robotwin_full_base_v1.yaml",
+        "configs/experiments/e0_vlabench_bi.yaml",
+        "configs/experiments/post_vlabench_base_v1.yaml",
+        "configs/experiments/e0_robocasa_bi.yaml",
+        "configs/experiments/post_robocasa_base_v1.yaml"
+      ],
+      "published_artifacts": [],
+      "pending_requirements": [
+        "Foundation milestone release",
+        "Three training seeds and pinned task/reset manifests",
+        "Completed per-episode closed-loop results",
+        "Align subset and full-suite protocols before comparison to external references"
+      ],
+      "paper_reproduction_command": "python3 scripts/build_artifacts.py",
+      "launch_status": "reference_only; cluster launch parameters belong to source project and require its current resource policy",
+      "completion_evidence": [
+        "resolved config and source revision",
+        "checkpoint identity",
+        "log and result artifact",
+        "evaluation protocol and per-episode records"
+      ],
+      "source_training_arguments": [
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e0_libero_bi.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/post_libero_base_v1.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e0_robotwin_full_bi.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/post_robotwin_full_base_v1.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e0_vlabench_bi.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/post_vlabench_base_v1.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e0_robocasa_bi.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/post_robocasa_base_v1.yaml"
+        ]
+      ]
+    },
+    {
+      "id": "coupling",
+      "question": "Which information and gradient routes change world representation?",
+      "status": "planned",
+      "source_configs": [
+        "configs/experiments/e1_libero_passive.yaml",
+        "configs/experiments/e1_libero_passive_policy.yaml",
+        "configs/experiments/e2_libero_none.yaml",
+        "configs/experiments/e2_libero_w2a_detach.yaml",
+        "configs/experiments/e2_libero_w2a.yaml",
+        "configs/experiments/e2_libero_bi.yaml"
+      ],
+      "published_artifacts": [],
+      "pending_requirements": [
+        "Condition-matched static state route in all arms",
+        "Action-only control configuration and verified implementation",
+        "Match pretraining phase and downstream adaptation across arms",
+        "Frozen generated-input-corrupted probes",
+        "Record parameter and update budgets"
+      ],
+      "paper_reproduction_command": "python3 scripts/build_artifacts.py",
+      "launch_status": "reference_only; cluster launch parameters belong to source project and require its current resource policy",
+      "completion_evidence": [
+        "resolved config and source revision",
+        "checkpoint identity",
+        "log and result artifact",
+        "evaluation protocol and per-episode records"
+      ],
+      "source_training_arguments": [
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e1_libero_passive.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e1_libero_passive_policy.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e2_libero_none.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e2_libero_w2a_detach.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e2_libero_w2a.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e2_libero_bi.yaml"
+        ]
+      ]
+    },
+    {
+      "id": "composition",
+      "question": "What does human consequence supervision add at fixed robot exposure?",
+      "status": "planned",
+      "source_configs": [
+        "configs/experiments/e4_pretrain_v1_robot_only.yaml",
+        "configs/experiments/e4_pretrain_v1_ego_video.yaml",
+        "configs/experiments/e4_pretrain_v1_ego_consequence.yaml"
+      ],
+      "published_artifacts": [],
+      "pending_requirements": [
+        "Match robot exposure; also run compute-matched pairs",
+        "Consequences masked in human-video control",
+        "Hold source subsets and temporal durations fixed"
+      ],
+      "paper_reproduction_command": "python3 scripts/build_artifacts.py",
+      "launch_status": "reference_only; cluster launch parameters belong to source project and require its current resource policy",
+      "completion_evidence": [
+        "resolved config and source revision",
+        "checkpoint identity",
+        "log and result artifact",
+        "evaluation protocol and per-episode records"
+      ],
+      "source_training_arguments": [
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e4_pretrain_v1_robot_only.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e4_pretrain_v1_ego_video.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e4_pretrain_v1_ego_consequence.yaml"
+        ]
+      ]
+    },
+    {
+      "id": "scaling",
+      "question": "How do unique data, updates, and agent capacity affect transfer?",
+      "status": "planned",
+      "source_configs": [
+        "configs/experiments/jam_base_v1.yaml"
+      ],
+      "published_artifacts": [],
+      "pending_requirements": [
+        "Episode-stratified fractions 1/8,1/4,1/2,1 at fixed updates",
+        "Independent checkpoint-duration sweep at full corpus",
+        "Capacity sweep requires dedicated geometry-compatible configs",
+        "Action annotation density 25/50/100 percent at fixed corpus",
+        "Target figure is an illustration of layout, not an extrapolation"
+      ],
+      "paper_reproduction_command": "python3 scripts/build_artifacts.py",
+      "launch_status": "reference_only; cluster launch parameters belong to source project and require its current resource policy",
+      "completion_evidence": [
+        "resolved config and source revision",
+        "checkpoint identity",
+        "log and result artifact",
+        "evaluation protocol and per-episode records"
+      ],
+      "source_training_arguments": [
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/jam_base_v1.yaml"
+        ]
+      ]
+    },
+    {
+      "id": "ood",
+      "question": "Which shifts preserve the benefit of pretraining?",
+      "status": "planned",
+      "source_configs": [
+        "configs/experiments/post_libero_base_v1.yaml",
+        "configs/experiments/post_robotwin_full_base_v1.yaml",
+        "configs/experiments/post_vlabench_base_v1.yaml",
+        "configs/experiments/post_robocasa_base_v1.yaml"
+      ],
+      "published_artifacts": [],
+      "pending_requirements": [
+        "Official LIBERO-Plus full variant enumeration",
+        "LIBERO-PRO task/perturbation/reset manifest and official trial budget",
+        "Separate clean-only RoboTwin adaptation from Full training",
+        "Exclude a target embodiment before pretraining",
+        "Equal downstream demonstrations and paired resets"
+      ],
+      "paper_reproduction_command": "python3 scripts/build_artifacts.py",
+      "launch_status": "reference_only; cluster launch parameters belong to source project and require its current resource policy",
+      "completion_evidence": [
+        "resolved config and source revision",
+        "checkpoint identity",
+        "log and result artifact",
+        "evaluation protocol and per-episode records"
+      ],
+      "source_training_arguments": [
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/post_libero_base_v1.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/post_robotwin_full_base_v1.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/post_vlabench_base_v1.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/post_robocasa_base_v1.yaml"
+        ]
+      ]
+    },
+    {
+      "id": "mechanism",
+      "question": "Does the world representation encode actions and their visible consequences?",
+      "status": "planned",
+      "source_configs": [
+        "configs/experiments/e2_libero_w2a_detach.yaml",
+        "configs/experiments/e2_libero_bi.yaml"
+      ],
+      "published_artifacts": [],
+      "pending_requirements": [
+        "Frozen world probes with no clean action/consequence leakage",
+        "Matched simulator states and alternative-action ground truths",
+        "Conditioning study distinguishes observed and predicted consequences",
+        "Action-clamped sampler must independently integrate unobserved consequences",
+        "Document tracker/projection confidence and outlier-mask revision"
+      ],
+      "paper_reproduction_command": "python3 scripts/build_artifacts.py",
+      "launch_status": "reference_only; cluster launch parameters belong to source project and require its current resource policy",
+      "completion_evidence": [
+        "resolved config and source revision",
+        "checkpoint identity",
+        "log and result artifact",
+        "evaluation protocol and per-episode records"
+      ],
+      "source_training_arguments": [
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e2_libero_w2a_detach.yaml"
+        ],
+        [
+          "scripts/train.py",
+          "--config",
+          "configs/base.yaml",
+          "configs/experiments/e2_libero_bi.yaml"
+        ]
+      ]
+    }
+  ]
+}

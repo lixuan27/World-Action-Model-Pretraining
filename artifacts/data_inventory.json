@@ -1,0 +1,15 @@
+{
+  "status": "recorded_inventory",
+  "source": "docs/experiment_ledger.md, 2026-09-07 snapshot",
+  "source_counts": {
+    "droid": 1674648,
+    "bridge": 454690,
+    "egodex": 738550
+  },
+  "temperature": 0.7,
+  "probabilities": [
+    0.5088375336692232,
+    0.20428357352817195,
+    0.28687889280260487
+  ]
+}

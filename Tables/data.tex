@@ -1,0 +1,14 @@
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lrrl}
+\toprule
+Active source & Training windows & Sampling & Supervision \\
+\midrule
+DROID & 1,674,648 & 50.9\% & World + action \\
+BridgeData V2 & 454,690 & 20.4\% & World + action \\
+EgoDex & 738,550 & 28.7\% & World + consequence \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Which data contributes which signal?} Active cached windows after the episode holdout, as recorded in the project ledger. Probabilities apply temperature 0.7 to window counts; window duration follows each source\textquotesingle s native frame rate. The recipe is shared by the archived foundation-training segment. Additional acquired sources remain outside this table.}
+\label{tab:data}
+\end{table}

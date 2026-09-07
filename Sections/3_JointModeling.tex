@@ -1,432 +1,88 @@
-\section{Joint Action-World Modeling}
-\label{sec:joint}
+\section{Joint Action--World Modeling}
+\label{sec:method}
+The design starts from a simple requirement: action prediction and world prediction should be able
+to use and update each other's representations. A joint objective specifies which variables are
+generated. The attention structure determines how learning those variables interacts.
 
-\subsection{One Joint Distribution and Its Conditional Slices}
-\label{sec:slices}
+\subsection{The prediction problem}
+Let $o_0$ be the current observation, $\ell$ a language instruction, and $s$ the available
+proprioceptive state. We write $h=(o_0,\ell,s)$ for these conditions, with a learned null token for
+missing state. Let $z$ denote encoded future observations and $a$ a chunk of future motor actions.
+JAM models $p_\theta(z,a\mid h)$. When visual consequence labels $c$ are available, the same
+computation models $p_\theta(z,a,c\mid h)$. A fixed video autoencoder maps observations to latents;
+its decoder maps generated latents back to images. Action and consequence tokens preserve their
+respective control and image-space meanings.
 
-Write $o_0$ for the current observation, $\ell$ for the language instruction,
-$o_{1:T}$ for the future observations, and $a_{1:H}$ for the future action chunk.
-Three familiar model classes each learn a different distribution over these
-quantities, and \tref{tab:slices} places them side by side. A passive world
-model learns $p(o_{1:T}\mid o_0,\ell)$ and integrates the action out, so it
-describes what usually follows the current observation. A policy learns
-$p(a_{1:H}\mid o_0,\ell)$ and receives no explicit constraint from how the world
-responds. An action-conditioned world model learns
-$p(o_{1:T}\mid o_0,a_{1:H},\ell)$ and treats the action as an exogenous input
-that it evaluates rather than a variable it models.
-
-\sys{} learns the joint distribution
+For each generated modality $m\in\{w,a,c\}$, let $x^w=z$, $x^a=a$, and $x^c=c$. We draw independent
+standard Gaussian noise $\epsilon^m$ and a corruption level $\tau_m$ between clean and fully noisy.
+Rectified-flow training constructs
 \begin{equation}
-  p_\theta\!\left(o_{1:T},\, a_{1:H}\,\middle|\, o_0,\ell\right),
-  \label{eq:joint}
+ x^m_{\tau_m}=(1-\tau_m)x^m+\tau_m\epsilon^m,
+ \qquad u^m=\epsilon^m-x^m.
+ \label{eq:flow}
 \end{equation}
-and the three classes above are conditional or marginal slices of
-\eqref{eq:joint}. The paper studies what the joint objective changes about the
-learned representation, and the slices become the instruments of that study
-because each one is obtainable from a single trained network.
-
-\begin{table}[t]
-\centering
-\small
-\caption{Four modelling choices over the same variables. The action appears as a
-marginalised variable, as the only target, as an exogenous condition, and as a
-jointly generated variable. \sys{} occupies the last row and the three rows
-above it are slices of it.}
-\label{tab:slices}
-\adjustbox{max width=\linewidth}{%
-\begin{tabular}{@{}lll@{}}
-\toprule
-\textbf{Model class} & \textbf{Learned distribution} & \textbf{Status of the action} \\
-\midrule
-Passive world model & $p(o_{1:T}\mid o_0,\ell)$ & marginalised out of the objective \\
-Policy & $p(a_{1:H}\mid o_0,\ell)$ & the only target, unconstrained by world response \\
-Action-conditioned world model & $p(o_{1:T}\mid o_0,a_{1:H},\ell)$ & exogenous condition, evaluated but not generated \\
-\rowcolor{tabhl}
-\sys{} & $p(o_{1:T},a_{1:H}\mid o_0,\ell)$ & jointly generated variable \\
-\bottomrule
-\end{tabular}}
-\end{table}
-
-\subsection{Joint Flow Matching on the Action-World Noise Plane}
-\label{sec:plane}
-
-\Paragraph{Two streams, two noise levels.}
-\fref{fig:framework} draws the construction. A frozen video autoencoder maps
-the observation clip to a latent grid
-$z_0 \in \mathbb{R}^{C\times T\times h\times w}$ whose first temporal slice is
-the clean current observation. The action chunk $a_0 \in \mathbb{R}^{A\times D}$
-lives in the shared slot layout of \sref{sec:interfaces}. Both quantities are
-noised by the same rectified-flow interpolation
-\citep{lipman2023flowmatching,liu2023rectifiedflow}, and each carries its own
-noise level,
+Here $u^m$ is the target velocity along the interpolation from data to noise. The model predicts all
+available velocities from the corrupted modalities and the clean conditions:
 \begin{equation}
-  z_{\tw} = (1-\tw)\,z_0 + \tw\,\epsilon_w,
-  \qquad
-  a_{\ta} = (1-\ta)\,a_0 + \ta\,\epsilon_a,
-  \qquad
-  \epsilon_w,\epsilon_a \sim \mathcal{N}(0,I).
-  \label{eq:interp}
+ (v^w_\theta,v^a_\theta,v^c_\theta)
+ =F_\theta(z_{\tau_w},a_{\tau_a},c_{\tau_c};h,\tau_w,\tau_a,\tau_c).
+ \label{eq:prediction}
 \end{equation}
-Noise levels are drawn through the time warp
+The current configuration samples consequence corruption independently of action corruption. This
+keeps the confidence of the consequence input distinct from that of the motor input. The formulation
+follows independent-modality corruption in UWM \citep{uwm}; the coupling described below specifies
+how the pretrained representations participate.
+
+\input{Figures/framework}
+
+\subsection{Reciprocal computation across streams}
+The world stream retains a pretrained video transformer's latent embeddings, blocks, and output
+projection. The agent stream contains a state token followed by action and consequence tokens. It
+uses separate input projections for each token type and noise-dependent adaptive normalization. Both
+streams receive the language condition. Their residual widths may differ; their attention
+projections share a common head geometry.
+
+At each coupled layer, each stream forms its own queries, keys, and values. World queries attend to
+world and agent keys; agent queries attend to agent and world keys. In schematic form, for stream
+$m$ and the other stream $\bar m$,
 \begin{equation}
-  f_\lambda(u) = \frac{\lambda u}{1+(\lambda-1)u},
-  \qquad u\sim\mathrm{Unif}[0,1],
-  \qquad \lambda = 5,
-  \label{eq:warp}
+ H'_m=H_m+P_m\,\operatorname{Attn}
+ \bigl(Q_m,[K_m;K_{\bar m}],[V_m;V_{\bar m}]\bigr),
+ \label{eq:coupling}
 \end{equation}
-which concentrates training on high-noise levels \citep{esser2024sd3}. One
-network consumes both noisy streams together with the conditioning and returns
-one velocity field per stream,
+where $H_m$ is the layer input, $P_m$ maps attention outputs to its residual width, and brackets
+denote token concatenation. Each block then applies language cross-attention and a feed-forward
+update. Consequence tokens belong to the agent computation and participate in the same exchange.
+Figure~\ref{fig:framework} shows the complete training flow.
+
+The default coupling is bidirectional at every layer, with the exchanged tensors attached to the
+computation graph. Thus action loss has a route into world parameters through the world keys and
+values read by the agent; world loss has a reciprocal route into agent parameters. These routes
+establish a mechanism for action supervision to influence the world representation. Their value for
+transfer is an empirical question. Visibility masks and gradient stops expose the mechanism to
+controlled comparison.
+
+The current observation forms a clean prefix in the world sequence. Prefix queries attend only to
+the clean prefix, while generated world tokens can read the prefix and the agent stream. This
+preserves an observation context throughout joint prediction. The state token is a clean input to
+the agent stream and is excluded from the generation loss.
+
+\subsection{Learning under partial supervision}
+Each example carries coordinate masks $M^m$ for the labels it supplies. We use a masked mean squared
+error, $\operatorname{MSE}_{M^m}$, averaged over valid coordinates within that example. Let
+$\mathcal{B}_m$ be the batch examples with at least one supervised coordinate for modality $m$. The
+implemented objective is
 \begin{equation}
-  \left(v_w, v_a\right)
-  = f_\theta\!\left(z_{\tw},\, a_{\ta};\ \tw,\ \ta,\ o_0,\ \ell,\ s\right),
-  \label{eq:net}
+ \mathcal{L}=\sum_{m\in\{w,a,c\}}\lambda_m
+ \frac{1}{|\mathcal{B}_m|}
+ \sum_{i\in\mathcal{B}_m}
+ \omega(\tau_{m,i})\,
+ \operatorname{MSE}_{M_i^m}\!\left(v^m_{\theta,i},u_i^m\right),
+ \label{eq:objective}
 \end{equation}
-where $s$ is the proprioceptive state at the observation step. Writing
-$\|\cdot\|^2_{M}$ for the mean squared error restricted to the entries a boolean
-mask $M$ selects, the objective is
-\begin{equation}
-  \mathcal{L}(\theta) =
-  \mathbb{E}\Big[\,
-    \lambda_w\, \omega(\tw)\,\big\|v_w - (\epsilon_w - z_0)\big\|^2_{M_w}
-    \;+\;
-    \lambda_a\, \omega(\ta)\,\big\|v_a - (\epsilon_a - a_0)\big\|^2_{M_a}
-  \Big].
-  \label{eq:loss}
-\end{equation}
-The world mask $M_w$ selects the future latent frames and drops the clean
-current observation together with any padded frame. The action mask $M_a$ selects
-the horizon steps and action dimensions the source actually measures, which is
-the mechanism that lets one action head serve many embodiments and lets
-action-free footage contribute to the world term alone. The level weight
-$\omega$ is a bell profile centred at $\tw = \tfrac{1}{2}$, normalised to unit
-mean under the warped sampling distribution, and shared by both streams.
-
-\Paragraph{Independent levels make the sampler a free variable.}
-The single decision that separates \eqref{eq:loss} from a diffusion policy with a
-video loss attached is that $\tw$ and $\ta$ are drawn independently for every
-training example.
-
-\begin{proposition}[Plane coverage]
-\label{prop:plane}
-Let $\tw$ and $\ta$ be drawn independently through \eqref{eq:warp} for every
-example. Then the joint law of the level pair has full support on
-$[0,1]^2$, and the minimiser of \eqref{eq:loss} matches the conditional
-expectations $\mathbb{E}[\epsilon_w - z_0 \mid z_{\tw}, a_{\ta}]$ and
-$\mathbb{E}[\epsilon_a - a_0 \mid z_{\tw}, a_{\ta}]$ at almost every point of
-that square.
-\end{proposition}
-
-\begin{proof}[Proof sketch]
-Independence makes the joint law the product of two marginals, each of which has
-a positive density on $(0,1)$ because $f_\lambda$ is a diffeomorphism of $[0,1]$
-for $\lambda>0$. Conditioned on a fixed level pair, \eqref{eq:loss} is a pair of
-weighted least-squares regressions whose minimisers are the stated conditional
-expectations. The level pair enters $f_\theta$ as an input and the losses at
-distinct pairs are additive, so the pointwise minimisers are attained together.
-\end{proof}
-
-Proposition~\ref{prop:plane} has an immediate consequence. Every monotone path
-from $(\tw,\ta)=(1,1)$ to $(0,0)$ lies inside the
-support of the training distribution, so the choice of path belongs to
-deployment. Tying the two
-levels together during training would supervise the diagonal alone and would fix
-the sampler in advance.
-
-\Paragraph{Boundary rays.}
-The two edges of the square carry the two conditional slices of
-\sref{sec:slices} that matter most, and \eqref{eq:warp} places vanishing
-probability on them. \sys{} therefore spends a small fraction $p_b$ of the
-training mass on the edges: with probability $p_b/2$ the action level is pinned
-to $\ta=0$ and the action term is removed from the loss, which trains the
-action-conditioned world model explicitly, and with probability $p_b/2$ the world
-level is pinned to $\tw=0$ and the world term is removed, which trains the
-inverse dynamics model explicitly. A pinned stream is a condition rather than a
-target, so its loss weight is zero. The change costs one scalar in the sampling
-distribution and follows directly from \eqref{eq:joint}.
-
-\begin{figure}[t]
-\centering
-\adjustbox{max width=\linewidth}{%
-\begin{tikzpicture}[font=\figfont,
-  blk/.style={draw=black!60, rounded corners=2pt, align=center, inner sep=4pt},
-  wb/.style={blk, fill=moBlue!45, minimum width=22mm, minimum height=7mm},
-  ab/.style={blk, fill=moClay!50, minimum width=20mm, minimum height=7mm},
-  frz/.style={blk, fill=moStone!45, minimum height=11mm, minimum width=38mm},
-  hd/.style={blk, fill=moRose!45, minimum height=11mm, minimum width=42mm},
-  ar/.style={-{Stealth[length=2.4mm]}, draw=black!70, line width=0.6pt},
-  bus/.style={draw=black!55, line width=0.7pt},
-  ex/.style={{Stealth[length=2.2mm]}-{Stealth[length=2.2mm]}, draw=moSage!70!black, line width=1.1pt},
-  lb/.style={align=center}]
-
-% ---------------- (a) one forward pass ---------------- %
-\node[frz] (vae)  at (0,4.30) {observation clip\\frozen video autoencoder};
-\node[frz] (txt)  at (0,2.55) {instruction $\ell$\\frozen text encoder};
-\node[frz] (st)   at (0,0.95) {proprioceptive state $s$};
-
-\draw[bus] (2.55,0.95) -- (2.55,4.30);
-\draw[ar] (vae.east) -- (2.55,4.30);
-\draw[ar] (txt.east) -- (2.55,2.55);
-\draw[ar] (st.east)  -- (2.55,0.95);
-
-\node[lb] at (4.90,5.90) {\textbf{world stream}\\pretrained video backbone\\30 layers, width 3072};
-\node[lb] at (8.60,5.90) {\textbf{action stream}\\transformer\\30 layers, width 1024};
-
-\foreach \i in {0,1,2,3} {
-  \node[wb] (w\i) at (4.90, 0.95+\i*1.12) {};
-  \node[ab] (a\i) at (8.60, 0.95+\i*1.12) {};
-  \draw[ex] (w\i.east) -- (a\i.west);
-}
-\node[lb, text=moSage!45!black] at (6.75,-0.85) {one shared attention space\\keys and values exchanged at every layer};
-
-\draw[ar] (2.55,3.20) -- (3.72,3.20);
-\draw[bus] (2.55,0.35) -- (7.35,0.35);
-\draw[ar] (7.35,0.35) -- (7.35,0.95) -- (7.55,0.95);
-
-\node[anchor=east] at (3.62,0.95) {\tw};
-\node[anchor=west] at (9.58,0.95) {\ta};
-
-\node[hd] (vw) at (13.10,4.30) {world velocity $v_w$\\future latent frames};
-\node[hd] (va) at (13.10,2.55) {action velocity $v_a$\\32 steps, 80 slots};
-\node[hd] (vc) at (13.10,0.80) {consequence velocity $v_c$\\16 steps, 48 keypoints};
-\draw[ar] (w3.north) -- (4.90,5.05) -- (10.55,5.05) -- (10.55,4.30) -- (vw.west);
-\draw[ar] (a3.north) -- (8.60,4.75) -- (10.25,4.75) -- (10.25,2.55) -- (va.west);
-\draw[ar] (a0.south) -- (8.60,0.55) -- (9.95,0.55) -- (9.95,0.80) -- (vc.west);
-\node[lb] at (6.75,-2.20) {\textbf{(a) one forward pass}};
-
-% ---------------- (b) the noise plane ---------------- %
-\begin{scope}[shift={(4.20,-11.10)}]
-  \fill[moSage!16] (0,0) rectangle (5.4,5.4);
-  \draw[->, black!70, line width=0.6pt] (-0.2,0) -- (5.95,0) node[anchor=north] {\tw};
-  \draw[->, black!70, line width=0.6pt] (0,-0.2) -- (0,5.95) node[anchor=east] {\ta};
-  \foreach \t/\l in {0/0, 5.4/1} {
-    \node[anchor=north] at (\t,-0.22) {\l};
-    \node[anchor=east] at (-0.22,\t) {\l};}
-  \node[align=left, anchor=west] at (2.85,1.60) {the training distribution\\covers the whole square};
-  \draw[moSage!65!black, line width=1.6pt] (5.30,5.30) -- (0.10,0.10);
-  \draw[moBlue!75!black, line width=1.6pt, densely dashed] (5.30,0.26) -- (0.10,0.26);
-  \draw[moClay!80!black, line width=1.6pt, densely dotted] (0.26,5.30) -- (0.26,0.10);
-  \node[anchor=south west, rotate=45] at (2.30,2.30) {joint path};
-  \node[anchor=west] at (1.85,0.70) {action-clamped ray};
-  \node[anchor=west, rotate=90] at (0.62,2.20) {world-clamped ray};
-  \node[circle, fill=black!75, inner sep=1pt] at (5.30,5.30) {};
-  \node[circle, fill=black!75, inner sep=1pt] at (0.10,0.10) {};
-  \node[anchor=south west] at (5.05,5.45) {noise};
-  \node[anchor=north east] at (-0.10,-0.10) {clean};
-  \node[lb] at (2.70,-1.15) {\textbf{(b) three inference paths}};
-\end{scope}
-\end{tikzpicture}}
-\caption{\sys{} in one forward pass and one inference diagram. Frozen encoders
-supply the latent grid, the language context, and the state condition. The world
-stream is a pretrained video backbone and the action stream is a transformer of
-matching head geometry, so both project into one shared attention space and
-exchange keys and values at every layer. Each stream carries its own noise
-level, and because the two levels are drawn independently the training
-distribution covers the whole square in panel (b). The diagonal gives control,
-the horizontal edge gives an action-conditioned world model, and the vertical
-edge gives an inverse dynamics model, all from one trained network.}
-\label{fig:framework}
-\end{figure}
-
-\subsection{Three Paths, Three Instruments}
-\label{sec:paths}
-
-Sampling walks a path $\{(\tw^{(k)},\ta^{(k)})\}_{k=0}^{K}$ that ends at
-$(0,0)$, taking one Euler step per stream per iteration,
-\begin{equation}
-  x^{(k+1)} = x^{(k)} + \big(\tau^{(k+1)} - \tau^{(k)}\big)\, v^{(k)},
-  \label{eq:euler}
-\end{equation}
-and re-pinning the clean observation frame after every step. Three paths matter,
-and each one measures a different property of the trained model.
-
-The \emph{joint path} follows \eqref{eq:euler} with both levels in lockstep and
-is the control mode:
-it samples an action chunk and the future it induces together, and the action
-chunk drives the robot under receding-horizon execution.
-
-The \emph{action-clamped ray} holds $\ta\equiv0$ with the action tokens fixed to
-a supplied chunk and lets only the world level descend, which realises the
-action-conditioned world model. Supplying the true chunk, a chunk from a
-different episode, a zero chunk, and a time-shuffled chunk turns this ray into a
-counterfactual test of whether the generated future follows the action.
-
-The \emph{world-clamped ray} holds $\tw\equiv0$ with the future latent frames
-fixed to their ground truth and lets only the action level descend, which
-realises inverse dynamics. The quality of the recovered chunk measures how much
-action information the world representation carries.
-
-A fourth family of paths lets one stream lead the other by a fixed offset in the
-progress variable, which turns the synchrony of the two streams into an ablation
-rather than a design commitment.
-
-\subsection{Coupling as One Experimental Axis}
-\label{sec:coupling}
-
-\Paragraph{One sequence, one mask.}
-Both streams present their tokens to a single attention over the concatenation
-\begin{equation}
-  x = \big[\;\underbrace{z_{\tw}}_{\text{world}}\;\big|\;
-      \underbrace{s}_{\text{condition}}\;\big|\;
-      \underbrace{a_{\ta}}_{\text{action}}\;\big|\;
-      \underbrace{c_{\ta}}_{\text{consequence}}\;\big],
-  \label{eq:seq}
-\end{equation}
-and one boolean matrix $M$ decides which query reads which key. Three blocks of
-$M$ stay fixed across every configuration. The clean observation tokens attend to
-themselves alone, which keeps the conditioning prefix a self-contained
-representation of the present and keeps its keys reusable across denoising
-iterations. The action-side tokens attend freely among themselves, because a
-chunk is a jointly denoised trajectory. The state token is a condition that the
-noisy world tokens may always read, so the axis below varies only what the
-streams read of each other's \emph{generated} content.
-
-\Paragraph{Three degrees of freedom.}
-The remaining blocks of $M$ form the experimental axis of the paper, and
-\tref{tab:coupling} lists the settings with the competing hypothesis each one
-realises. Cross-stream visibility takes four values. Setting \vnone{} keeps the
-two streams independent and reduces \eqref{eq:loss} to two objectives that share
-a data loader. Setting \vwa{} lets action queries read the world stream, which
-is the world-model-plus-readout hypothesis. Setting \vaw{} lets noisy world
-queries read the action tokens, which is the action-conditioned hypothesis.
-Setting \vbi{} enables both directions and is \sys{}. Gradient flow is the second
-degree of freedom: detaching the world keys and values that the action stream
-reads leaves the action stream able to read the world representation while
-removing its ability to shape that representation, which is exactly an auxiliary
-action head attached to a trunk the video objective owns. Coupling depth is the
-third degree of freedom and selects the subset of backbone layers at which the
-exchange happens. \fref{fig:masks} draws the visibility settings, and the
-combination of \vwa{} with detached keys names the auxiliary baseline that the
-experiments have to separate from \vbi{}.
-
-\begin{table}[t]
-\centering
-\small
-\caption{The coupling axis. Every row is one boolean or enumerated
-configuration value, and the arms share parameters, data, optimiser, and seed
-set. The last column names the hypothesis about pretraining that the row
-realises, which is what makes the axis a single controlled comparison rather
-than a survey of architectures.}
-\label{tab:coupling}
-\adjustbox{max width=\linewidth}{%
-\begin{tabular}{@{}lll@{}}
-\toprule
-\textbf{Degree of freedom} & \textbf{Setting} & \textbf{Hypothesis it realises} \\
-\midrule
-\panel{3}{Cross-stream visibility} \\
-\quad \vnone{} & neither stream reads the other & two objectives sharing a data loader \\
-\quad \vwa{} & action queries read the world stream & world model with a policy readout \\
-\quad \vaw{} & noisy world queries read the action tokens & action-conditioned world model \\
-\rowcolor{tabhl}
-\quad \vbi{} & both directions enabled & \sys{} \\
-\midrule
-\panel{3}{Gradient flow} \\
-\quad detached world keys & action loss reads but does not shape the world stream & auxiliary action head \\
-\rowcolor{tabhl}
-\quad attached world keys & action loss shapes the world stream & joint pretraining \\
-\midrule
-\panel{3}{Coupling depth} \\
-\quad first ten layers / last ten layers & exchange restricted to one end of the backbone & where grounding is formed \\
-\rowcolor{tabhl}
-\quad all thirty layers & exchange at every layer & \sys{} \\
-\bottomrule
-\end{tabular}}
-\end{table}
-
-\begin{figure}[t]
-\centering
-\adjustbox{max width=\linewidth}{%
-\begin{tikzpicture}[font=\figfont, x=1mm, y=1mm,
-  ttl/.style={align=center},
-  onx/.style={fill=moSage!60},
-  offx/.style={fill=moStone!30},
-  cndx/.style={fill=moBlue!45}]
-
-\def\mm#1#2#3#4#5#6#7{%
-  \begin{scope}[shift={(#1,#2)}]
-    \fill[#3] (0,20) rectangle (20,40);
-    \fill[cndx] (20,20) rectangle (27,40);
-    \fill[#4] (27,20) rectangle (41,40);
-    \fill[#5] (0,13) rectangle (20,20);
-    \fill[onx] (20,0) rectangle (41,20);
-    \fill[#6] (0,0) rectangle (20,13);
-    \draw[black!70, line width=0.5pt] (0,0) rectangle (41,40);
-    \draw[black!70, line width=0.5pt] (20,0) -- (20,40);
-    \draw[black!70, line width=0.5pt] (0,20) -- (41,20);
-    \draw[black!45, line width=0.3pt, densely dotted] (27,0) -- (27,40);
-    \draw[black!45, line width=0.3pt, densely dotted] (0,13) -- (41,13);
-    \node[ttl] at (20.5,48) {#7};
-    \node[anchor=east] at (-1.5,30) {world};
-    \node[anchor=east] at (-1.5,16.5) {state};
-    \node[anchor=east] at (-1.5,6.5) {action};
-    \node[anchor=north] at (10,-1.5) {world};
-    \node[anchor=north] at (23.5,-1.5) {state};
-    \node[anchor=north] at (34,-1.5) {action};
-  \end{scope}}
-
-\mm{0}{62}{onx}{offx}{offx}{offx}{\vnone{}, independent}
-\mm{66}{62}{onx}{offx}{onx}{onx}{\vwa{}, action reads world}
-\mm{0}{0}{onx}{onx}{offx}{offx}{\vaw{}, world reads action}
-\mm{66}{0}{onx}{onx}{onx}{onx}{\vbi{}, \sys{}}
-
-\node[anchor=north west, align=left] at (118,44)
-  {rows are queries\\columns are keys\\[6pt]
-   \textcolor{moSage!60}{$\blacksquare$}\enspace readable\\[3pt]
-   \textcolor{moBlue!45}{$\blacksquare$}\enspace state condition,\\ \hspace{3.6mm} readable everywhere\\[3pt]
-   \textcolor{moStone!30}{$\blacksquare$}\enspace withheld};
-\end{tikzpicture}}
-\caption{The four cross-stream visibility settings as blocks of the joint
-attention mask. The leading world rows of the clean observation and the internal
-block of the action-side tokens are identical in all four, so the settings
-differ only in what each stream reads of the other's generated content. The
-state condition stays readable by the world stream everywhere, which keeps
-proprioception out of the comparison.}
-\label{fig:masks}
-\end{figure}
-
-\subsection{From Command to Consequence}
-\label{sec:consequence}
-
-A motor command specifies actuator motion and leaves the resulting change in the
-world implicit. The consequence of an action specifies that change directly. We
-define a consequence label for a window as the displacement of $K$ world
-keypoint slots over the next $H_c$ control steps together with their
-observability,
-\begin{equation}
-  c_{0}[\tau,k] = \Big(\,g\cdot\big(u_k(\tau) - u_k(0)\big),\ \ 2\nu_k(\tau)-1\,\Big)
-  \in \mathbb{R}^3,
-  \qquad \tau = 1,\dots,H_c,
-  \label{eq:consequence}
-\end{equation}
-where $u_k(\tau)$ is the image position of slot $k$ in camera-normalised
-coordinates, $u_k(0)$ is its anchor at the observation step, $\nu_k \in [0,1]$ is
-its observability, and $g$ scales the displacement so the flow target has unit
-order of magnitude. Slots that a source cannot supply are masked out of the loss.
-Actuator slots are anchored at their tracked position at the observation step,
-and scene probe slots are anchored at fixed query locations on a grid, which
-gives coverage of the background as well as the manipulator.
-
-Three properties make consequence the natural next step of \eqref{eq:joint}
-rather than a separate method. Consequence labels need no action annotation,
-because a tracker recovers them from video alone
-\citep{doersch2023tapir,karaev2024cotracker}, so egocentric human footage can
-ground the action side of the model. Consequence is defined in image
-coordinates, so the same slot table applies to platforms with different
-kinematics and the resulting probe transfers across embodiments. Consequence is
-the quantity the grounding mechanism is supposed to be about: if coupling helps
-because the action constrains how the world changes, then supervising the change
-itself should provide grounding of the same kind.
-
-\sys{} therefore admits consequence as a third generated stream that shares the
-action noise level, which extends \eqref{eq:joint} to
-\begin{equation}
-  p_\theta\!\left(o_{1:T},\, a_{1:H},\, c_{1:H_c}\,\middle|\, o_0,\ell\right),
-  \label{eq:joint3}
-\end{equation}
-adds one term $\lambda_c\,\omega(\ta)\|v_c-(\epsilon_c-c_0)\|^2_{M_c}$ to
-\eqref{eq:loss}, and places the consequence tokens in the action-side block of
-\eqref{eq:seq} so they inherit the visibility setting under study. The clamped
-rays of \sref{sec:paths} extend accordingly: clamping the consequence stream
-in place of the action stream gives a consequence-conditioned world model, and
-comparing the two clamps on one trained network measures which level of grounding
-gives the more controllable future.
+where $\lambda_m$ controls each modality's contribution and $\omega$ weights its noise level. An
+empty supervised set contributes zero. World loss covers future latents; the clean prefix is
+excluded. Missing coordinates are masked after corruption as well as in the loss. Robot batches
+supervise actions and video, while human batches supervise video and the available consequences.
+Consequence annotations may also accompany robot data. Appendix~\ref{app:details} gives the
+implemented sampling distribution and normalization rules.

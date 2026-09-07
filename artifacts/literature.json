@@ -1,0 +1,530 @@
+{
+  "uwm": {
+    "title": [
+      "Unified World Models: Coupling Video and Action Diffusion for Pretraining on Large Robotic Datasets"
+    ],
+    "author": [
+      "Zhu, Chuning",
+      "Yu, Raymond",
+      "Feng, Siyuan",
+      "Burchfiel, Benjamin",
+      "Shah, Paarth",
+      "Gupta, Abhishek"
+    ],
+    "date": [
+      "2025/04/03"
+    ],
+    "id": "2504.02792"
+  },
+  "cosmos": {
+    "title": [
+      "Cosmos Policy: Fine-Tuning Video Models for Visuomotor Control and Planning"
+    ],
+    "author": [
+      "Kim, Moo Jin",
+      "Gao, Yihuai",
+      "Lin, Tsung-Yi",
+      "Lin, Yen-Chen",
+      "Ge, Yunhao",
+      "Lam, Grace",
+      "Liang, Percy",
+      "Song, Shuran",
+      "Liu, Ming-Yu",
+      "Finn, Chelsea",
+      "Gu, Jinwei"
+    ],
+    "date": [
+      "2026/01/22"
+    ],
+    "id": "2601.16163"
+  },
+  "wan": {
+    "title": [
+      "Wan: Open and Advanced Large-Scale Video Generative Models"
+    ],
+    "author": [
+      "Wan, Team",
+      "Wang, Ang",
+      "Ai, Baole",
+      "Wen, Bin",
+      "Mao, Chaojie",
+      "Xie, Chen-Wei",
+      "Chen, Di",
+      "Yu, Feiwu",
+      "Zhao, Haiming",
+      "Yang, Jianxiao",
+      "Zeng, Jianyuan",
+      "Wang, Jiayu",
+      "Zhang, Jingfeng",
+      "Zhou, Jingren",
+      "Wang, Jinkai",
+      "Chen, Jixuan",
+      "Zhu, Kai",
+      "Zhao, Kang",
+      "Yan, Keyu",
+      "Huang, Lianghua",
+      "Feng, Mengyang",
+      "Zhang, Ningyi",
+      "Li, Pandeng",
+      "Wu, Pingyu",
+      "Chu, Ruihang",
+      "Feng, Ruili",
+      "Zhang, Shiwei",
+      "Sun, Siyang",
+      "Fang, Tao",
+      "Wang, Tianxing",
+      "Gui, Tianyi",
+      "Weng, Tingyu",
+      "Shen, Tong",
+      "Lin, Wei",
+      "Wang, Wei",
+      "Wang, Wei",
+      "Zhou, Wenmeng",
+      "Wang, Wente",
+      "Shen, Wenting",
+      "Yu, Wenyuan",
+      "Shi, Xianzhong",
+      "Huang, Xiaoming",
+      "Xu, Xin",
+      "Kou, Yan",
+      "Lv, Yangyu",
+      "Li, Yifei",
+      "Liu, Yijing",
+      "Wang, Yiming",
+      "Zhang, Yingya",
+      "Huang, Yitong",
+      "Li, Yong",
+      "Wu, You",
+      "Liu, Yu",
+      "Pan, Yulin",
+      "Zheng, Yun",
+      "Hong, Yuntao",
+      "Shi, Yupeng",
+      "Feng, Yutong",
+      "Jiang, Zeyinzi",
+      "Han, Zhen",
+      "Wu, Zhi-Fan",
+      "Liu, Ziyu"
+    ],
+    "date": [
+      "2025/03/26"
+    ],
+    "id": "2503.20314"
+  },
+  "droid": {
+    "title": [
+      "DROID: A Large-Scale In-The-Wild Robot Manipulation Dataset"
+    ],
+    "author": [
+      "Khazatsky, Alexander",
+      "Pertsch, Karl",
+      "Nair, Suraj",
+      "Balakrishna, Ashwin",
+      "Dasari, Sudeep",
+      "Karamcheti, Siddharth",
+      "Nasiriany, Soroush",
+      "Srirama, Mohan Kumar",
+      "Chen, Lawrence Yunliang",
+      "Ellis, Kirsty",
+      "Fagan, Peter David",
+      "Hejna, Joey",
+      "Itkina, Masha",
+      "Lepert, Marion",
+      "Ma, Yecheng Jason",
+      "Miller, Patrick Tree",
+      "Wu, Jimmy",
+      "Belkhale, Suneel",
+      "Dass, Shivin",
+      "Ha, Huy",
+      "Jain, Arhan",
+      "Lee, Abraham",
+      "Lee, Youngwoon",
+      "Memmel, Marius",
+      "Park, Sungjae",
+      "Radosavovic, Ilija",
+      "Wang, Kaiyuan",
+      "Zhan, Albert",
+      "Black, Kevin",
+      "Chi, Cheng",
+      "Hatch, Kyle Beltran",
+      "Lin, Shan",
+      "Lu, Jingpei",
+      "Mercat, Jean",
+      "Rehman, Abdul",
+      "Sanketi, Pannag R",
+      "Sharma, Archit",
+      "Simpson, Cody",
+      "Vuong, Quan",
+      "Walke, Homer Rich",
+      "Wulfe, Blake",
+      "Xiao, Ted",
+      "Yang, Jonathan Heewon",
+      "Yavary, Arefeh",
+      "Zhao, Tony Z.",
+      "Agia, Christopher",
+      "Baijal, Rohan",
+      "Castro, Mateo Guaman",
+      "Chen, Daphne",
+      "Chen, Qiuyu",
+      "Chung, Trinity",
+      "Drake, Jaimyn",
+      "Foster, Ethan Paul",
+      "Gao, Jensen",
+      "Guizilini, Vitor",
+      "Herrera, David Antonio",
+      "Heo, Minho",
+      "Hsu, Kyle",
+      "Hu, Jiaheng",
+      "Irshad, Muhammad Zubair",
+      "Jackson, Donovon",
+      "Le, Charlotte",
+      "Li, Yunshuang",
+      "Lin, Kevin",
+      "Lin, Roy",
+      "Ma, Zehan",
+      "Maddukuri, Abhiram",
+      "Mirchandani, Suvir",
+      "Morton, Daniel",
+      "Nguyen, Tony",
+      "O'Neill, Abigail",
+      "Scalise, Rosario",
+      "Seale, Derick",
+      "Son, Victor",
+      "Tian, Stephen",
+      "Tran, Emi",
+      "Wang, Andrew E.",
+      "Wu, Yilin",
+      "Xie, Annie",
+      "Yang, Jingyun",
+      "Yin, Patrick",
+      "Zhang, Yunchu",
+      "Bastani, Osbert",
+      "Berseth, Glen",
+      "Bohg, Jeannette",
+      "Goldberg, Ken",
+      "Gupta, Abhinav",
+      "Gupta, Abhishek",
+      "Jayaraman, Dinesh",
+      "Lim, Joseph J",
+      "Malik, Jitendra",
+      "Martín-Martín, Roberto",
+      "Ramamoorthy, Subramanian",
+      "Sadigh, Dorsa",
+      "Song, Shuran",
+      "Wu, Jiajun",
+      "Yip, Michael C.",
+      "Zhu, Yuke",
+      "Kollar, Thomas",
+      "Levine, Sergey",
+      "Finn, Chelsea"
+    ],
+    "date": [
+      "2024/03/19"
+    ],
+    "id": "2403.12945"
+  },
+  "bridge": {
+    "title": [
+      "BridgeData V2: A Dataset for Robot Learning at Scale"
+    ],
+    "author": [
+      "Walke, Homer",
+      "Black, Kevin",
+      "Lee, Abraham",
+      "Kim, Moo Jin",
+      "Du, Max",
+      "Zheng, Chongyi",
+      "Zhao, Tony",
+      "Hansen-Estruch, Philippe",
+      "Vuong, Quan",
+      "He, Andre",
+      "Myers, Vivek",
+      "Fang, Kuan",
+      "Finn, Chelsea",
+      "Levine, Sergey"
+    ],
+    "date": [
+      "2023/08/24"
+    ],
+    "id": "2308.12952"
+  },
+  "libero": {
+    "title": [
+      "LIBERO: Benchmarking Knowledge Transfer for Lifelong Robot Learning"
+    ],
+    "author": [
+      "Liu, Bo",
+      "Zhu, Yifeng",
+      "Gao, Chongkai",
+      "Feng, Yihao",
+      "Liu, Qiang",
+      "Zhu, Yuke",
+      "Stone, Peter"
+    ],
+    "date": [
+      "2023/06/05"
+    ],
+    "id": "2306.03310"
+  },
+  "robotwin": {
+    "title": [
+      "RoboTwin 2.0: A Scalable Data Generator and Benchmark with Strong Domain Randomization for Robust Bimanual Robotic Manipulation"
+    ],
+    "author": [
+      "Chen, Tianxing",
+      "Chen, Zanxin",
+      "Chen, Baijun",
+      "Cai, Zijian",
+      "Liu, Yibin",
+      "Li, Zixuan",
+      "Liang, Qiwei",
+      "Lin, Xianliang",
+      "Ge, Yiheng",
+      "Gu, Zhenyu",
+      "Deng, Weiliang",
+      "Guo, Yubin",
+      "Nian, Tian",
+      "Xie, Xuanbing",
+      "Chen, Qiangyu",
+      "Su, Kailun",
+      "Xu, Tianling",
+      "Liu, Guodong",
+      "Hu, Mengkang",
+      "Gao, Huan-ang",
+      "Wang, Kaixuan",
+      "Liang, Zhixuan",
+      "Qin, Yusen",
+      "Yang, Xiaokang",
+      "Luo, Ping",
+      "Mu, Yao"
+    ],
+    "date": [
+      "2025/06/22"
+    ],
+    "id": "2506.18088"
+  },
+  "egodex": {
+    "title": [
+      "EgoDex: Learning Dexterous Manipulation from Large-Scale Egocentric Video"
+    ],
+    "author": [
+      "Hoque, Ryan",
+      "Huang, Peide",
+      "Yoon, David J.",
+      "Sivapurapu, Mouli",
+      "Zhang, Jian"
+    ],
+    "date": [
+      "2025/05/16"
+    ],
+    "id": "2505.11709"
+  },
+  "flowmatching": {
+    "title": [
+      "Flow Matching for Generative Modeling"
+    ],
+    "author": [
+      "Lipman, Yaron",
+      "Chen, Ricky T. Q.",
+      "Ben-Hamu, Heli",
+      "Nickel, Maximilian",
+      "Le, Matt"
+    ],
+    "date": [
+      "2022/10/06"
+    ],
+    "id": "2210.02747"
+  },
+  "rectifiedflow": {
+    "title": [
+      "Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow"
+    ],
+    "author": [
+      "Liu, Xingchao",
+      "Gong, Chengyue",
+      "Liu, Qiang"
+    ],
+    "date": [
+      "2022/09/07"
+    ],
+    "id": "2209.03003"
+  },
+  "openvla": {
+    "title": [
+      "OpenVLA: An Open-Source Vision-Language-Action Model"
+    ],
+    "author": [
+      "Kim, Moo Jin",
+      "Pertsch, Karl",
+      "Karamcheti, Siddharth",
+      "Xiao, Ted",
+      "Balakrishna, Ashwin",
+      "Nair, Suraj",
+      "Rafailov, Rafael",
+      "Foster, Ethan",
+      "Lam, Grace",
+      "Sanketi, Pannag",
+      "Vuong, Quan",
+      "Kollar, Thomas",
+      "Burchfiel, Benjamin",
+      "Tedrake, Russ",
+      "Sadigh, Dorsa",
+      "Levine, Sergey",
+      "Liang, Percy",
+      "Finn, Chelsea"
+    ],
+    "date": [
+      "2024/06/13"
+    ],
+    "id": "2406.09246"
+  },
+  "unipi": {
+    "title": [
+      "Learning Universal Policies via Text-Guided Video Generation"
+    ],
+    "author": [
+      "Du, Yilun",
+      "Yang, Mengjiao",
+      "Dai, Bo",
+      "Dai, Hanjun",
+      "Nachum, Ofir",
+      "Tenenbaum, Joshua B.",
+      "Schuurmans, Dale",
+      "Abbeel, Pieter"
+    ],
+    "date": [
+      "2023/01/31"
+    ],
+    "id": "2302.00111"
+  },
+  "atm": {
+    "title": [
+      "Any-point Trajectory Modeling for Policy Learning"
+    ],
+    "author": [
+      "Wen, Chuan",
+      "Lin, Xingyu",
+      "So, John",
+      "Chen, Kai",
+      "Dou, Qi",
+      "Gao, Yang",
+      "Abbeel, Pieter"
+    ],
+    "date": [
+      "2023/12/28"
+    ],
+    "id": "2401.00025"
+  },
+  "track2act": {
+    "title": [
+      "Track2Act: Predicting Point Tracks from Internet Videos enables Generalizable Robot Manipulation"
+    ],
+    "author": [
+      "Bharadhwaj, Homanga",
+      "Mottaghi, Roozbeh",
+      "Gupta, Abhinav",
+      "Tulsiani, Shubham"
+    ],
+    "date": [
+      "2024/05/02"
+    ],
+    "id": "2405.01527"
+  },
+  "cotracker": {
+    "title": [
+      "CoTracker: It is Better to Track Together"
+    ],
+    "author": [
+      "Karaev, Nikita",
+      "Rocco, Ignacio",
+      "Graham, Benjamin",
+      "Neverova, Natalia",
+      "Vedaldi, Andrea",
+      "Rupprecht, Christian"
+    ],
+    "date": [
+      "2023/07/14"
+    ],
+    "id": "2307.07635"
+  },
+  "vlabench": {
+    "title": [
+      "VLABench: A Large-Scale Benchmark for Language-Conditioned Robotics Manipulation with Long-Horizon Reasoning Tasks"
+    ],
+    "author": [
+      "Zhang, Shiduo",
+      "Xu, Zhe",
+      "Liu, Peiju",
+      "Yu, Xiaopeng",
+      "Li, Yuan",
+      "Gao, Qinghui",
+      "Fei, Zhaoye",
+      "Yin, Zhangyue",
+      "Wu, Zuxuan",
+      "Jiang, Yu-Gang",
+      "Qiu, Xipeng"
+    ],
+    "date": [
+      "2024/12/24"
+    ],
+    "id": "2412.18194"
+  },
+  "robocasa365": {
+    "title": [
+      "RoboCasa365: A Large-Scale Simulation Framework for Training and Benchmarking Generalist Robots"
+    ],
+    "author": [
+      "Nasiriany, Soroush",
+      "Nasiriany, Sepehr",
+      "Maddukuri, Abhiram",
+      "Zhu, Yuke"
+    ],
+    "date": [
+      "2026/03/04"
+    ],
+    "id": "2603.04356"
+  },
+  "liberoplus": {
+    "title": [
+      "LIBERO-Plus: In-depth Robustness Analysis of Vision-Language-Action Models"
+    ],
+    "author": [
+      "Fei, Senyu",
+      "Wang, Siyin",
+      "Shi, Junhao",
+      "Dai, Zihao",
+      "Cai, Jikun",
+      "Qian, Pengfang",
+      "Ji, Li",
+      "He, Xinzhe",
+      "Zhang, Shiduo",
+      "Fei, Zhaoye",
+      "Fu, Jinlan",
+      "Gong, Jingjing",
+      "Qiu, Xipeng"
+    ],
+    "date": [
+      "2025/10/15"
+    ],
+    "id": "2510.13626"
+  },
+  "liberopro": {
+    "title": [
+      "LIBERO-PRO: Towards Robust and Fair Evaluation of Vision-Language-Action Models Beyond Memorization"
+    ],
+    "author": [
+      "Zhou, Xueyang",
+      "Xu, Yangming",
+      "Tie, Guiyao",
+      "Chen, Yongchao",
+      "Zhang, Guowen",
+      "Chu, Duanfeng",
+      "Zhou, Pan",
+      "Sun, Lichao"
+    ],
+    "date": [
+      "2025/10/04"
+    ],
+    "id": "2510.03827"
+  }
+}

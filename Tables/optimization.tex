@@ -1,0 +1,15 @@
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lrr}
+\toprule
+Objective & First logged batch & Final-window mean \\
+\midrule
+World & 0.4221 & 0.0573 \\
+Action & 1.3282 & 0.0108 \\
+Consequence & 1.7038 & 0.0305 \\
+Total & 3.4541 & 0.0985 \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{Measured joint optimization.} LIBERO direct adaptation, 20,000 updates. The final column averages the last 10\% of logged points using the archived training summary. These are training losses. All values come from \texttt{e0\_libero\_bi\_summary.json}; the initialization contains public video weights and a fresh agent.}
+\label{tab:optimization}
+\end{table}

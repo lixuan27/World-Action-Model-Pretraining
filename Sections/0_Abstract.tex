@@ -1,30 +1,16 @@
 \begin{abstract}
-Video pretraining gives an embodied agent a model of how the visual world
-evolves. Embodied interaction asks for something stronger, because an agent has
-to know how its own actions participate in that evolution. We formulate this as
-one modelling problem and call it Joint Action-World Modeling. A single
-continuous flow-matching process generates the future observation and the future
-action chunk together, the two streams carry independently drawn noise levels,
-and they exchange information through one shared attention space at every layer
-of the backbone. The pair of noise levels spans a plane, and the training
-distribution covers that plane, so one trained model yields three inference
-paths: a joint path that produces actions and futures together, an
-action-clamped ray that turns the model into an action-conditioned world model,
-and a world-clamped ray that turns it into an inverse dynamics model. Those
-paths are also the measurement instruments of the paper, because they read out
-how much action information the world representation carries and how strongly
-the generated future follows an intervention on the action. The formulation
-extends one step further to action consequence, defined as the displacement of
-world keypoints that an action actually produces in the image, which supplies
-grounding on human video that carries no action label and gives a probe of
-representation content that does not depend on the action space of any single
-embodiment. Coupling becomes a single experimental axis with three degrees of
-freedom, namely cross-stream visibility, gradient flow, and coupling depth, and
-that axis separates joint modelling from an auxiliary action head under matched
-parameters, data, and optimisation. The paper delivers the formulation, the
-implementation, the pretraining corpus of robot and egocentric human footage,
-and a pre-registered measurement programme with declared floors, criteria, and
-failure conditions. Published policies fix the external comparison on the nine
-benchmarks the study uses, and every value the programme still has to measure is
-marked as a target in both the text and the source.
+Video pretraining provides a prior over how scenes evolve. Learning to act also requires a
+representation of how control relates to that evolution. We study whether action supervision can
+shape a pretrained world representation through the computation used to generate future
+observations. JAM, Joint Action--World Modeling, jointly generates future video, motor actions, and
+visual action consequences. A video backbone and an agent transformer exchange attention keys and
+values at every layer, allowing action prediction to update the world stream. Visual consequences
+describe image-space displacement and observability, extending the same training objective to human
+demonstrations with tracked motion. Independent corruption levels support learning from modalities
+with different levels of uncertainty. The available training record shows decreasing world, action,
+and consequence objectives in a completed task adaptation run, while foundation pretraining
+continues on robot and human data. Controlled comparisons are organized around the effects of
+information exchange, gradient routing, and consequence supervision on representation quality and
+transfer. This formulation makes the influence of action learning on world pretraining a concrete,
+testable property of the model.
 \end{abstract}

@@ -1,0 +1,15 @@
+% PLANNED-VALUE: every JAM score in this table is a layout target.
+\begin{table}[t]
+\centering\small
+\begin{tabular}{lrrr}
+\toprule
+Pretraining data & LIBERO & LIBERO-Plus & Consequence ADE \\
+\midrule
+Robot data & \target{98.4} & \target{74.2} & \target{0.12} \\
+Robot + human video & \target{98.9} & \target{82.6} & \target{0.1} \\
+Robot + human video and consequences & \target{99.4} & \target{90.2} & \target{0.08} \\
+\bottomrule
+\end{tabular}
+\caption{\textbf{What does human motion supervision contribute?} Planned data-composition comparison with matched robot exposure. The human-video arm masks the consequence objective. The final arm includes projected hand-motion targets. Success is in percent; average displacement error (ADE) uses image-normalized coordinates on the same held-out episode list. A companion compute-matched run and a label-density sweep separate supervision from additional updates. \targetnote}
+\label{tab:composition}
+\end{table}

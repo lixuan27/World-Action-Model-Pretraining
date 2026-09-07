@@ -1,52 +1,9 @@
 \section{Conclusion}
-\label{sec:conclusion}
-
-World pretraining supplies a model of how the visual world evolves, and embodied
-interaction needs a model of how the agent participates in that evolution. This
-report closes that gap by construction rather than by an added prediction task.
-Joint Action-World Modeling places the future observation and the future action
-chunk in one continuous flow-matching process, gives each stream its own noise
-level, and lets the two streams exchange keys and values through one shared
-attention space at every layer of the backbone.
-
-Two consequences follow from the formulation alone and hold independently of any
-measurement. Independent noise levels give the training distribution full
-support on the square of level pairs, which makes the sampler a deployment-time
-choice and turns one trained network into a policy, an action-conditioned world
-model, and an inverse dynamics model at once. Those same three paths are
-measurement instruments, because the world-clamped ray reads how much action
-information the world representation carries and the action-clamped ray reads how
-strongly the generated future follows an intervention on the action. The
-coupling therefore becomes a single experimental axis with three declared
-degrees of freedom, and the gradient degree of freedom separates a representation
-that the action objective shapes from a representation that an auxiliary head
-merely reads.
-
-The formulation extends to action consequence without a second method. Defining
-consequence as the displacement and observability of world keypoints places the
-grounding signal in image coordinates, which reaches egocentric human footage
-that carries no action label and gives a probe of representation content that
-transfers across embodiments. Consequence enters as a third generated stream of
-the same joint process, shares the action noise level, and inherits the
-visibility setting under study, so the model tree stays single.
-
-The implementation is verified at the level the current runs support. The
-uncoupled forward pass reproduces the official backbone implementation to the
-bit, gradients are blocked exactly where the coupling specification says they
-are, and a resumed run repeats no optimiser step. Normalisation statistics for
-both battlegrounds are computed and frozen into the cache fingerprint. The
-closed-loop and representation measurements of \sref{sec:exp} are pre-registered
-with their arms, their floors, their statistical test, and their acceptance
-criteria fixed in advance, and the targets printed in this report record what
-each measurement is expected to show rather than what it has shown, and
-published policies supply the external comparison on each benchmark.
-
-The core insight the formulation offers is therefore stated as a testable
-proposition rather than as a result: if coupling helps, it helps by changing what
-the world representation encodes about action and consequence, and the three
-paths through the noise plane are sufficient to decide that question without
-appealing to a benchmark average. \sref{sec:plan} names the instrument that
-decides each question and the floor that would retract it, and the honest
-boundary is recorded beside it: the study runs in simulation alone, and its
-corpus matches the largest published recipe in size while differing from it in
-composition, because the evaluation suites stay out of pretraining.
+JAM places action prediction inside the computation used to learn world dynamics. Its coupled
+streams give action supervision a direct gradient route into a pretrained video representation,
+while visual consequences provide a motion target shared by robot and human demonstrations. The
+completed adaptation record shows that the implementation can optimize world, action, and
+consequence prediction together. Foundation training and the controlled evaluation address the
+remaining scientific question: when does this coupling produce a representation that transfers to
+new interactions? The present evidence supports the training formulation and motivates measuring
+representation change separately from optimization progress.

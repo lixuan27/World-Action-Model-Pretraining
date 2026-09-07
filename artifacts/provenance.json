@@ -1,0 +1,133 @@
+{
+  "snapshot_date": "2026-09-07",
+  "source_root": "/public/home/lixuan/lixuan/JAM",
+  "source_head": "9bb88f9dd77bf01d523c367991556ac0df7129d7",
+  "note": "Live audit revision; individual runs may have launched at earlier revisions. File hashes identify archived evidence.",
+  "files": [
+    {
+      "source": "runs/jam_base_v1/metrics.jsonl",
+      "source_sha256": "d8aaa4cf207da8354e00bc8b2d352afb47ce9c75865f2fc77328003534b03174",
+      "published": "artifacts/measurements/jam_base_v1.jsonl",
+      "published_sha256": "d8aaa4cf207da8354e00bc8b2d352afb47ce9c75865f2fc77328003534b03174",
+      "status": "measured"
+    },
+    {
+      "source": "runs/jam_base_v1/config.yaml",
+      "source_sha256": "aec236e08334cdeab1c242772be05474272f2575f10b2eedc1acc30c1174df5f",
+      "published": "artifacts/configs/jam_base_v1.json",
+      "published_sha256": "924562ee250fab5c7a5f602d08232c6ed257e9f05c01aed5649cecfe61195d10",
+      "status": "resolved_configuration"
+    },
+    {
+      "source": "runs/e0_libero_bi/metrics.jsonl",
+      "source_sha256": "2813fa8b095fd5657617bb6e5db96bfa04daeecddc72f717f80cf72a1bfc86b6",
+      "published": "artifacts/measurements/e0_libero_bi.jsonl",
+      "published_sha256": "2813fa8b095fd5657617bb6e5db96bfa04daeecddc72f717f80cf72a1bfc86b6",
+      "status": "measured"
+    },
+    {
+      "source": "runs/e0_libero_bi/config.yaml",
+      "source_sha256": "6b0e87f599bcdea17e2992482f9af093d1a096ea40a31acc0bde70933a02e748",
+      "published": "artifacts/configs/e0_libero_bi.json",
+      "published_sha256": "8c52190497ef8a74dcb0c362649e1b6ffb5f76e59acb584395fc451f7f5ec18d",
+      "status": "resolved_configuration"
+    },
+    {
+      "source": "results/e0_libero_bi/train_summary.json",
+      "source_sha256": "719cd4b7064189e643b1a8b312d8d66562f2960ec9f659c38f59683bd4248e72",
+      "published": "artifacts/measurements/e0_libero_bi_summary.json",
+      "published_sha256": "719cd4b7064189e643b1a8b312d8d66562f2960ec9f659c38f59683bd4248e72",
+      "status": "measured"
+    },
+    {
+      "source": "src/jam/model/jam.py",
+      "source_sha256": "e77e75f7ca60e8ac5daccadf7612ba6669cd14cfe3e19789d8b0e4607de79774",
+      "status": "reviewed_source"
+    },
+    {
+      "source": "src/jam/model/objective.py",
+      "source_sha256": "d3f28dd01910933fcd8ce8e2fd6ad6d24413a9633da519aa84acdbe834b63d1a",
+      "status": "reviewed_source"
+    },
+    {
+      "source": "src/jam/model/flow.py",
+      "source_sha256": "2e6e04735503912288c334490690c1add44e47b1090fd9734eb6dcc83604a592",
+      "status": "reviewed_source"
+    },
+    {
+      "source": "src/jam/model/action_stream.py",
+      "source_sha256": "90c7f2405e3fd3e19e1c3d26142fb5668589ae50bacd7f8c8e5c9fa61252e364",
+      "status": "reviewed_source"
+    },
+    {
+      "source": "src/jam/model/world_stream.py",
+      "source_sha256": "839e9db58fcee32ca5aff3e72fc4848486d20711ba69586a7ebbe2a7af992dcb",
+      "status": "reviewed_source"
+    },
+    {
+      "source": "src/jam/infer/sampler.py",
+      "source_sha256": "da4d65c7282b74ebfaee68d6e589790cc6a9e23c34ac9e2c56b986d867c67a36",
+      "status": "reviewed_source"
+    },
+    {
+      "source": "src/jam/corpus/consequence.py",
+      "source_sha256": "2697f77cfbaf7bbe954d68fc4c81a1ad1c15a04d293d4bad8df52f6de0f11096",
+      "status": "reviewed_source"
+    },
+    {
+      "source": "src/jam/corpus/egodex_rlds.py",
+      "source_sha256": "5671c9817db20d6562e9340c6151142120b53c3fe97a86a0f0824fc39f796d25",
+      "status": "reviewed_source"
+    },
+    {
+      "source": "src/jam/corpus/normalize.py",
+      "source_sha256": "e4c6ad0a3ebc8ee3b2f8775756b0fcea4f91f884a660be62885515bfc6d7af3e",
+      "status": "reviewed_source"
+    },
+    {
+      "source": "src/jam/corpus/cache.py",
+      "source_sha256": "7c4aeb17c062fa35bf44a2bd564e4d0519c10a2a6fb930ff99ad8ef5cc5ea03a",
+      "status": "reviewed_source"
+    },
+    {
+      "source": "docs/data_recipe.md",
+      "source_sha256": "e37d34557ba12275e8fe44a721446c8a103f8795661ba70ef08155e7465fae39",
+      "status": "reviewed_project_record"
+    },
+    {
+      "source": "docs/decision_log.md",
+      "source_sha256": "1ae630c56982bbd544f4972e770c395165a37fce91928e0b21a25402be7742c5",
+      "status": "reviewed_project_record"
+    },
+    {
+      "source": "docs/experiment_ledger.md",
+      "source_sha256": "967dd58d833d449c4afe9e12a3194414b43ad4f2eb913d334c7a368f858c438c",
+      "status": "reviewed_project_record"
+    },
+    {
+      "source": "docs/narrative.md",
+      "source_sha256": "9582bf859c7e7cc2538037faff98bf898e5c47b261df200dfb3523ea32f7707b",
+      "status": "reviewed_project_record"
+    },
+    {
+      "source": "docs/research_design.md",
+      "source_sha256": "6e9f15d4d72e4e2e9b4a651f6db9726f3c78783fe20f7588b2bad9bffec9e9e9",
+      "status": "reviewed_project_record"
+    },
+    {
+      "source": "docs/engineering_design.md",
+      "source_sha256": "9f7beba58da7123bb8744862ff03c5db58351479ec8124f790901013a327dbc4",
+      "status": "reviewed_project_record"
+    },
+    {
+      "source": "docs/notes/2026-09-07.md",
+      "source_sha256": "3c73ebad41aa8ffada2401c6a578178e900878ed568f3b6e048511a277ff6c5f",
+      "status": "reviewed_project_record"
+    },
+    {
+      "source": "README.md",
+      "source_sha256": "653af8cfddf8d57b061263c6aa4b17e4239896502aa68d3f273c75ab5ca577c5",
+      "status": "reviewed_project_record"
+    }
+  ]
+}

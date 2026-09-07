@@ -1,0 +1,678 @@
+{
+  "status": "external_reference",
+  "reference_id": "R1",
+  "source_url": "https://raw.githubusercontent.com/OpenWAM-Official/OpenWAM-Official.github.io/cd5d05c0a002599560eeee17bcb7a8d61a5a7553/src/data/benchmark-tables.json",
+  "source_sha256": "268b5b777c79a2890e46e7d36c94c35674ecb426debf25d0ae710c10cacd3c3d",
+  "retrieved": "2026-09-07",
+  "rows": [
+    {
+      "table": "libero",
+      "title": "LIBERO",
+      "model": "R1",
+      "sub": null,
+      "columns": [
+        "Spatial",
+        "Object",
+        "Goal",
+        "Long",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "99.6",
+          "value": 99.6
+        },
+        {
+          "text": "99.6",
+          "value": 99.6
+        },
+        {
+          "text": "99.8",
+          "value": 99.8
+        },
+        {
+          "text": "98.2",
+          "value": 98.2
+        },
+        {
+          "text": "99.3",
+          "value": 99.3
+        }
+      ],
+      "source_pointer": "/simulation/0/groups/1/rows/7"
+    },
+    {
+      "table": "libero_plus",
+      "title": "LIBERO-Plus",
+      "model": "R1",
+      "sub": null,
+      "columns": [
+        "Camera",
+        "Robot",
+        "Language",
+        "Light",
+        "Background",
+        "Noise",
+        "Layout",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "33.8",
+          "value": 33.8
+        },
+        {
+          "text": "76.1",
+          "value": 76.1
+        },
+        {
+          "text": "88.0",
+          "value": 88.0
+        },
+        {
+          "text": "97.0",
+          "value": 97.0
+        },
+        {
+          "text": "87.1",
+          "value": 87.1
+        },
+        {
+          "text": "39.8",
+          "value": 39.8
+        },
+        {
+          "text": "77.5",
+          "value": 77.5
+        },
+        {
+          "text": "69.2",
+          "value": 69.2
+        }
+      ],
+      "source_pointer": "/simulation/1/groups/1/rows/5"
+    },
+    {
+      "table": "vlabench",
+      "title": "VLABench",
+      "model": "R1",
+      "sub": null,
+      "columns": [
+        "In-dist. · SR",
+        "In-dist. · PS",
+        "In-dist. · IS",
+        "Category · SR",
+        "Category · PS",
+        "Category · IS",
+        "Commonsense · SR",
+        "Commonsense · PS",
+        "Commonsense · IS",
+        "Instruction · SR",
+        "Instruction · PS",
+        "Instruction · IS",
+        "Texture · SR",
+        "Texture · PS",
+        "Texture · IS",
+        "Avg · SR",
+        "Avg · PS",
+        "Avg · IS"
+      ],
+      "cells": [
+        {
+          "text": "83.4",
+          "value": 83.4
+        },
+        {
+          "text": "87.9",
+          "value": 87.9
+        },
+        {
+          "text": "75.2",
+          "value": 75.2
+        },
+        {
+          "text": "38.1",
+          "value": 38.1
+        },
+        {
+          "text": "45.9",
+          "value": 45.9
+        },
+        {
+          "text": "45.9",
+          "value": 45.9
+        },
+        {
+          "text": "58.0",
+          "value": 58.0
+        },
+        {
+          "text": "64.8",
+          "value": 64.8
+        },
+        {
+          "text": "57.9",
+          "value": 57.9
+        },
+        {
+          "text": "53.8",
+          "value": 53.8
+        },
+        {
+          "text": "64.5",
+          "value": 64.5
+        },
+        {
+          "text": "66.5",
+          "value": 66.5
+        },
+        {
+          "text": "61.4",
+          "value": 61.4
+        },
+        {
+          "text": "72.9",
+          "value": 72.9
+        },
+        {
+          "text": "71.6",
+          "value": 71.6
+        },
+        {
+          "text": "58.9",
+          "value": 58.9
+        },
+        {
+          "text": "67.2",
+          "value": 67.2
+        },
+        {
+          "text": "63.5",
+          "value": 63.5
+        }
+      ],
+      "source_pointer": "/simulation/2/groups/1/rows/1"
+    },
+    {
+      "table": "robotwin_c2r",
+      "title": "RoboTwin2",
+      "model": "R1",
+      "sub": null,
+      "columns": [
+        "Clean",
+        "Randomized",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "89.4",
+          "value": 89.4
+        },
+        {
+          "text": "48.7",
+          "value": 48.7
+        },
+        {
+          "text": "69.0",
+          "value": 69.0
+        }
+      ],
+      "source_pointer": "/simulation/3/groups/1/rows/4"
+    },
+    {
+      "table": "robotwin",
+      "title": "RoboTwin2",
+      "model": "R1",
+      "sub": null,
+      "columns": [
+        "Clean",
+        "Randomized",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "93.74",
+          "value": 93.74
+        },
+        {
+          "text": "93.46",
+          "value": 93.46
+        },
+        {
+          "text": "93.60",
+          "value": 93.6
+        }
+      ],
+      "source_pointer": "/simulation/4/groups/1/rows/6"
+    },
+    {
+      "table": "robodojo",
+      "title": "RoboDojo",
+      "model": "R1",
+      "sub": null,
+      "columns": [
+        "Gen-Std · SR",
+        "Gen-Std · Score",
+        "Gen-Rand · SR",
+        "Gen-Rand · Score",
+        "Precision · SR",
+        "Precision · Score",
+        "Long-Horizon · SR",
+        "Long-Horizon · Score",
+        "Memory · SR",
+        "Memory · Score",
+        "Open · SR",
+        "Open · Score",
+        "Avg · SR",
+        "Avg · Score"
+      ],
+      "cells": [
+        {
+          "text": "25.56",
+          "value": 25.56
+        },
+        {
+          "text": "33.16",
+          "value": 33.16
+        },
+        {
+          "text": "4.11",
+          "value": 4.11
+        },
+        {
+          "text": "8.26",
+          "value": 8.26
+        },
+        {
+          "text": "9.25",
+          "value": 9.25
+        },
+        {
+          "text": "18.45",
+          "value": 18.45
+        },
+        {
+          "text": "25.33",
+          "value": 25.33
+        },
+        {
+          "text": "34.93",
+          "value": 34.93
+        },
+        {
+          "text": "9.11",
+          "value": 9.11
+        },
+        {
+          "text": "10.41",
+          "value": 10.41
+        },
+        {
+          "text": "1.08",
+          "value": 1.08
+        },
+        {
+          "text": "1.41",
+          "value": 1.41
+        },
+        {
+          "text": "11.92",
+          "value": 11.92
+        },
+        {
+          "text": "17.18",
+          "value": 17.18
+        }
+      ],
+      "source_pointer": "/simulation/5/groups/1/rows/4"
+    },
+    {
+      "table": "ebench",
+      "title": "EBench",
+      "model": "R1",
+      "sub": null,
+      "columns": [
+        "Table Top · SR",
+        "Table Top · Score",
+        "Simple PnP · SR",
+        "Simple PnP · Score",
+        "Long Horizon · SR",
+        "Long Horizon · Score",
+        "Overall · SR",
+        "Overall · Score"
+      ],
+      "cells": [
+        {
+          "text": "30.0",
+          "value": 30.0
+        },
+        {
+          "text": "44.2",
+          "value": 44.2
+        },
+        {
+          "text": "67.5",
+          "value": 67.5
+        },
+        {
+          "text": "72.0",
+          "value": 72.0
+        },
+        {
+          "text": "44.3",
+          "value": 44.3
+        },
+        {
+          "text": "72.6",
+          "value": 72.6
+        },
+        {
+          "text": "49.4",
+          "value": 49.4
+        },
+        {
+          "text": "64.7",
+          "value": 64.7
+        }
+      ],
+      "source_pointer": "/simulation/6/groups/1/rows/1"
+    },
+    {
+      "table": "robocasa_365",
+      "title": "RoboCasa365",
+      "model": "R1",
+      "sub": null,
+      "columns": [
+        "Atomic",
+        "Comp.-Seen",
+        "Comp.-Unseen",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "69.7",
+          "value": 69.7
+        },
+        {
+          "text": "32.1",
+          "value": 32.1
+        },
+        {
+          "text": "8.9",
+          "value": 8.9
+        },
+        {
+          "text": "38.2",
+          "value": 38.2
+        }
+      ],
+      "source_pointer": "/simulation/7/groups/1/rows/2"
+    },
+    {
+      "table": "robocasa_gr1",
+      "title": "RoboCasa-GR1",
+      "model": "R1",
+      "sub": null,
+      "columns": [
+        "SR (%)"
+      ],
+      "cells": [
+        {
+          "text": "60.5",
+          "value": 60.5
+        }
+      ],
+      "source_pointer": "/simulation/8/groups/1/rows/4"
+    },
+    {
+      "table": "real_world",
+      "title": "Single-Arm Real-Robot Tasks",
+      "model": "R1",
+      "sub": null,
+      "columns": [
+        "Stack Jenga",
+        "Stack Ring",
+        "Put Chili in Drawer",
+        "Put Jenga in Drawer",
+        "Hang on M",
+        "Hang on Cup",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "17/20 (85%)",
+          "value": 85.0
+        },
+        {
+          "text": "12/20 (60%)",
+          "value": 60.0
+        },
+        {
+          "text": "20/20 (100%)",
+          "value": 100.0
+        },
+        {
+          "text": "20/20 (100%)",
+          "value": 100.0
+        },
+        {
+          "text": "13/20 (65%)",
+          "value": 65.0
+        },
+        {
+          "text": "17/20 (85%)",
+          "value": 85.0
+        },
+        {
+          "text": "99/120 (82.5%)",
+          "value": 82.5
+        }
+      ],
+      "source_pointer": "/real/0/groups/0/rows/2"
+    },
+    {
+      "table": "robodojo_real",
+      "title": "RoboDojo real-world track",
+      "model": "R1",
+      "sub": "ARX X5",
+      "columns": [
+        "Task 1",
+        "Task 2",
+        "Task 3",
+        "Task 4",
+        "Task 5",
+        "Task 6",
+        "Emb. Avg.",
+        "Overall Avg."
+      ],
+      "cells": [
+        {
+          "text": "31.0 / 0.0",
+          "value": 31.0
+        },
+        {
+          "text": "0.0 / 0.0",
+          "value": 0.0
+        },
+        {
+          "text": "13.0 / 0.0",
+          "value": 13.0
+        },
+        {
+          "text": "52.0 / 20.0",
+          "value": 52.0
+        },
+        {
+          "text": "100.0 / 100.0",
+          "value": 100.0
+        },
+        {
+          "text": "38.0 / 20.0",
+          "value": 38.0
+        },
+        {
+          "text": "39.0 / 23.3",
+          "value": 39.0
+        },
+        {
+          "text": "—",
+          "value": null
+        }
+      ],
+      "source_pointer": "/real/1/groups/0/rows/15"
+    },
+    {
+      "table": "robodojo_real",
+      "title": "RoboDojo real-world track",
+      "model": "R1",
+      "sub": "Piper",
+      "columns": [
+        "Task 1",
+        "Task 2",
+        "Task 3",
+        "Task 4",
+        "Task 5",
+        "Task 6",
+        "Emb. Avg.",
+        "Overall Avg."
+      ],
+      "cells": [
+        {
+          "text": "8.3 / 0.0",
+          "value": 8.3
+        },
+        {
+          "text": "60.0 / 40.0",
+          "value": 60.0
+        },
+        {
+          "text": "36.7 / 30.0",
+          "value": 36.7
+        },
+        {
+          "text": "0.0 / 0.0",
+          "value": 0.0
+        },
+        {
+          "text": "100.0 / 100.0",
+          "value": 100.0
+        },
+        {
+          "text": "75.0 / 50.0",
+          "value": 75.0
+        },
+        {
+          "text": "46.7 / 36.7",
+          "value": 46.7
+        },
+        {
+          "text": "—",
+          "value": null
+        }
+      ],
+      "source_pointer": "/real/1/groups/0/rows/16"
+    },
+    {
+      "table": "robodojo_real",
+      "title": "RoboDojo real-world track",
+      "model": "R1",
+      "sub": "Piper X",
+      "columns": [
+        "Task 1",
+        "Task 2",
+        "Task 3",
+        "Task 4",
+        "Task 5",
+        "Task 6",
+        "Emb. Avg.",
+        "Overall Avg."
+      ],
+      "cells": [
+        {
+          "text": "0.0 / 0.0",
+          "value": 0.0
+        },
+        {
+          "text": "28.0 / 10.0",
+          "value": 28.0
+        },
+        {
+          "text": "18.0 / 0.0",
+          "value": 18.0
+        },
+        {
+          "text": "52.3 / 20.0",
+          "value": 52.3
+        },
+        {
+          "text": "40.0 / 40.0",
+          "value": 40.0
+        },
+        {
+          "text": "24.7 / 10.0",
+          "value": 24.7
+        },
+        {
+          "text": "27.2 / 13.3",
+          "value": 27.2
+        },
+        {
+          "text": "37.6 / 24.4",
+          "value": 37.6
+        }
+      ],
+      "source_pointer": "/real/1/groups/0/rows/17"
+    },
+    {
+      "table": "real_world_dex",
+      "title": "Dexterous-Hand Real-Robot Tasks",
+      "model": "R1",
+      "sub": null,
+      "columns": [
+        "Stack Toy Tower · ID",
+        "Stack Toy Tower · OOD",
+        "Collect Shuttlecocks · ID",
+        "Collect Shuttlecocks · OOD",
+        "Put Away Clothes · ID",
+        "Put Away Clothes · OOD",
+        "Twist off Bottle Cap · ID",
+        "Twist off Bottle Cap · OOD"
+      ],
+      "cells": [
+        {
+          "text": "4/10 (40%) / 21/30 (70.0)",
+          "value": 40.0
+        },
+        {
+          "text": "3/10 (30%) / 17/30 (56.7)",
+          "value": 30.0
+        },
+        {
+          "text": "6/10 (60%) / 29/35 (82.9)",
+          "value": 60.0
+        },
+        {
+          "text": "4/15 (26.7%) / 30/57 (52.6)",
+          "value": 26.7
+        },
+        {
+          "text": "10/10 (100%) / 30/30 (100.0)",
+          "value": 100.0
+        },
+        {
+          "text": "17/20 (85%) / 55/60 (91.7)",
+          "value": 85.0
+        },
+        {
+          "text": "7/10 (70%) / 10/10 (100.0)",
+          "value": 70.0
+        },
+        {
+          "text": "16/20 (80%) / 18/20 (90.0)",
+          "value": 80.0
+        }
+      ],
+      "source_pointer": "/real/2/groups/0/rows/1"
+    }
+  ]
+}
