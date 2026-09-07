@@ -37,8 +37,10 @@ further configuration.
 
 Two kinds of number appear, and the document separates them everywhere.
 
-**Published results.** Tables 4 to 6 carry the published results of OpenVLA,
-Pi-0, and Pi-0.5 on the benchmark each table covers. Those rows print in black,
+**Published results.** Tables 4 to 11 carry the published results of OpenVLA,
+Pi-0, Pi-0.5, StarVLA, X-VLA, Fast-WAM, Being-H0.7, LingBot-VLA, and
+Qwen-RobotManip on the benchmark each table covers, and a cell reads an en-dash
+where the source reports only the benchmark average. Those rows print in black,
 their captions say so, and the bibliography carries the source. Each of those
 policies received large-scale pretraining of its own, which the table states in
 its panel headers, so the pretrained rows of this work are the ones that compare

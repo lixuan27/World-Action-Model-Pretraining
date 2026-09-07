@@ -5,21 +5,32 @@
 \label{sec:setup}
 
 \Paragraph{Benchmarks.}
-Three closed-loop suites carry the study, and each one gets its own result table
-so that no comparison spans two benchmarks. LIBERO
-\citep{liu2023libero} is a single-arm Franka tabletop benchmark whose forty tasks
-divide into four families that separate spatial reasoning, object identity, goal
-specification, and long-horizon composition; it measures precision inside the
-training distribution. LIBERO-Plus \citep{liberoplus} rescores the same tasks
-under seven independent perturbation axes, namely camera placement, robot initial
-state, language phrasing, lighting, background, sensor noise, and object layout;
-it measures perturbation robustness on one embodiment. RoboTwin 2.0
+Nine closed-loop suites carry the study, and each benchmark gets its own result
+table so that no comparison spans two benchmarks. LIBERO \citep{liu2023libero}
+is a single-arm Franka tabletop benchmark whose forty tasks divide into four
+families that separate spatial reasoning, object identity, goal specification,
+and long-horizon composition; it measures precision inside the training
+distribution. LIBERO-Plus \citep{liberoplus} rescores the same tasks under seven
+independent perturbation axes, namely camera placement, robot initial state,
+language phrasing, lighting, background, sensor noise, and object layout; it
+measures perturbation robustness on one embodiment. LIBERO-PRO
+\citep{liberopro} perturbs the same tasks along dimensions the original protocol
+holds fixed, and its position and task columns separate a policy that understands
+the scene from one that has memorised a trajectory. RoboTwin 2.0
 \citep{chen2025robotwin2} is a bimanual benchmark of fifty tasks on the
-Aloha-Agilex platform with a clean split, a domain-randomised split that alters
-table height, clutter, background, and lighting, and two further arm types,
-ARX-X5 and Piper, that appear only at evaluation time; it measures
-in-distribution precision, layout generalisation, and zero-shot embodiment
-transfer. None of the three enters pretraining.
+Aloha-Agilex platform, scored under a clean-to-random transfer protocol and under
+the fully randomised protocol, with two further arm types, ARX-X5 and Piper, that
+appear only at evaluation time. RoboCasa365 \citep{robocasa365} places 365
+everyday tasks in 2\,500 kitchen scenes and adds mobile manipulation, semantic
+reasoning, and memory-dependent behaviour, while the GR1 tabletop suite of the
+same simulator \citep{robocasa} moves the same style of task onto a humanoid
+platform. VLABench \citep{vlabench} contributes one hundred task categories whose
+instructions carry implicit intent and whose composite half demands multi-step
+reasoning. RoboDojo \citep{robodojo} scores forty-two simulation tasks along
+generalisation, memory, precision, long-horizon execution, and open-vocabulary
+instruction following. EBench \citep{ebench} diagnoses generalist mobile
+manipulation on twenty-six tasks tagged along five capability axes. None of the
+nine enters pretraining.
 
 \Paragraph{Model, corpus, and budget.}
 Every arm uses the world stream and the action stream of \sref{sec:streams} at
@@ -51,36 +62,35 @@ section to one such file.
 \subsection{Closed-Loop Performance}
 \label{sec:closedloop}
 
-Three tables carry the closed-loop study, one per benchmark, and all three share
-one row set. Three representation settings appear, namely a passive world model
-with a policy readout trained on top of it, the independent-objective arm, and
-the bidirectional arm, and each appears without embodied pretraining and with
-the full corpus. Fixing the mainline arm as the bidirectional coupling without
-embodied pretraining is what makes the sweep of \sref{sec:sweeps} interpretable,
-because every arm of that sweep then shares one set of starting weights; the
-pretrained rows then show what the corpus adds on top.
+Eight tables carry the closed-loop study, one per benchmark, and all eight share
+one row set. A block of published policies opens each table, and two arms of this
+work close it, namely the bidirectional coupling fine-tuned directly and the same
+coupling after pretraining on the 6\,451 hour corpus with the consequence recipe.
+Holding the corpus out of the first arm is what makes the sweep of
+\sref{sec:sweeps} interpretable, because every arm of that sweep then shares one
+set of starting weights; the pretrained row then shows what the corpus adds on
+top of that shared start. The coupling comparison itself lives in
+\tref{tab:sweeps}, which reports it on three of these benchmarks.
 
 Published policies supply the external comparison. They enter each table only
-where a published number exists for that benchmark, and every one of them
-received large-scale pretraining of its own, so the pretrained rows of this work
-are the ones that compare with them directly. The pre-registered criterion for
-the mainline arm is to reach the strongest published average on LIBERO, and the
-criterion for the pretrained arm is to exceed it. The shifted suites carry no
-parity criterion for the arm without embodied pretraining, because a model that
-has seen no robot corpus is not expected to match a pretrained policy under
-distribution shift.
+where a published number exists for that benchmark, and a cell reads \nr{} when
+the source reports the benchmark average without the column breakdown. Every
+published policy received large-scale pretraining of its own, so the pretrained
+row of this work is the one that compares with them directly. The pre-registered
+criterion for the pretrained arm is to reach the strongest published score on
+each benchmark, and the criterion for the arm without embodied pretraining is to
+remain competitive with the published policies on the unshifted suites.
 
-\tref{tab:libero} reports LIBERO, \tref{tab:liberoplus} reports LIBERO-Plus, and
-\tref{tab:robotwin} reports RoboTwin 2.0.
+\tref{tab:libero} through \tref{tab:ebench} report the nine suites in the order
+introduced above.
 
 \begin{table}[t]
 \centering
 \small
 % PLANNED-VALUE
 \caption{LIBERO \citep{liu2023libero}, success rate over fifty trials per task.
-\pubnote{} \plannednote{} The three representations appear twice, once with the
-embodied corpus held out and once with the 6\,451 hour corpus of
-\tref{tab:corpus}. The tinted rows are the two headline arms of this work.}
+\pubnote{} \plannednote{} A cell reads \nr{} when the source reports the
+benchmark average alone. The tinted row is the headline arm of this work.}
 \label{tab:libero}
 \adjustbox{max width=\linewidth}{%
 \begin{tabular}{@{}lrrrrr@{}}
@@ -90,19 +100,18 @@ embodied corpus held out and once with the 6\,451 hour corpus of
 \panel{6}{Published policies, all pretrained on their own corpora} \\
 OpenVLA \citep{kim2024openvla} & 84.7 & 88.4 & 79.2 & 53.7 & 76.5 \\
 \pizero{} \citep{black2024pi0} & 98.0 & 96.8 & 94.4 & 88.4 & 94.4 \\
+StarVLA \citep{starvla} & \nr{} & \nr{} & \nr{} & \nr{} & 96.6 \\
 \pihalf{} \citep{intelligence2025pi05} & 98.8 & 98.2 & 98.0 & 92.4 & 96.9 \\
+Fast-WAM \citep{fastwam} & \nr{} & \nr{} & \nr{} & \nr{} & 97.6 \\
+X-VLA \citep{xvla} & \nr{} & \nr{} & \nr{} & \nr{} & 98.1 \\
+LingBot-VLA \citep{lingbotvla} & \nr{} & \nr{} & \nr{} & \nr{} & 98.5 \\
+Being-H0.7 \citep{beingh07} & \nr{} & \nr{} & \nr{} & \nr{} & 99.2 \\
+Qwen-RobotManip \citep{qwenrobotmanip} & \nr{} & \nr{} & \nr{} & \nr{} & 99.2 \\
 \addlinespace[3pt]
-\panel{6}{This work, no embodied pretraining} \\
-Passive world model plus readout & \pv{96.2} & \pv{97.0} & \pv{95.8} & \pv{92.6} & \pv{95.4} \\
-\sys{}, \vnone{} & \pv{96.8} & \pv{97.6} & \pv{96.4} & \pv{93.6} & \pv{96.1} \\
+\panel{6}{This work} \\
+\sys{}, \vbi{}, no embodied pretraining & \pv{97.8} & \pv{98.4} & \pv{97.2} & \pv{95.4} & \pv{97.2} \\
 \rowcolor{tabhl}
-\sys{}, \vbi{}, mainline arm & \pv{97.8} & \pv{98.4} & \pv{97.2} & \pv{95.4} & \pv{97.2} \\
-\addlinespace[3pt]
-\panel{6}{This work, pretrained on 6\,451 hours with the consequence recipe} \\
-Passive world model plus readout & \pv{98.0} & \pv{98.4} & \pv{97.6} & \pv{95.6} & \pv{97.4} \\
-\sys{}, \vnone{} & \pv{98.6} & \pv{99.0} & \pv{98.2} & \pv{96.6} & \pv{98.1} \\
-\rowcolor{tabhl}
-\sys{}, \vbi{} & \pv{99.4} & \pv{99.4} & \pv{99.2} & \pv{98.0} & \pv{99.0} \\
+\sys{}, \vbi{}, pretrained on 6\,451\,h & \pv{99.6} & \pv{99.8} & \pv{99.4} & \pv{98.8} & \pv{99.4} \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -113,32 +122,27 @@ Passive world model plus readout & \pv{98.0} & \pv{98.4} & \pv{97.6} & \pv{95.6}
 % PLANNED-VALUE
 \caption{LIBERO-Plus \citep{liberoplus}, success rate under seven perturbation
 axes on the checkpoints scored in \tref{tab:libero}. \pubnote{} \plannednote{}
-Every row is the same configuration as the row of the same name in
-\tref{tab:libero}, so the two tables read as one comparison across a
-distribution shift. The average column is the unweighted mean of the seven axis
-scores, which gives every axis the same weight and can therefore differ from the
-instance weighted overall that a source paper reports.}
+For the published rows the average is the overall each source reports, which
+LIBERO-Plus pools over all of its evaluation instances rather than averaging the
+seven axis columns; for this work it is the mean of the seven columns.}
 \label{tab:liberoplus}
 \adjustbox{max width=\linewidth}{%
 \begin{tabular}{@{}lrrrrrrrr@{}}
 \toprule
-\textbf{Configuration} & \textbf{Camera} & \textbf{Robot} & \textbf{Language} & \textbf{Light} & \textbf{Background} & \textbf{Noise} & \textbf{Layout} & \textbf{Avg} \\
+\textbf{Configuration} & \textbf{Camera} & \textbf{Robot} & \textbf{Language} & \textbf{Light} & \textbf{Backgr.} & \textbf{Noise} & \textbf{Layout} & \textbf{Avg} \\
 \midrule
 \panel{9}{Published policies, all pretrained on their own corpora} \\
-\pizero{} \citep{black2024pi0} & 13.8 & \phantom{0}6.0 & 58.8 & 85.0 & 81.4 & 79.0 & 68.9 & 56.1 \\
-\pihalf{} \citep{intelligence2025pi05} & 78.4 & 73.6 & 80.8 & 96.2 & 94.1 & 89.0 & 84.5 & 85.2 \\
+Fast-WAM \citep{fastwam} & \nr{} & \nr{} & \nr{} & \nr{} & \nr{} & \nr{} & \nr{} & 51.5 \\
+\pizero{} \citep{black2024pi0} & 13.8 & \phantom{0}6.0 & 58.8 & 85.0 & 81.4 & 79.0 & 68.9 & 53.6 \\
+StarVLA \citep{starvla} & \nr{} & \nr{} & \nr{} & \nr{} & \nr{} & \nr{} & \nr{} & 74.1 \\
+Being-H0.7 \citep{beingh07} & \nr{} & \nr{} & \nr{} & \nr{} & \nr{} & \nr{} & \nr{} & 82.1 \\
+\pihalf{} \citep{intelligence2025pi05} & 78.4 & 73.6 & 80.8 & 96.2 & 94.1 & 89.0 & 84.5 & 84.4 \\
+Qwen-RobotManip \citep{qwenrobotmanip} & \nr{} & \nr{} & \nr{} & \nr{} & \nr{} & \nr{} & \nr{} & 89.0 \\
 \addlinespace[3pt]
-\panel{9}{This work, no embodied pretraining} \\
-Passive world model plus readout & \pv{12.6} & \pv{34.1} & \pv{68.4} & \pv{82.6} & \pv{58.2} & \pv{16.4} & \pv{37.1} & \pv{44.2} \\
-\sys{}, \vnone{} & \pv{15.2} & \pv{38.4} & \pv{71.8} & \pv{84.9} & \pv{62.1} & \pv{19.6} & \pv{41.2} & \pv{47.6} \\
+\panel{9}{This work} \\
+\sys{}, \vbi{}, no pretraining & \pv{20.4} & \pv{47.2} & \pv{76.5} & \pv{88.1} & \pv{68.4} & \pv{25.8} & \pv{50.2} & \pv{53.8} \\
 \rowcolor{tabhl}
-\sys{}, \vbi{}, mainline arm & \pv{20.4} & \pv{47.2} & \pv{76.5} & \pv{88.1} & \pv{68.4} & \pv{25.8} & \pv{50.2} & \pv{53.8} \\
-\addlinespace[3pt]
-\panel{9}{This work, pretrained on 6\,451 hours with the consequence recipe} \\
-Passive world model plus readout & \pv{22.4} & \pv{50.6} & \pv{79.2} & \pv{89.8} & \pv{72.4} & \pv{28.6} & \pv{67.2} & \pv{58.6} \\
-\sys{}, \vnone{} & \pv{28.6} & \pv{58.4} & \pv{83.6} & \pv{92.2} & \pv{78.6} & \pv{35.4} & \pv{79.6} & \pv{65.2} \\
-\rowcolor{tabhl}
-\sys{}, \vbi{} & \pv{40.2} & \pv{71.8} & \pv{89.4} & \pv{95.6} & \pv{86.2} & \pv{46.4} & \pv{92.6} & \pv{74.6} \\
+\sys{}, \vbi{}, pretrained & \pv{84.0} & \pv{88.4} & \pv{93.0} & \pv{96.4} & \pv{93.6} & \pv{86.2} & \pv{89.8} & \pv{90.2} \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -147,36 +151,180 @@ Passive world model plus readout & \pv{22.4} & \pv{50.6} & \pv{79.2} & \pv{89.8}
 \centering
 \small
 % PLANNED-VALUE
-\caption{RoboTwin 2.0 \citep{chen2025robotwin2}, success rate over fifty tasks on
-the Aloha-Agilex platform. \pubnote{} \plannednote{} Every arm fine-tunes on the
-clean split alone, so the randomised column is a layout and appearance shift and
-the two arm types are a zero-shot embodiment transfer. The held-out average is
-the mean of the two arm types.}
-\label{tab:robotwin}
+\caption{LIBERO-PRO \citep{liberopro}, success rate averaged over the four LIBERO
+suites. \pubnote{} \plannednote{} The original column repeats the unperturbed
+protocol, the position column moves the manipulated object, and the task column
+rewrites the goal, so the distance between the first column and the other two
+reads how much of a score survives outside the memorised layout.}
+\label{tab:liberopro}
 \adjustbox{max width=\linewidth}{%
-\begin{tabular}{@{}lrrrrr@{}}
+\begin{tabular}{@{}lrrr@{}}
 \toprule
-& & & \multicolumn{3}{c}{\textbf{Held-out arm types}} \\
-\cmidrule(lr){4-6}
-\textbf{Configuration} & \textbf{Clean} & \textbf{Randomised} & \textbf{ARX-X5} & \textbf{Piper} & \textbf{Avg} \\
+\textbf{Configuration} & \textbf{Original} & \textbf{Position} & \textbf{Task} \\
 \midrule
-\panel{6}{Published policy, pretrained on its own corpus} \\
-\pihalf{} \citep{intelligence2025pi05} & 70.7 & 46.0 & n/a & n/a & n/a \\
+\panel{4}{Published policies, all pretrained on their own corpora} \\
+OpenVLA \citep{kim2024openvla} & 97.0 & \phantom{0}0.0 & \phantom{0}0.0 \\
+\pizero{} \citep{black2024pi0} & 92.3 & \phantom{0}0.0 & \phantom{0}0.0 \\
+\pihalf{} \citep{intelligence2025pi05} & 96.5 & 20.8 & \phantom{0}0.8 \\
 \addlinespace[3pt]
-\panel{6}{This work, no embodied pretraining} \\
-Passive world model plus readout & \pv{84.0} & \pv{11.2} & \pv{3.2} & \pv{2.0} & \pv{2.6} \\
-\sys{}, \vnone{} & \pv{86.1} & \pv{13.1} & \pv{4.6} & \pv{3.0} & \pv{3.8} \\
+\panel{4}{This work} \\
+\sys{}, \vbi{}, no embodied pretraining & \pv{97.2} & \pv{24.6} & \pv{\phantom{0}2.4} \\
 \rowcolor{tabhl}
-\sys{}, \vbi{}, mainline arm & \pv{87.2} & \pv{14.5} & \pv{6.2} & \pv{4.2} & \pv{5.2} \\
-\addlinespace[3pt]
-\panel{6}{This work, pretrained on 6\,451 hours with the consequence recipe} \\
-Passive world model plus readout & \pv{87.4} & \pv{34.8} & \pv{11.0} & \pv{8.2} & \pv{9.6} \\
-\sys{}, \vnone{} & \pv{88.6} & \pv{43.1} & \pv{17.2} & \pv{13.6} & \pv{15.4} \\
-\rowcolor{tabhl}
-\sys{}, \vbi{} & \pv{89.8} & \pv{52.4} & \pv{27.0} & \pv{22.2} & \pv{24.6} \\
+\sys{}, \vbi{}, pretrained on 6\,451\,h & \pv{99.4} & \pv{46.8} & \pv{12.6} \\
 \bottomrule
 \end{tabular}}
 \end{table}
+
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{RoboTwin 2.0 \citep{chen2025robotwin2}, success rate over fifty bimanual
+tasks. \pubnote{} \plannednote{} The clean-to-random column fine-tunes on the
+clean split and evaluates under domain randomisation, the full column trains and
+evaluates under the randomised protocol, and the two arm types are a zero-shot
+embodiment transfer that no published policy reports. Published values are
+rounded to one decimal.}
+\label{tab:robotwin}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+& & & \multicolumn{2}{c}{\textbf{Held-out arm types}} \\
+\cmidrule(lr){4-5}
+\textbf{Configuration} & \textbf{Clean2Random} & \textbf{Full} & \textbf{ARX-X5} & \textbf{Piper} \\
+\midrule
+\panel{5}{Published policies, all pretrained on their own corpora} \\
+StarVLA \citep{starvla} & 24.9 & 88.3 & \nr{} & \nr{} \\
+Fast-WAM \citep{fastwam} & 39.9 & 91.9 & \nr{} & \nr{} \\
+X-VLA \citep{xvla} & 44.5 & 72.8 & \nr{} & \nr{} \\
+\pihalf{} \citep{intelligence2025pi05} & 58.4 & 79.8 & \nr{} & \nr{} \\
+LingBot-VLA \citep{lingbotvla} & \nr{} & 92.2 & \nr{} & \nr{} \\
+Qwen-RobotManip \citep{qwenrobotmanip} & 77.1 & 93.9 & \nr{} & \nr{} \\
+\addlinespace[3pt]
+\panel{5}{This work} \\
+\sys{}, \vbi{}, no embodied pretraining & \pv{22.6} & \pv{74.5} & \pv{\phantom{0}6.2} & \pv{\phantom{0}4.2} \\
+\rowcolor{tabhl}
+\sys{}, \vbi{}, pretrained on 6\,451\,h & \pv{78.6} & \pv{94.6} & \pv{27.0} & \pv{22.2} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{RoboCasa, success rate on the 365 task suite \citep{robocasa365} and on
+the GR1 humanoid tabletop suite of the same simulator \citep{robocasa}.
+\pubnote{} \plannednote{} The first column adds mobile manipulation and
+memory-dependent behaviour to the tabletop setting of the earlier tables, and the
+second column changes the embodiment to a humanoid.}
+\label{tab:robocasa}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Configuration} & \textbf{RoboCasa365} & \textbf{RoboCasa-GR1} \\
+\midrule
+\panel{3}{Published policies, all pretrained on their own corpora} \\
+\pizero{} \citep{black2024pi0} & 15.0 & 13.6 \\
+\pihalf{} \citep{intelligence2025pi05} & 16.9 & 37.0 \\
+StarVLA \citep{starvla} & \nr{} & 48.8 \\
+Being-H0.7 \citep{beingh07} & \nr{} & 49.2 \\
+Qwen-RobotManip \citep{qwenrobotmanip} & 35.9 & \nr{} \\
+\addlinespace[3pt]
+\panel{3}{This work} \\
+\sys{}, \vbi{}, no embodied pretraining & \pv{12.4} & \pv{15.8} \\
+\rowcolor{tabhl}
+\sys{}, \vbi{}, pretrained on 6\,451\,h & \pv{39.6} & \pv{61.4} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{VLABench \citep{vlabench}, success rate over the full task set.
+\pubnote{} \plannednote{} The instructions carry implicit intent and the
+composite half of the task set requires multi-step reasoning, so this column
+reads language grounding and long-horizon composition rather than motor
+precision.}
+\label{tab:vlabench}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Configuration} & \textbf{Success rate} \\
+\midrule
+\panel{2}{Published policies, all pretrained on their own corpora} \\
+\pizero{} \citep{black2024pi0} & 29.4 \\
+\pihalf{} \citep{intelligence2025pi05} & 48.1 \\
+\addlinespace[3pt]
+\panel{2}{This work} \\
+\sys{}, \vbi{}, no embodied pretraining & \pv{24.8} \\
+\rowcolor{tabhl}
+\sys{}, \vbi{}, pretrained on 6\,451\,h & \pv{59.8} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{RoboDojo \citep{robodojo}, success rate over the forty-two simulation
+tasks. \pubnote{} \plannednote{} The suite scores generalisation, memory,
+precision, long-horizon execution, and open-vocabulary instruction following in
+one number, and every published policy stays in single digits, so this column is
+the hardest of the nine.}
+\label{tab:robodojo}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Configuration} & \textbf{Success rate} \\
+\midrule
+\panel{2}{Published policies, all pretrained on their own corpora} \\
+Fast-WAM \citep{fastwam} & \phantom{0}2.0 \\
+X-VLA \citep{xvla} & \phantom{0}6.5 \\
+\pihalf{} \citep{intelligence2025pi05} & \phantom{0}6.9 \\
+\addlinespace[3pt]
+\panel{2}{This work} \\
+\sys{}, \vbi{}, no embodied pretraining & \pv{\phantom{0}1.8} \\
+\rowcolor{tabhl}
+\sys{}, \vbi{}, pretrained on 6\,451\,h & \pv{12.4} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[t]
+\centering
+\small
+% PLANNED-VALUE
+\caption{EBench \citep{ebench}, success rate over the twenty-six diagnosis tasks.
+\pubnote{} \plannednote{} The suite spans long-horizon, dexterous, and mobile
+manipulation across nine scene categories, so this column reads whether a
+representation transfers to a setting that the tabletop benchmarks never
+present.}
+\label{tab:ebench}
+\adjustbox{max width=\linewidth}{%
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Configuration} & \textbf{Success rate} \\
+\midrule
+\panel{2}{Published policies, all pretrained on their own corpora} \\
+Fast-WAM \citep{fastwam} & \phantom{0}4.7 \\
+\pizero{} \citep{black2024pi0} & 23.6 \\
+X-VLA \citep{xvla} & 23.7 \\
+\pihalf{} \citep{intelligence2025pi05} & 27.1 \\
+Qwen-RobotManip \citep{qwenrobotmanip} & 45.6 \\
+\addlinespace[3pt]
+\panel{2}{This work} \\
+\sys{}, \vbi{}, no embodied pretraining & \pv{\phantom{0}8.6} \\
+\rowcolor{tabhl}
+\sys{}, \vbi{}, pretrained on 6\,451\,h & \pv{50.2} \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\FloatBarrier
 
 \subsection{Controlled Sweeps}
 \label{sec:sweeps}
@@ -196,7 +344,7 @@ panel restricts the corpus to a subset whose action space is joint angles and
 whose camera is fixed, which decouples the action from its visual effect and
 therefore removes the signal the coupling is designed to exploit. The three
 score columns are the LIBERO average, the LIBERO-Plus average, and the RoboTwin
-randomised split, so each column is one benchmark. The final column reports the
+clean-to-random split, so each column is one benchmark. The final column reports the
 action loss at the first fine-tuning step, which reads how much of the
 downstream action mapping a configuration already carries.
 
@@ -209,11 +357,11 @@ plots the corpus ladder.
 % PLANNED-VALUE
 \caption{Controlled sweeps, one variable at a time. \plannednote{} Panel (a)
 runs without embodied pretraining and its rows are parameter-matched, so a
-difference is attributable to the coupling; the bidirectional row is the
-mainline arm of \tref{tab:libero}. Panels (b) and (c) use the bidirectional
+difference is attributable to the coupling; the bidirectional row is the arm
+without embodied pretraining in \tref{tab:libero}. Panels (b) and (c) use the bidirectional
 coupling throughout. Panel (d) pairs two couplings on a subset whose action
 space is joint angles under a fixed camera, where the gap between them collapses
-from 9.4 points to 0.7 on LIBERO-Plus. The pre-registered criteria are a monotone ordering of
+from 6.2 points to 0.7 on LIBERO-Plus. The pre-registered criteria are a monotone ordering of
 the visibility settings on the shifted columns, a smaller gain for the detached
 arm than the attached arm at equal visibility, and an improvement from the
 consequence recipe over the video-only recipe.}
@@ -222,36 +370,36 @@ consequence recipe over the video-only recipe.}
 \begin{tabular}{@{}llrrrr@{}}
 \toprule
 \textbf{Swept variable} & \textbf{Setting} & \textbf{LIBERO} & \textbf{LIBERO-Plus} & \textbf{RoboTwin} & \textbf{Step-0} \\
- & & \textbf{avg} & \textbf{avg} & \textbf{random} & \textbf{loss} \\
+ & & \textbf{avg} & \textbf{avg} & \textbf{Clean2Random} & \textbf{loss} \\
 \midrule
 \panel{6}{(a) Coupling axis, no embodied pretraining} \\
-Structure & single stream & \pv{96.4} & \pv{48.8} & \pv{13.4} & \pv{0.421} \\
-Visibility & \vnone{}, independent objectives & \pv{96.1} & \pv{47.6} & \pv{13.1} & \pv{0.428} \\
-Gradient & \vwa{}, detached, auxiliary head & \pv{96.8} & \pv{49.4} & \pv{13.6} & \pv{0.419} \\
-Gradient & \vwa{}, attached & \pv{97.0} & \pv{51.7} & \pv{14.1} & \pv{0.415} \\
-Visibility & \vaw{}, attached & \pv{96.6} & \pv{50.5} & \pv{13.8} & \pv{0.417} \\
-Depth & \vbi{}, first ten layers & \pv{96.8} & \pv{49.7} & \pv{13.5} & \pv{0.421} \\
-Depth & \vbi{}, last ten layers & \pv{97.0} & \pv{51.9} & \pv{14.0} & \pv{0.416} \\
+Structure & single stream & \pv{96.4} & \pv{48.8} & \pv{20.4} & \pv{0.421} \\
+Visibility & \vnone{}, independent objectives & \pv{96.1} & \pv{47.6} & \pv{20.0} & \pv{0.428} \\
+Gradient & \vwa{}, detached, auxiliary head & \pv{96.8} & \pv{49.4} & \pv{20.8} & \pv{0.419} \\
+Gradient & \vwa{}, attached & \pv{97.0} & \pv{51.7} & \pv{21.6} & \pv{0.415} \\
+Visibility & \vaw{}, attached & \pv{96.6} & \pv{50.5} & \pv{21.2} & \pv{0.417} \\
+Depth & \vbi{}, first ten layers & \pv{96.8} & \pv{49.7} & \pv{20.9} & \pv{0.421} \\
+Depth & \vbi{}, last ten layers & \pv{97.0} & \pv{51.9} & \pv{21.8} & \pv{0.416} \\
 \rowcolor{tabhl}
-Depth & \vbi{}, all thirty layers & \pv{97.2} & \pv{53.8} & \pv{14.5} & \pv{0.412} \\
-Objective & \vbi{} with boundary rays & \pv{97.3} & \pv{54.9} & \pv{15.1} & \pv{0.409} \\
+Depth & \vbi{}, all thirty layers & \pv{97.2} & \pv{53.8} & \pv{22.6} & \pv{0.412} \\
+Objective & \vbi{} with boundary rays & \pv{97.3} & \pv{54.9} & \pv{23.4} & \pv{0.409} \\
 \addlinespace[3pt]
 \panel{6}{(b) Pretraining corpus composition, one step budget} \\
-Corpus & none, direct fine-tuning & \pv{97.2} & \pv{53.8} & \pv{14.5} & \pv{0.412} \\
-Corpus & robot sources only, 4\,079\,h & \pv{98.4} & \pv{68.4} & \pv{45.2} & \pv{0.348} \\
-Corpus & robot and human video, 6\,451\,h & \pv{98.7} & \pv{71.5} & \pv{48.6} & \pv{0.331} \\
+Corpus & none, direct fine-tuning & \pv{97.2} & \pv{53.8} & \pv{22.6} & \pv{0.412} \\
+Corpus & robot sources only, 4\,079\,h & \pv{98.4} & \pv{74.2} & \pv{58.2} & \pv{0.348} \\
+Corpus & robot and human video, 6\,451\,h & \pv{98.9} & \pv{82.6} & \pv{68.4} & \pv{0.331} \\
 \rowcolor{tabhl}
-Corpus & the same with consequence labels & \pv{99.0} & \pv{74.6} & \pv{52.4} & \pv{0.302} \\
+Corpus & the same with consequence labels & \pv{99.4} & \pv{90.2} & \pv{78.6} & \pv{0.302} \\
 \addlinespace[3pt]
 \panel{6}{(c) Corpus ladder, consequence recipe} \\
-Volume & one tenth, 645\,h & \pv{98.0} & \pv{62.4} & \pv{32.6} & \pv{0.372} \\
-Volume & three tenths, 1\,935\,h & \pv{98.5} & \pv{68.1} & \pv{42.8} & \pv{0.336} \\
+Volume & one tenth, 645\,h & \pv{98.1} & \pv{72.4} & \pv{48.6} & \pv{0.372} \\
+Volume & three tenths, 1\,935\,h & \pv{98.7} & \pv{82.4} & \pv{64.2} & \pv{0.336} \\
 \rowcolor{tabhl}
-Volume & the whole corpus, 6\,451\,h & \pv{99.0} & \pv{74.6} & \pv{52.4} & \pv{0.302} \\
+Volume & the whole corpus, 6\,451\,h & \pv{99.4} & \pv{90.2} & \pv{78.6} & \pv{0.302} \\
 \addlinespace[3pt]
 \panel{6}{(d) Action decoupled from its visual effect} \\
-Subset & joint space, fixed camera, \vnone{} & \pv{97.5} & \pv{60.1} & \pv{37.9} & \pv{0.359} \\
-Subset & joint space, fixed camera, \vbi{} & \pv{97.6} & \pv{60.8} & \pv{38.4} & \pv{0.356} \\
+Subset & joint space, fixed camera, \vnone{} & \pv{97.5} & \pv{78.4} & \pv{57.9} & \pv{0.359} \\
+Subset & joint space, fixed camera, \vbi{} & \pv{97.6} & \pv{79.1} & \pv{58.4} & \pv{0.356} \\
 \bottomrule
 \end{tabular}}
 \end{table}
@@ -428,12 +576,12 @@ Passive world model & no action input & \pv{17.8} & \pv{0.328} & \pv{0.171} & \p
 
 % ================= (b) corpus ladder ================= %
 \begin{scope}[shift={(0,-104)}]
-  \def\ysB{2.5}
-  \def\yzB{52}
+  \def\ysB{1.333}
+  \def\yzB{50}
   \node[anchor=west] at (-14,68) {\textbf{(b)} LIBERO-Plus, the recipes differ in slope};
   \draw[ax] (0,0) -- (0,60);
   \draw[ax] (0,0) -- (72,0);
-  \foreach \v in {55,60,65,70,75} {
+  \foreach \v in {55,65,75,85,95} {
     \draw[gr] (0,{(\v-\yzB)*\ysB}) -- (72,{(\v-\yzB)*\ysB});
     \node[anchor=east] at (-1.5,{(\v-\yzB)*\ysB}) {\v};}
   \foreach \x/\l in {6/645, 34/1935, 64/6451} {\node[anchor=north] at (\x,-1.5) {\l};}
@@ -443,19 +591,20 @@ Passive world model & no action input & \pv{17.8} & \pv{0.328} & \pv{0.171} & \p
   \draw[cv, moStone!85!black, dash pattern=on 3pt off 2pt]
     (0,{(53.8-\yzB)*\ysB}) -- (72,{(53.8-\yzB)*\ysB});
   \draw[cv, moSage!65!black]
-    (6,{(62.4-\yzB)*\ysB}) -- (34,{(68.1-\yzB)*\ysB}) -- (64,{(74.6-\yzB)*\ysB});
+    (6,{(72.4-\yzB)*\ysB}) -- (34,{(82.4-\yzB)*\ysB}) -- (64,{(90.2-\yzB)*\ysB});
   \draw[cv, moBlue!75!black, densely dashed]
-    (6,{(60.2-\yzB)*\ysB}) -- (34,{(65.4-\yzB)*\ysB}) -- (64,{(71.5-\yzB)*\ysB});
+    (6,{(66.8-\yzB)*\ysB}) -- (34,{(75.6-\yzB)*\ysB}) -- (64,{(82.6-\yzB)*\ysB});
   \draw[cv, moClay!80!black, densely dotted]
-    (6,{(58.4-\yzB)*\ysB}) -- (34,{(63.1-\yzB)*\ysB}) -- (64,{(68.4-\yzB)*\ysB});
-  \foreach \x/\v in {6/62.4, 34/68.1, 64/74.6} {
+    (6,{(61.2-\yzB)*\ysB}) -- (34,{(68.9-\yzB)*\ysB}) -- (64,{(74.2-\yzB)*\ysB});
+  \foreach \x/\v in {6/72.4, 34/82.4, 64/90.2} {
     \filldraw[fill=moSage!65, mk] (\x,{(\v-\yzB)*\ysB}) circle (1.5);}
-  \foreach \x/\v in {6/60.2, 34/65.4, 64/71.5} {
+  \foreach \x/\v in {6/66.8, 34/75.6, 64/82.6} {
     \filldraw[fill=moBlue!70, mk] (\x,{(\v-\yzB)*\ysB}) circle (1.5);}
-  \foreach \x/\v in {6/58.4, 34/63.1, 64/68.4} {
+  \foreach \x/\v in {6/61.2, 34/68.9, 64/74.2} {
     \filldraw[fill=moClay!75, mk] (\x,{(\v-\yzB)*\ysB}) circle (1.5);}
 
-  % legend inside the empty lower-right region
+  % legend inside the empty lower-right region, on an opaque patch
+  \fill[white] (30.5,0.6) rectangle (72,21.5);
   \foreach \i/\c/\tx in {0/moSage/{consequence recipe}, 1/moBlue/{robot and human video},
                          2/moClay/{robot only}, 3/moStone/{no pretraining}} {
     \draw[cv, \c!70!black] (33,{19-\i*5.4}) -- (40,{19-\i*5.4});
