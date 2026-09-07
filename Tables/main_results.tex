@@ -1,17 +1,38 @@
-% PLANNED-VALUE: every JAM score in this table is a layout target.
-\begin{table}[t]
-\centering\small
-\begin{tabular}{lrrrr}
+% PLANNED-VALUE: superscript T identifies design values awaiting measurement.
+\begin{table}[H]
+\centering
+\begingroup\fontsize{9}{10.5}\selectfont
+\setlength{\tabcolsep}{3.5pt}\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\linewidth}{lRRRRR}
 \toprule
-Initialization & LIBERO & RoboTwin & VLABench & RoboCasa365 \\
+\panelrow{6}{A. LIBERO: task control}
+Model & Spatial & Object & Goal & Long & Mean \\
 \midrule
-\multicolumn{5}{l}{\emph{External results, verbatim from R1; source protocols}} \\
-R1 & 99.3 & 93.60 & 58.9 & 38.2 \\
-\midrule\multicolumn{5}{l}{\emph{Planned paired comparison; JAM values are layout targets}} \\
-Direct adaptation & \target{97.2} & \target{74.5} & \target{24.8} & \target{12.4} \\
-JAM pretraining + adaptation & \target{99.4} & \target{94.6} & \target{59.8} & \target{39.6} \\
+OpenVLA & 84.7 & 88.4 & 79.2 & 53.7 & 76.5 \\
+$\pi_0$ & 98.0 & 96.8 & 94.4 & 88.4 & 94.4 \\
+$\pi_{0.5}$ & 98.8 & 98.2 & 98.0 & 92.4 & 96.9 \\
+OpenVLA-OFT & 97.6 & 98.4 & 97.9 & 94.5 & 97.1 \\
+X-VLA & 98.2 & 98.6 & 97.8 & 97.6 & 98.1 \\
+R1 & 99.6 & 99.6 & 99.8 & 98.2 & 99.3 \\
+\midrule
+\jamshade\textbf{JAM direct} & \target{98.0} & \target{98.4} & \target{97.2} & \target{95.2} & \target{97.2} \\
+\jamshade\textbf{JAM pretrained} & \target{99.8} & \target{99.8} & \target{99.6} & \target{98.4} & \target{99.4} \\
 \bottomrule
-\end{tabular}
-\caption{\textbf{Does embodied pretraining improve downstream control?} Success percentages. The R1 row reproduces the source averages of \refsource{} exactly; these are measurements of that external system. JAM rows are planned layout targets. The external RoboCasa365 value is a full source average, whereas the current JAM protocol targets 50 tasks; protocol alignment is required for a direct comparison. The reference row therefore supplies context rather than a matched ranking. \targetnote}
+\end{tabularx}
+\vspace{2pt}
+\begin{tabularx}{\linewidth}{lRRRRR}
+\toprule
+\panelrow{6}{B. Transfer across task families}
+Model & Twin: clean & Twin: random & Twin: mean & VLABench & Casa365 \\
+\midrule
+$\pi_{0.5}$ & 82.70 & 76.80 & 79.75 & 48.1 & 16.9 \\
+R1 & 93.74 & 93.46 & 93.60 & 58.9 & 38.2 \\
+\midrule
+\jamshade\textbf{JAM direct} & \target{77.0} & \target{72.0} & \target{74.5} & \target{24.8} & \target{12.4} \\
+\jamshade\textbf{JAM pretrained} & \target{95.0} & \target{94.2} & \target{94.6} & \target{59.8} & \target{39.6} \\
+\bottomrule
+\end{tabularx}
+\endgroup
+\caption{\textbf{Does joint pretraining improve downstream control?} Success percentages; Twin denotes RoboTwin 2.0 Full. External scores reproduce the \refsource{} export. JAM pairs match adaptation settings. Casa365 compares external full-suite scores with JAM target-task scores, preserving their distinct scopes. \targetnote}
 \label{tab:main}
 \end{table}

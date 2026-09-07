@@ -1,0 +1,46 @@
+\begin{figure}[H]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=Latex,
+ flow/.style={->,line width=.85pt,draw=black!60},
+ box/.style={draw=stone,fill=stone!6,rounded corners=2pt,align=center,inner sep=5pt}]
+\node[font=\bfseries] at (1.35,3.08) {Shared reset};
+\node[font=\bfseries] at (5.55,3.08) {Alternative commands};
+\node[font=\bfseries] at (10.65,3.08) {Paired futures};
+\draw[draw=stone,fill=stone!5,rounded corners=2pt] (0,.45) rectangle (2.7,2.1);
+\draw[stone] (.17,.78) -- (2.5,.78);
+\draw[draw=world,fill=world!15] (1.05,.78) rectangle +(0.58,.60);
+\fill[consequence] (1.05,1.38) circle (.045);
+\fill[consequence] (1.63,1.38) circle (.045);
+\node[font=\footnotesize] at (1.35,.12) {Same scene and context};
+\node[box,draw=action,fill=action!12,minimum width=2.75cm] (left) at (5.55,1.98) {Move left};
+\node[box,draw=action,fill=action!12,minimum width=2.75cm] (right) at (5.55,.67) {Move right};
+\draw[flow] (2.82,1.35) -- (3.51,1.35) -- (3.51,1.98) -- (left.west);
+\draw[flow] (3.51,1.35) -- (3.51,.67) -- (right.west);
+\node[font=\footnotesize] at (9.55,2.63) {JAM};
+\node[font=\footnotesize] at (11.4,2.63) {Simulator};
+\foreach \yy in {.14,1.45} {
+ \foreach \xx in {8.83,10.68} {
+  \draw[draw=stone,fill=stone!4,rounded corners=1pt] (\xx,\yy) rectangle +(1.44,.94);
+  \draw[stone] (\xx+.12,\yy+.17) -- +(1.16,0);
+ }
+}
+% Symbolic locations are identical only to illustrate matched targets.
+\foreach \xx in {9.10,10.95} {
+ \draw[fill=world!16,draw=world] (\xx,1.62) rectangle +(.38,.4);
+ \draw[->,consequence,line width=1pt] (\xx+.56,2.07) -- (\xx+.05,2.07);
+}
+\foreach \xx in {9.58,11.43} {
+ \draw[fill=world!16,draw=world] (\xx,.31) rectangle +(.38,.4);
+ \draw[->,consequence,line width=1pt] (\xx-.22,.76) -- (\xx+.29,.76);
+}
+\draw[flow] (left.east) -- (8.60,1.98);
+\draw[flow] (right.east) -- (8.60,.67);
+\foreach \yy in {.67,1.98} {\draw[<->,draw=world,line width=.8pt] (10.31,\yy) -- (10.64,\yy);}
+\node[box,draw=world,fill=world!8,text width=2.0cm,minimum height=1.55cm] (score) at (14.05,1.32) {Image error\\Motion error};
+\draw[flow] (12.22,1.98) -- (12.72,1.98) -- (score.north west);
+\draw[flow] (12.22,.67) -- (12.72,.67) -- (score.south west);
+\end{tikzpicture}}
+\caption{\textbf{Does a changed command produce the corresponding future?} Protocol schematic for the intervention study. Each command starts from the same saved simulator state; its predicted future is scored against the rollout produced by that command. The illustrated blocks and arrows explain pairing and are not generated rollouts or measured outcomes.}
+\label{fig:intervention}
+\end{figure}

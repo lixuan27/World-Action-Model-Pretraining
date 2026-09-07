@@ -1,0 +1,35 @@
+% PLANNED-VALUE: superscript T identifies design values awaiting measurement.
+\begin{table}[H]
+\centering
+\begingroup\fontsize{9}{10.5}\selectfont
+\setlength{\tabcolsep}{3.5pt}\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\linewidth}{lRRRRRRR}
+\toprule
+\panelrow{8}{A. Information exchange and gradient routing}
+Variant & W reads A & A reads W & Gradient & LIBERO & Plus & A probe & C error \\
+\midrule
+World only & Off & Off & Off & \target{94.0} & \target{42.0} & \target{0.30} & \target{0.18} \\
+Action only & Off & Off & Off & \target{95.0} & \target{45.0} & \target{0.32} & \target{0.17} \\
+Independent & Off & Off & Off & \target{96.1} & \target{47.6} & \target{0.38} & \target{0.15} \\
+Auxiliary & Off & On & Off & \target{96.8} & \target{49.4} & \target{0.40} & \target{0.12} \\
+One-way & Off & On & On & \target{97.0} & \target{51.7} & \target{0.46} & \target{0.10} \\
+\jamshade{}\textbf{JAM joint} & On & On & On & \target{97.2} & \target{53.8} & \target{0.52} & \target{0.08} \\
+\bottomrule
+\end{tabularx}
+\vspace{2pt}
+\begin{tabularx}{\linewidth}{lRRRRR}
+\toprule
+\panelrow{6}{B. Representation and consequence diagnostics}
+Diagnostic & Metric & Reference & Test & Ref. score & Test score \\
+\midrule
+\jamshade{}Action probe & R-squared & Auxiliary & JAM & \target{0.40} & \target{0.52} \\
+\jamshade{}Consequence & ADE & Auxiliary & JAM & \target{0.12} & \target{0.08} \\
+\jamshade{}Intervention & ADE & Auxiliary & JAM & \target{0.18} & \target{0.10} \\
+\jamshade{}World forecast & Image dist. & Action & Action + C & \target{0.24} & \target{0.20} \\
+\jamshade{}C conditioning & ADE & Observed C & Predicted C & \target{0.10} & \target{0.13} \\
+\bottomrule
+\end{tabularx}
+\endgroup
+\caption{\textbf{What does reciprocal action--world learning change?} W, A, and C denote world, action, and consequence. Panel A fixes clean conditions; Gradient denotes action-loss access to world parameters; the probe reports R-squared and C error is average displacement error (ADE). Panel B pairs each diagnostic with its reference and test condition. Image distance measures perceptual prediction error. Observed and predicted consequences remain separate conditions, including a possible prediction gap. \targetnote}
+\label{tab:joint}
+\end{table}

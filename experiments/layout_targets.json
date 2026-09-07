@@ -212,5 +212,87 @@
   "provenance": {
     "base_manuscript_commit": "8af6a24",
     "note": "Some design values retained from the prior manuscript; additional control/display values introduced in this revision. All are unmeasured layout choices."
+  },
+  "display_revision": {
+    "status": "planned",
+    "note": "Expanded layout design only. All additional JAM scores are unmeasured. Aggregate targets are retained from the previous manuscript."
+  },
+  "display": {
+    "libero": {
+      "Direct": [
+        98.0,
+        98.4,
+        97.2,
+        95.2,
+        97.2
+      ],
+      "Pretrained": [
+        99.8,
+        99.8,
+        99.6,
+        98.4,
+        99.4
+      ]
+    },
+    "robotwin_full": {
+      "Direct": [
+        77.0,
+        72.0,
+        74.5
+      ],
+      "Pretrained": [
+        95.0,
+        94.2,
+        94.6
+      ]
+    },
+    "libero_plus": {
+      "Direct": [
+        28.8,
+        36.4,
+        62.5,
+        71.9,
+        64.1,
+        45.3,
+        67.6,
+        53.8
+      ],
+      "Pretrained": [
+        86.2,
+        87.1,
+        91.3,
+        95.4,
+        93.7,
+        86.9,
+        90.8,
+        90.2
+      ]
+    },
+    "vlabench": {
+      "Direct": [
+        40.0,
+        16.0,
+        24.0,
+        22.0,
+        22.0,
+        24.8
+      ],
+      "Pretrained": [
+        84.0,
+        39.0,
+        60.0,
+        54.0,
+        62.0,
+        59.8
+      ]
+    },
+    "coupling_consequence_ade": [
+      0.18,
+      0.17,
+      0.15,
+      0.12,
+      0.1,
+      0.08
+    ]
   }
 }

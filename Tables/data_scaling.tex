@@ -1,0 +1,34 @@
+% PLANNED-VALUE: superscript T identifies design values awaiting measurement.
+\begin{table}[H]
+\centering
+\begingroup\fontsize{9}{10.5}\selectfont
+\setlength{\tabcolsep}{3.5pt}\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\linewidth}{lRRRRRR}
+\toprule
+\panelrow{7}{A. Which supervision source contributes?}
+Mixture & Robot budget & Human & Human C & LIBERO & Plus & C error \\
+\midrule
+Robot & Matched & Off & Off & \target{98.4} & \target{74.2} & \target{0.12} \\
++ human video & Matched & On & Off & \target{98.9} & \target{82.6} & \target{0.10} \\
+\jamshade\textbf{JAM mixture} & Matched & On & On & \target{99.4} & \target{90.2} & \target{0.08} \\
+\bottomrule
+\end{tabularx}
+\vspace{2pt}
+\begin{tabularx}{\linewidth}{lRRRR}
+\toprule
+\panelrow{5}{B. Capacity and supervision density}
+Axis & Setting & Corpus & Updates & Plus \\
+\midrule
+Agent width & 768 & Full & 60k & \target{85.0} \\
+\jamshade{}Agent width & 1024 & Full & 60k & \target{90.2} \\
+Agent width & 1280 & Full & 60k & \target{91.0} \\
+\midrule
+Action labels & 25\% & Full & 60k & \target{82.0} \\
+Action labels & 50\% & Full & 60k & \target{86.0} \\
+\jamshade{}Action labels & 100\% & Full & 60k & \target{90.2} \\
+\bottomrule
+\end{tabularx}
+\endgroup
+\caption{\textbf{Which data and scale choices support action grounding?} Panel A matches robot exposure and varies human video and consequence supervision. Panel B fixes the video backbone, corpus, and update budget; blue rows identify the reference settings. Success is in percent and C error uses image-normalized ADE. Figure~\ref{fig:scaling} separately varies unique data and update count. \targetnote}
+\label{tab:data_scaling}
+\end{table}

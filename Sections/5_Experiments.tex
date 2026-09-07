@@ -1,102 +1,57 @@
+\clearpage
 \section{Experiments}
 \label{sec:experiments}
-The evaluation asks whether reciprocal action--world learning changes representations in ways that
-support control and transfer. Its ordering follows the proposed mechanism: establish optimization,
-isolate the coupling, vary the supervision, and examine the resulting behavior under distribution
-shift.
+The evaluation connects reciprocal computation to control, transfer, and representation quality.
+Each comparison isolates one step in this proposed relationship.
 
 \subsection{Experimental setup}
-\textbf{Evidence status.}
-This manuscript records the project snapshot of 7 September 2026. Task adaptation on LIBERO
-completed 20,000 updates. Foundation pretraining is active; the archived log reaches
-\FoundationSteps{} updates. The available artifacts establish training behavior. Closed-loop
-evaluation and controlled representation comparisons are awaiting complete measurements. Tables
-distinguish \emph{measured training statistics}, \emph{externally reported results}, and
-\emph{layout targets}, with the latter marked by superscript T throughout. Target values support
-manuscript layout only. Artifact hashes and the claim ledger accompany the source.
+JAM pretrains on DROID \citep{droid}, BridgeData V2 \citep{bridge}, and EgoDex \citep{egodex},
+combining robot commands with human motion supervision from the first update. The model pairs a
+pretrained video backbone with a newly initialized agent stream, totaling 6.02 billion parameters.
+Foundation training uses eight H200 accelerators and global batch 512. Episode-level holdouts
+separate training windows from open-loop evaluation. Downstream tests cover LIBERO \citep{libero},
+RoboTwin 2.0 \citep{robotwin}, VLABench \citep{vlabench}, and RoboCasa365 \citep{robocasa365};
+LIBERO-Plus \citep{liberoplus} and LIBERO-PRO \citep{liberopro} test distribution shifts.
 
-\textbf{Data and splits.}
-The active pretraining mixture contains DROID \citep{droid}, BridgeData V2 \citep{bridge}, and
-EgoDex \citep{egodex}; Table~\ref{tab:data} records the cached training windows and sampling
-probabilities. The cache reserves an episode-level holdout using a deterministic one-in-ten
-partition. All windows from an episode follow that partition. The active mixture contains the
-training portions of these sources and excludes the benchmark datasets below. Holdout windows serve
-open-loop checks; environment resets define the separate closed-loop test sets. Dataset expansion is
-tracked separately from data already consumed by training.
-
-\input{Tables/data}
-
-\textbf{Model and optimization.}
-The world stream uses Wan2.2-TI2V-5B through its released Diffusers implementation, initialized with
-public video weights. The agent stream is trained from scratch. The combined model has approximately
-6.02 billion parameters, including a 1.02-billion-parameter agent with width 1,024 and 30 layers.
-Both streams use 24 attention heads of dimension 128. The video autoencoder and text encoder remain
-frozen. Foundation training uses eight H200 accelerators, a batch of 16 per device, and four
-accumulation steps, giving a global batch of 512. AdamW uses world/agent learning rates of
-0.00005/0.0001, momentum coefficients 0.9/0.95, weight decay 0.01, and gradient clipping at 1. The
-planned budget is 60,000 updates with 1,500 warmup updates and a final 6,000-update decay. All three
-loss weights are 1. The resolved configuration uses independent corruption levels and zero explicit
-boundary-sampling probability. The completed direct-adaptation run uses four H200 accelerators,
-global batch 64, and a cosine learning-rate schedule; Appendix~\ref{app:details} records the
-remaining settings.
-
-\textbf{Tasks and comparison protocol.}
-The core downstream arenas are LIBERO \citep{libero}, RoboTwin 2.0 Full \citep{robotwin}, VLABench
-\citep{vlabench}, and the RoboCasa365 target-task split \citep{robocasa365}. Direct adaptation
-starts from the public video initialization plus a fresh agent; pretrained adaptation starts from a
-JAM foundation release. The paired comparison fixes the demonstrations, action adapter, training
-budget, sampler, and environment version. LIBERO-Plus \citep{liberoplus} and LIBERO-PRO
-\citep{liberopro} supply robustness tests. RoboTwin clean-to-randomized transfer is evaluated
-separately from training on its Full mixture. The proposed final protocol uses three training seeds,
-50 trials per LIBERO task, and the official one-trial-per-variant LIBERO-Plus enumeration. Each
-remaining suite follows its pinned task and reset manifest. Full-suite external averages remain
-distinct from the current task-subset experiments.
-
-\textbf{Metrics and statistics.}
-Control is measured by task success rate, with subtask progress retained where supplied by the
-benchmark. World prediction uses perceptual image distance and tracked-motion error. Consequence
-prediction uses average displacement error in image-normalized coordinates and visibility
-calibration. Frozen-world probes predict actions and consequences from intermediate world features
-with generated action and consequence inputs fully corrupted. A shuffled-label probe and an
-observation-only predictor establish reference levels. Planned uncertainty estimates use a paired
-hierarchical bootstrap over training seeds, tasks, and shared episode resets with 10,000 resamples
-and 95\% intervals. Open-loop metrics use episode-level resampling.
+Paired comparisons hold demonstrations, adaptation budget, samplers, and environment resets fixed.
+Control uses task success; representation tests use frozen-world probes, perceptual prediction error,
+and consequence displacement error. The planned protocol uses three training seeds with paired
+bootstrap intervals. The evidence snapshot contains a completed 20,000-update direct-adaptation run
+and foundation logs through update \FoundationSteps{}. These are measured optimization records.
+External benchmark scores retain source attribution; JAM benchmark cells marked T are layout
+targets awaiting evaluation. Appendix~\ref{app:setup} specifies data proportions, optimization,
+evaluation manifests, and statistics.
 
 \subsection{Optimization and downstream control}
-Table~\ref{tab:optimization} and Figure~\ref{fig:training} report the completed joint-optimization
-record, while Table~\ref{tab:main} separates external control results from the planned paired
-downstream comparison.
-\input{Tables/optimization}
-\begin{figure}[t]
+Figure~\ref{fig:training} records both stages of joint optimization, and Table~\ref{tab:main}
+organizes downstream control by task family.
+\begin{figure}[H]
 \centering\includegraphics[width=\linewidth]{Figures/training.pdf}
-\caption{\textbf{Do the implemented objectives optimize together?} Measured training losses from the completed LIBERO direct-adaptation run. Thin lines are logged values; thick lines are trailing means over 11 logged points. Each panel retains its own objective scale. The figure reports optimization on training batches; held-out control and representation evaluations provide the separate tests of transfer. Source: \texttt{artifacts/measurements/e0\_libero\_bi.jsonl}.}
+\caption{\textbf{Do the three objectives optimize together?} Measured world, action, and consequence losses during completed LIBERO adaptation (top) and the archived foundation prefix (bottom). Thin traces show logged batches; thick traces average the available supervised values within the last 11 records. Missing supervision is excluded, and each objective retains its own logarithmic scale. Top annotations summarize the final tenth of adaptation records. Foundation outliers remain visible. These curves measure training behavior; control and transfer require separate evaluation.}
 \label{fig:training}
 \end{figure}
 \input{Tables/main_results}
 
-\subsection{Which part of joint learning matters?}
-Table~\ref{tab:coupling} defines the comparison that separates world-only and action-only learning,
-independent multitask prediction, auxiliary supervision, and reciprocal joint computation.
-\input{Tables/coupling}
+\subsection{Generalization under distribution shift}
+Table~\ref{tab:robustness} reports visual, semantic, and embodiment shifts with benchmark-specific breakdowns.
+\input{Tables/robustness}
 
-\subsection{Data composition and scaling}
-Tables~\ref{tab:composition} and~\ref{tab:scalecontrols}, together with Figure~\ref{fig:scaling},
-specify how robot exposure, human video, consequence supervision, and optimization duration enter
-the scaling study.
-\input{Tables/composition}
-\begin{figure}[t]
+\clearpage
+\subsection{Reciprocal computation and representation}
+Table~\ref{tab:joint} links the coupling controls to representation diagnostics, with the paired
+intervention protocol illustrated in Figure~\ref{fig:intervention}.
+\input{Tables/joint_analysis}
+\input{Figures/intervention}
+
+\clearpage
+\subsection{Data, capacity, and supervision}
+Table~\ref{tab:data_scaling} and Figure~\ref{fig:scaling} separate supervision source, unique data,
+optimization duration, and agent capacity.
+\input{Tables/data_scaling}
+\begin{figure}[H]
 \centering\includegraphics[width=\linewidth]{Figures/scaling_targets.pdf}
-\caption{\textbf{How should a pretraining gain vary with data and training duration?} Layout targets for LIBERO-Plus success under a fixed downstream protocol. The left panel varies a stratified subset of the active corpus at fixed updates; the right panel varies updates at fixed corpus. Every plotted point is a PLANNED-VALUE awaiting measurement. The curves illustrate the display only; their slopes and ordering carry no empirical claim.}
+\caption{\textbf{How does the study separate data, training, and capacity?} Layout targets for LIBERO-Plus success. Each panel varies one axis while fixing the other two: corpus fraction at 60,000 updates, update count on the full corpus, and agent width at full corpus and 60,000 updates. All plotted points are PLANNED-VALUE, awaiting measurement. Dashed curves and their ordering specify the display, with no empirical scaling claim.}
 \label{fig:scaling}
 \end{figure}
-
-\subsection{Out-of-distribution generalization and transfer}
-Table~\ref{tab:ood} organizes the planned evaluations by the shift applied to a fixed adapted checkpoint.
-\input{Tables/ood}
-
-\subsection{Mechanism and representation}
-Table~\ref{tab:mechanism} specifies the probes, matched interventions, and consequence-conditioning
-comparisons used to examine what the world representation retains.
-\input{Tables/mechanism}
 
 \FloatBarrier

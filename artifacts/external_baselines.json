@@ -1,0 +1,626 @@
+{
+  "status": "external_reference",
+  "source_url": "https://raw.githubusercontent.com/OpenWAM-Official/OpenWAM-Official.github.io/cd5d05c0a002599560eeee17bcb7a8d61a5a7553/src/data/benchmark-tables.json",
+  "source_sha256": "268b5b777c79a2890e46e7d36c94c35674ecb426debf25d0ae710c10cacd3c3d",
+  "retrieved": "2026-09-07",
+  "note": "Additional baseline rows, verbatim from the same immutable benchmark export; source-reported protocols.",
+  "rows": [
+    {
+      "table": "libero",
+      "model": "OpenVLA",
+      "columns": [
+        "Spatial",
+        "Object",
+        "Goal",
+        "Long",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "84.7",
+          "value": 84.7
+        },
+        {
+          "text": "88.4",
+          "value": 88.4
+        },
+        {
+          "text": "79.2",
+          "value": 79.2
+        },
+        {
+          "text": "53.7",
+          "value": 53.7
+        },
+        {
+          "text": "76.5",
+          "value": 76.5
+        }
+      ],
+      "source_pointer": "/simulation/0/groups/0/rows/0"
+    },
+    {
+      "table": "libero",
+      "model": "π₀",
+      "columns": [
+        "Spatial",
+        "Object",
+        "Goal",
+        "Long",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "98.0",
+          "value": 98.0
+        },
+        {
+          "text": "96.8",
+          "value": 96.8
+        },
+        {
+          "text": "94.4",
+          "value": 94.4
+        },
+        {
+          "text": "88.4",
+          "value": 88.4
+        },
+        {
+          "text": "94.4",
+          "value": 94.4
+        }
+      ],
+      "source_pointer": "/simulation/0/groups/0/rows/1"
+    },
+    {
+      "table": "libero",
+      "model": "π₀.₅",
+      "columns": [
+        "Spatial",
+        "Object",
+        "Goal",
+        "Long",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "98.8",
+          "value": 98.8
+        },
+        {
+          "text": "98.2",
+          "value": 98.2
+        },
+        {
+          "text": "98.0",
+          "value": 98.0
+        },
+        {
+          "text": "92.4",
+          "value": 92.4
+        },
+        {
+          "text": "96.9",
+          "value": 96.9
+        }
+      ],
+      "source_pointer": "/simulation/0/groups/0/rows/3"
+    },
+    {
+      "table": "libero",
+      "model": "OpenVLA-OFT",
+      "columns": [
+        "Spatial",
+        "Object",
+        "Goal",
+        "Long",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "97.6",
+          "value": 97.6
+        },
+        {
+          "text": "98.4",
+          "value": 98.4
+        },
+        {
+          "text": "97.9",
+          "value": 97.9
+        },
+        {
+          "text": "94.5",
+          "value": 94.5
+        },
+        {
+          "text": "97.1",
+          "value": 97.1
+        }
+      ],
+      "source_pointer": "/simulation/0/groups/0/rows/5"
+    },
+    {
+      "table": "libero",
+      "model": "X-VLA",
+      "columns": [
+        "Spatial",
+        "Object",
+        "Goal",
+        "Long",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "98.2",
+          "value": 98.2
+        },
+        {
+          "text": "98.6",
+          "value": 98.6
+        },
+        {
+          "text": "97.8",
+          "value": 97.8
+        },
+        {
+          "text": "97.6",
+          "value": 97.6
+        },
+        {
+          "text": "98.1",
+          "value": 98.1
+        }
+      ],
+      "source_pointer": "/simulation/0/groups/0/rows/6"
+    },
+    {
+      "table": "libero_plus",
+      "model": "π₀",
+      "columns": [
+        "Camera",
+        "Robot",
+        "Language",
+        "Light",
+        "Background",
+        "Noise",
+        "Layout",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "13.8",
+          "value": 13.8
+        },
+        {
+          "text": "6.0",
+          "value": 6.0
+        },
+        {
+          "text": "58.8",
+          "value": 58.8
+        },
+        {
+          "text": "85.0",
+          "value": 85.0
+        },
+        {
+          "text": "81.4",
+          "value": 81.4
+        },
+        {
+          "text": "79.0",
+          "value": 79.0
+        },
+        {
+          "text": "68.9",
+          "value": 68.9
+        },
+        {
+          "text": "53.6",
+          "value": 53.6
+        }
+      ],
+      "source_pointer": "/simulation/1/groups/0/rows/0"
+    },
+    {
+      "table": "libero_plus",
+      "model": "OpenVLA-OFT",
+      "columns": [
+        "Camera",
+        "Robot",
+        "Language",
+        "Light",
+        "Background",
+        "Noise",
+        "Layout",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "56.4",
+          "value": 56.4
+        },
+        {
+          "text": "31.9",
+          "value": 31.9
+        },
+        {
+          "text": "79.5",
+          "value": 79.5
+        },
+        {
+          "text": "88.7",
+          "value": 88.7
+        },
+        {
+          "text": "93.3",
+          "value": 93.3
+        },
+        {
+          "text": "75.8",
+          "value": 75.8
+        },
+        {
+          "text": "74.2",
+          "value": 74.2
+        },
+        {
+          "text": "69.6",
+          "value": 69.6
+        }
+      ],
+      "source_pointer": "/simulation/1/groups/0/rows/1"
+    },
+    {
+      "table": "libero_plus",
+      "model": "π₀.₅",
+      "columns": [
+        "Camera",
+        "Robot",
+        "Language",
+        "Light",
+        "Background",
+        "Noise",
+        "Layout",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "78.4",
+          "value": 78.4
+        },
+        {
+          "text": "73.6",
+          "value": 73.6
+        },
+        {
+          "text": "80.8",
+          "value": 80.8
+        },
+        {
+          "text": "96.2",
+          "value": 96.2
+        },
+        {
+          "text": "94.1",
+          "value": 94.1
+        },
+        {
+          "text": "89.0",
+          "value": 89.0
+        },
+        {
+          "text": "84.5",
+          "value": 84.5
+        },
+        {
+          "text": "84.4",
+          "value": 84.4
+        }
+      ],
+      "source_pointer": "/simulation/1/groups/0/rows/4"
+    },
+    {
+      "table": "libero_plus",
+      "model": "Cosmos-Policy",
+      "columns": [
+        "Camera",
+        "Robot",
+        "Language",
+        "Light",
+        "Background",
+        "Noise",
+        "Layout",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "75.8",
+          "value": 75.8
+        },
+        {
+          "text": "63.3",
+          "value": 63.3
+        },
+        {
+          "text": "81.7",
+          "value": 81.7
+        },
+        {
+          "text": "96.5",
+          "value": 96.5
+        },
+        {
+          "text": "88.9",
+          "value": 88.9
+        },
+        {
+          "text": "92.7",
+          "value": 92.7
+        },
+        {
+          "text": "82.2",
+          "value": 82.2
+        },
+        {
+          "text": "82.2",
+          "value": 82.2
+        }
+      ],
+      "source_pointer": "/simulation/1/groups/1/rows/2"
+    },
+    {
+      "table": "vlabench",
+      "model": "π₀",
+      "columns": [
+        "In-dist. · SR",
+        "In-dist. · PS",
+        "In-dist. · IS",
+        "Category · SR",
+        "Category · PS",
+        "Category · IS",
+        "Commonsense · SR",
+        "Commonsense · PS",
+        "Commonsense · IS",
+        "Instruction · SR",
+        "Instruction · PS",
+        "Instruction · IS",
+        "Texture · SR",
+        "Texture · PS",
+        "Texture · IS",
+        "Avg · SR",
+        "Avg · PS",
+        "Avg · IS"
+      ],
+      "cells": [
+        {
+          "text": "47.0",
+          "value": 47.0
+        },
+        {
+          "text": "62.7",
+          "value": 62.7
+        },
+        {
+          "text": "67.8",
+          "value": 67.8
+        },
+        {
+          "text": "21.2",
+          "value": 21.2
+        },
+        {
+          "text": "33.6",
+          "value": 33.6
+        },
+        {
+          "text": "44.0",
+          "value": 44.0
+        },
+        {
+          "text": "29.1",
+          "value": 29.1
+        },
+        {
+          "text": "43.0",
+          "value": 43.0
+        },
+        {
+          "text": "54.9",
+          "value": 54.9
+        },
+        {
+          "text": "17.3",
+          "value": 17.3
+        },
+        {
+          "text": "38.7",
+          "value": 38.7
+        },
+        {
+          "text": "58.0",
+          "value": 58.0
+        },
+        {
+          "text": "32.2",
+          "value": 32.2
+        },
+        {
+          "text": "42.5",
+          "value": 42.5
+        },
+        {
+          "text": "50.6",
+          "value": 50.6
+        },
+        {
+          "text": "29.4",
+          "value": 29.4
+        },
+        {
+          "text": "44.1",
+          "value": 44.1
+        },
+        {
+          "text": "55.0",
+          "value": 55.0
+        }
+      ],
+      "source_pointer": "/simulation/2/groups/0/rows/0"
+    },
+    {
+      "table": "vlabench",
+      "model": "π₀.₅",
+      "columns": [
+        "In-dist. · SR",
+        "In-dist. · PS",
+        "In-dist. · IS",
+        "Category · SR",
+        "Category · PS",
+        "Category · IS",
+        "Commonsense · SR",
+        "Commonsense · PS",
+        "Commonsense · IS",
+        "Instruction · SR",
+        "Instruction · PS",
+        "Instruction · IS",
+        "Texture · SR",
+        "Texture · PS",
+        "Texture · IS",
+        "Avg · SR",
+        "Avg · PS",
+        "Avg · IS"
+      ],
+      "cells": [
+        {
+          "text": "65.4",
+          "value": 65.4
+        },
+        {
+          "text": "77.8",
+          "value": 77.8
+        },
+        {
+          "text": "80.4",
+          "value": 80.4
+        },
+        {
+          "text": "38.2",
+          "value": 38.2
+        },
+        {
+          "text": "49.7",
+          "value": 49.7
+        },
+        {
+          "text": "52.0",
+          "value": 52.0
+        },
+        {
+          "text": "43.9",
+          "value": 43.9
+        },
+        {
+          "text": "57.3",
+          "value": 57.3
+        },
+        {
+          "text": "60.0",
+          "value": 60.0
+        },
+        {
+          "text": "48.2",
+          "value": 48.2
+        },
+        {
+          "text": "64.2",
+          "value": 64.2
+        },
+        {
+          "text": "67.0",
+          "value": 67.0
+        },
+        {
+          "text": "44.9",
+          "value": 44.9
+        },
+        {
+          "text": "62.3",
+          "value": 62.3
+        },
+        {
+          "text": "65.0",
+          "value": 65.0
+        },
+        {
+          "text": "48.1",
+          "value": 48.1
+        },
+        {
+          "text": "62.3",
+          "value": 62.3
+        },
+        {
+          "text": "64.9",
+          "value": 64.9
+        }
+      ],
+      "source_pointer": "/simulation/2/groups/0/rows/3"
+    },
+    {
+      "table": "robotwin",
+      "model": "π₀.₅",
+      "columns": [
+        "Clean",
+        "Randomized",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "82.70",
+          "value": 82.7
+        },
+        {
+          "text": "76.80",
+          "value": 76.8
+        },
+        {
+          "text": "79.75",
+          "value": 79.75
+        }
+      ],
+      "source_pointer": "/simulation/4/groups/0/rows/1"
+    },
+    {
+      "table": "robocasa_365",
+      "model": "π₀.₅",
+      "columns": [
+        "Atomic",
+        "Comp.-Seen",
+        "Comp.-Unseen",
+        "Avg"
+      ],
+      "cells": [
+        {
+          "text": "39.6",
+          "value": 39.6
+        },
+        {
+          "text": "7.1",
+          "value": 7.1
+        },
+        {
+          "text": "1.2",
+          "value": 1.2
+        },
+        {
+          "text": "16.9",
+          "value": 16.9
+        }
+      ],
+      "source_pointer": "/simulation/7/groups/0/rows/2"
+    }
+  ]
+}

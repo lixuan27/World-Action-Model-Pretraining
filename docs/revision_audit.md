@@ -49,3 +49,14 @@ R1 is the external system named in the linked immutable source, not a renamed JA
 ## Remaining scientific work
 
 Complete foundation releases and matched downstream adaptation, repair the condition confound for coupling controls, complete probes and paired interventions, validate conditional samplers with latent consequences, audit data overlap for newly incorporated sources, and report errors with completed suite records. This work belongs to the training project; the manuscript revision does not launch or duplicate it.
+
+## Layout refinement, 7 September 2026
+
+- Condensed Experimental setup to two natural paragraphs and moved exact source counts, proportions, optimizer settings, splits, and evaluation protocols to Appendix B.
+- Deleted the old data-inventory Table 1; automatic numbering now starts with the consolidated downstream-control table.
+- Replaced eight small experimental displays with four full-width panelled tables. Native `tabularx` columns keep pale-blue shading continuous across each JAM row. Headers and cells use concise phrases rather than protocol prose.
+- Expanded the LIBERO, LIBERO-Plus, RoboTwin Full, and VLABench breakdowns using 13 additional baseline rows from the same immutable export. All 27 external rows retain exact source strings and pointers. Source aggregation is preserved rather than recomputed.
+- Extended the layout-only JAM arrays for the corresponding subcategories and consequence controls. Every new score remains marked T, and the target manifest records their status explicitly.
+- Added a homepage overview and paired-intervention schematic. Kept the detailed framework and consequence interface. The measured optimization figure now displays both archived runs, with unsupervised records masked and foundation outliers preserved. The planned scaling figure adds agent capacity as a third panel.
+- Kept the experiments adjacent to their displays and placed the conclusion on the final main page. The main text uses 9 pages, within the 12-page limit. References and appendix follow separately.
+- Extended validation to check paragraph count, full-width tables, missing cells, homepage teaser placement, main-page budget, and exact external-row provenance. This revision preserves the existing evidence cutoff and launches no training.

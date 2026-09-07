@@ -1,21 +1,20 @@
-\begin{table}[t]
-\centering\small
-\begin{tabular}{lr}
+% EXTERNAL-REFERENCE: verbatim source values.
+\begin{table}[H]
+\centering
+\begingroup\fontsize{9}{10.5}\selectfont
+\setlength{\tabcolsep}{3.5pt}\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\linewidth}{lRRRRR}
 \toprule
-External evaluation & Reported success (percent) \\
+\panelrow{6}{R1: source protocol anchors}
+Benchmark & Success & Benchmark & Success & Benchmark & Success \\
 \midrule
-Task control: LIBERO & 99.3 \\
-Bimanual control: RoboTwin Full & 93.60 \\
-Perturbations: LIBERO-Plus & 69.2 \\
-Clean-to-randomized: randomized only & 48.7 \\
-Clean-to-randomized: source mean & 69.0 \\
-Language and task transfer: VLABench & 58.9 \\
-Household tasks: RoboCasa365 & 38.2 \\
-Manipulation coverage: RoboDojo & 11.92 \\
-Mobile manipulation: EBench & 49.4 \\
-Humanoid setup: RoboCasa-GR1 & 60.5 \\
+LIBERO & 99.3 & Twin Full & 93.60 & VLABench & 58.9 \\
+Casa365 & 38.2 & Dojo & 11.92 & EBench & 49.4 \\
+Plus & 69.2 & Twin clean & 89.4 & Twin random & 48.7 \\
+Twin mean & 69.0 & Casa-GR1 & 60.5 & LIBERO Long & 98.2 \\
 \bottomrule
-\end{tabular}
-\caption{\textbf{External reference anchors.} All cells are reproduced verbatim from \refsource{}, with the source\textquotesingle s own training and evaluation protocols. In particular, 69.0 is the clean-to-randomized average of clean and randomized performance; its randomized-only score is 48.7. The machine-readable source pointer for every value is retained in \texttt{artifacts/external\_reference.json}. These values describe the external system only.}
+\end{tabularx}
+\endgroup
+\caption{\textbf{External reference coverage.} Source-reported success percentages from \refsource{}. Dojo denotes RoboDojo and Casa-GR1 denotes RoboCasa-GR1. Twin clean, random, and mean refer to the clean-to-randomized protocol. Exact source strings and row pointers accompany every value.}
 \label{tab:reference}
 \end{table}

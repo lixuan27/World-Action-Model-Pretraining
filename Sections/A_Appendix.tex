@@ -43,7 +43,7 @@ boundary-mixture comparison is planned independently of the primary coupling com
 The completed LIBERO run uses 20,000 optimizer updates, batch 16 per device on four H200
 accelerators, one accumulation step, and seed 0. World and agent learning rates both start at 0.0001
 with 1,000 warmup updates and cosine decay to 0.01 of the peak. The foundation run uses the settings
-in Section~\ref{sec:experiments}, with a warmup--stable--decay schedule ending at 0.05 of the peak.
+in Appendix~\ref{app:setup}, with a warmup--stable--decay schedule ending at 0.05 of the peak.
 Training uses bfloat16 computation, float32 gradient reduction, and activation checkpointing.
 Foundation training uses hybrid sharding across two nodes of four accelerators. The video backbone
 is initialized from released video weights; embodied foundation training is performed within JAM.
@@ -57,6 +57,54 @@ completed scaling comparisons. The completed LIBERO adaptation has 401 logged po
 final-window summary averages the last 10\% of those points. A zero consequence loss in a robot-only
 microbatch indicates absent supervision, so foundation summaries condition on the recorded
 supervised fraction.
+
+\subsection{Experimental setup and evaluation}
+\label{app:setup}
+\textbf{Data and splits.}
+The active pretraining mixture contains DROID \citep{droid}, BridgeData V2 \citep{bridge}, and
+EgoDex \citep{egodex}; The active caches contain 1,674,648 DROID, 454,690 Bridge, and 738,550 EgoDex training windows.
+Sampling temperature 0.7 gives source probabilities of approximately 50.9\%, 20.4\%, and 28.7\%. The cache reserves an episode-level holdout using a deterministic one-in-ten
+partition. All windows from an episode follow that partition. The active mixture contains the
+training portions of these sources and excludes the benchmark datasets below. Holdout windows serve
+open-loop checks; environment resets define the separate closed-loop test sets. Dataset expansion is
+tracked separately from data already consumed by training.
+
+
+\textbf{Model and optimization.}
+The world stream uses Wan2.2-TI2V-5B through its released Diffusers implementation, initialized with
+public video weights. The agent stream is trained from scratch. The combined model has approximately
+6.02 billion parameters, including a 1.02-billion-parameter agent with width 1,024 and 30 layers.
+Both streams use 24 attention heads of dimension 128. The video autoencoder and text encoder remain
+frozen. Foundation training uses eight H200 accelerators, a batch of 16 per device, and four
+accumulation steps, giving a global batch of 512. AdamW uses world/agent learning rates of
+0.00005/0.0001, momentum coefficients 0.9/0.95, weight decay 0.01, and gradient clipping at 1. The
+planned budget is 60,000 updates with 1,500 warmup updates and a final 6,000-update decay. All three
+loss weights are 1. The resolved configuration uses independent corruption levels and zero explicit
+boundary-sampling probability. The completed direct-adaptation run uses four H200 accelerators,
+global batch 64, and a cosine learning-rate schedule; Appendix~\ref{app:details} records the remaining adaptation settings.
+
+\textbf{Tasks and comparison protocol.}
+The core downstream arenas are LIBERO \citep{libero}, RoboTwin 2.0 Full \citep{robotwin}, VLABench
+\citep{vlabench}, and the RoboCasa365 target-task split \citep{robocasa365}. Direct adaptation
+starts from the public video initialization plus a fresh agent; pretrained adaptation starts from a
+JAM foundation release. The paired comparison fixes the demonstrations, action adapter, training
+budget, sampler, and environment version. LIBERO-Plus \citep{liberoplus} and LIBERO-PRO
+\citep{liberopro} supply robustness tests. RoboTwin clean-to-randomized transfer is evaluated
+separately from training on its Full mixture. The proposed final protocol uses three training seeds,
+50 trials per LIBERO task, and the official one-trial-per-variant LIBERO-Plus enumeration. Each
+remaining suite follows its pinned task and reset manifest. Full-suite external averages remain
+distinct from the current task-subset experiments.
+
+\textbf{Metrics and statistics.}
+Control is measured by task success rate, with subtask progress retained where supplied by the
+benchmark. World prediction uses perceptual image distance and tracked-motion error. Consequence
+prediction uses average displacement error in image-normalized coordinates and visibility
+calibration. Frozen-world probes predict actions and consequences from intermediate world features
+with generated action and consequence inputs fully corrupted. A shuffled-label probe and an
+observation-only predictor establish reference levels. Planned uncertainty estimates use a paired
+hierarchical bootstrap over training seeds, tasks, and shared episode resets with 10,000 resamples
+and 95\% intervals. Open-loop metrics use episode-level resampling.
+
 
 \subsection{Controls required by the scientific question}
 \label{app:controls}
@@ -110,7 +158,6 @@ explicitly. The manuscript consequently treats policy sampling as the primary im
 conditional comparisons as pending validation. Independent training levels define the corruption
 family; each deployment sampler still requires its own correctness and fidelity check.
 
-\input{Tables/scale_controls}
 \FloatBarrier
 
 \subsection{Evidence boundaries and failure analysis}

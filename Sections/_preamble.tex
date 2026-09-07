@@ -6,7 +6,7 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,calc,fit,backgrounds}
 \usepackage[round,authoryear]{natbib}
-\usepackage{caption,subcaption,enumitem,placeins}
+\usepackage{caption,subcaption,enumitem,placeins,float}
 \usepackage[hyphens]{url}
 \usepackage{xurl}
 \usepackage[colorlinks=true,linkcolor=black,citecolor=blue!45!black,urlcolor=blue!45!black]{hyperref}
@@ -27,3 +27,13 @@
 \definecolor{planned}{HTML}{995037}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \setlength{\emergencystretch}{1em}
+
+\definecolor{jamrow}{HTML}{EAF3FA}
+\definecolor{tableband}{HTML}{F1F4F6}
+\definecolor{tableink}{HTML}{314B60}
+\newcommand{\jamshade}{\rowcolor{jamrow}}
+\newcommand{\panelrow}[2]{\rowcolor{tableband}\multicolumn{#1}{l}{\rule{0pt}{2.3ex}\textcolor{tableink}{\textbf{#2}}}\\}
+
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+
+\setlength{\intextsep}{8pt plus 1pt minus 1pt}

@@ -59,11 +59,7 @@ integrates predicted velocities toward clean samples, and executes a prefix of t
 before observing again. The world decoder and consequence readout make the jointly sampled future
 available for diagnostics.
 
-The joint formulation also permits conditioning on observed generated variables. Given an action
-chunk, world prediction estimates its associated visual evolution; given a future observation,
-inverse prediction estimates compatible actions. Independent noise levels expose the model to
-varying uncertainty in these inputs. Practical conditional samplers additionally specify which
-variables are supplied, which remain latent, and how each latent variable is integrated. The primary
-implemented policy uses a shared decreasing sampling schedule, while conditional-sampling
-comparisons remain part of the evaluation protocol. The current objective remains focused on world,
-action, and consequence prediction.
+The joint formulation also supports action-conditioned world prediction and inverse action
+prediction from future observations. Independent corruption varies uncertainty in each input. Each
+sampler specifies supplied variables, latent variables, and their integration schedules. The
+current policy uses a shared decreasing schedule; conditional comparisons await sampler validation.
