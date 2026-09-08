@@ -59,3 +59,11 @@ The comparison uses the existing measured JSON reports without changing their va
 Action substitution asks a separate question about input sensitivity. Its complete donor, hold, and time-shuffle comparison is retained as appendix Figure 7, with horizontal paired intervals and a zero reference. All intervals include zero; the Figure 5 caption explicitly states this and links to the appendix display. These readout gains do not isolate the effect of reciprocal coupling or establish alternative-action fidelity.
 
 The numerical figures use embedded DejaVu Serif text. Figure 5 uses a full-width, compact two-column layout and a top float to avoid an internal half-empty page. Figures 5 and 7 and their surrounding manuscript pages are rendered for visual review. Main text remains 11 pages, and the compiled paper contains 17 pages including references and appendix.
+
+## Teaser and framework from the updated two-slide deck
+
+The updated source contains the framework on slide 1 and the teaser on slide 2. Both now replace the manuscript figures through native PowerPoint PDF exports. The supplied two-slide PPT is archived byte-for-byte in `Figures/source/JAM-framework-v11.pptx`. The former TikZ teaser is removed from the manuscript. Unicode mappings preserve portable extraction of the embedded Toppan fonts.
+
+Outer blank margins are cropped without scaling individual objects. The source teaser has an overlap between Independent and One-way. The exported Independent label is shifted left by 8 points, giving a 4.44-point gap. This is the only drawing-stream edit; all remaining commands are byte-identical to the native export. The original PPT and its archived copy remain unchanged. The normalizer's optional spacing correction checks the exact source position before applying this change.
+
+Figure 1 remains on the homepage below the abstract at full text width. Its caption describes reciprocal attention and joint refinement and identifies the illustrations as schematic. A small reduction in the title-block gap makes room for the taller figure. Figure 2 appears on page 4, and its caption now explicitly names the shared head geometry. Both figure numbers and references are preserved. Main text remains 11 pages, with references and appendix bringing the complete PDF to 17 pages. Source and export provenance are recorded separately for both figures.

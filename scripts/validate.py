@@ -151,6 +151,15 @@ for i in range(len(layers)):
 check(comparison['jam_beats_copy_first_layers']==[layers[i] for i,v in enumerate(jam['consequence_ade']) if v<comparison['copy_first_consequence_ade']],'Copy-first comparison')
 qa=json.load(open(P/'artifacts/figure_qa.json'))
 check(len(qa)==4 and {x['figure'] for x in qa}=={'training','representation','action_sensitivity','scaling_targets'} and all(x['font']=='DejaVu Serif' and x['text_bounds']=='PASS' for x in qa),'Figure typography or bounds audit')
+for stem,slide in [('teaser_v11',2),('framework_v11',1)]:
+ drawing=json.load(open(P/f'artifacts/{stem}_qa.json'))
+ check(drawing['source_slide']==slide and drawing['slide_count']==2,'Supplied slide mapping '+stem)
+ for field in ['source','pdf']:
+  check(hashlib.sha256((P/drawing[field]).read_bytes()).hexdigest()==drawing[field+'_sha256'],'Supplied figure hash '+stem+' '+field)
+ page=PdfReader(P/drawing['pdf']).pages[0]
+ check(list(map(float,page.mediabox))==drawing['dimensions_pt'],'Figure crop '+stem)
+ check(hashlib.sha256(page.get_contents().get_data()).hexdigest()==drawing['drawing_stream_sha256'],'Figure drawing stream '+stem)
+ if stem=='teaser_v11':check(drawing['spacing_correction']['verified_gap_pt']>0,'Teaser label spacing')
 verify_external='--verify-external' in sys.argv
 if verify_external:
  try:
@@ -166,7 +175,7 @@ main_pages=int(end.group(1)) if end else 0
 check(0<main_pages<=12, f'Main text is {main_pages} pages; maximum is 12')
 if (P/'main.pdf').exists():
  pdf=PdfReader(P/'main.pdf')
- check('Learning an interaction through its commands' in pdf.pages[0].extract_text(),'Teaser is missing from the homepage')
+ check('Reciprocal action and world learning' in pdf.pages[0].extract_text(),'Teaser is missing from the homepage')
  check('Conclusion' in pdf.pages[main_pages-1].extract_text(),'Main-page endpoint does not contain Conclusion')
  check('References' in pdf.pages[main_pages].extract_text(),'References must start after main text')
 else:check(False,'Compiled PDF missing')

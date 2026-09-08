@@ -1,50 +1,9 @@
-\begin{figure}[!ht]
+\begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{%
-\begin{tikzpicture}[x=1cm,y=1cm,font=\small,
- flow/.style={-{Latex[length=1.8mm]},draw=black!55,line width=.8pt},
- dual/.style={<->,>=Latex,draw=world!60!black,line width=1.25pt},
- tile/.style={rounded corners=2pt,line width=.65pt,align=center,inner sep=4pt}]
-\node[font=\bfseries] at (1.8,2.88) {Demonstrations};
-\node[font=\bfseries] at (8.05,2.88) {Reciprocal computation};
-\node[font=\bfseries] at (13.95,2.88) {Joint prediction};
-% Small editable scenes: two views of a manipulation episode.
-\foreach \x in {.05,1.70} {
- \draw[draw=stone,fill=stone!5,rounded corners=1pt] (\x,1.25) rectangle +(1.42,1.12);
- \draw[stone,line width=.6pt] (\x+.08,1.49) -- +(1.25,0);
-}
-\draw[action!85!black,line width=3pt,line cap=round] (.31,1.49) -- (.42,2.13) -- (.88,1.98) -- (1.04,1.8);
-\draw[action!85!black,line width=3pt,line cap=round] (1.96,1.49) -- (2.16,2.10) -- (2.61,1.92) -- (2.69,1.65);
-\draw[fill=world!23,draw=world] (1.04,1.49) rectangle +(0.25,.26);
-\draw[fill=world!23,draw=world] (2.71,1.49) rectangle +(0.25,.26);
-\draw[flow] (1.49,1.84) -- (1.65,1.84);
-\node[font=\footnotesize,align=center] at (1.60,.87) {Robot: video + actions\\Human: video + tracks};
-\node[tile,draw=stone,fill=stone!7,font=\footnotesize,minimum width=3.0cm] (condition) at (1.60,.10) {Image / instruction / state};
-% One coupled computation, with consequence tokens in the agent stream.
-\draw[draw=stone!65,rounded corners=3pt,fill=stone!3] (4.08,-.20) rectangle (11.52,2.51);
-\node[tile,draw=world,fill=world!13,minimum width=2.28cm,minimum height=.63cm] (w) at (5.57,1.54) {World tokens};
-\node[tile,draw=action,fill=action!15,text width=2.3cm,minimum height=.57cm] (a) at (9.96,1.95) {Action tokens};
-\node[tile,draw=consequence,fill=consequence!13,text width=2.3cm,minimum height=.57cm] (c) at (9.96,1.08) {Consequence\\tokens};
-\draw[dual] (w.east) -- (8.35,1.54);
-\draw[dual] (8.37,1.54) -- (a.west);
-\draw[dual] (8.37,1.54) -- (c.west);
-\node[font=\footnotesize,align=center] at (7.70,2.12) {Shared\\attention};
-\node[font=\footnotesize,align=center] at (7.70,.91) {Information\\+ gradients};
-\node[tile,draw=stone!70,fill=white,font=\footnotesize,minimum width=6.73cm] at (7.82,.14) {Independent corruption\quad $\longrightarrow$\quad Joint flow matching};
-\draw[flow] (3.18,1.55) -- (4.32,1.55);
-\draw[flow] (condition.east) -- (3.58,.10) -- (3.58,.57) -- (4.13,.57);
-\node[font=\scriptsize,text=black!60] at (3.56,1.95) {Targets};
-% Simultaneously generated variables; no downstream benchmark claims.
-\node[tile,draw=world,fill=world!13,minimum width=2.9cm,minimum height=.53cm] (ow) at (13.98,2.02) {Future visual world};
-\node[tile,draw=action,fill=action!15,minimum width=2.9cm,minimum height=.53cm] (oa) at (13.98,1.19) {Motor action chunk};
-\node[tile,draw=consequence,fill=consequence!13,minimum width=2.9cm,minimum height=.53cm] (oc) at (13.98,.36) {Visible point motion};
-\draw[flow] (11.56,1.19) -- (12.28,1.19);
-\draw[black!45,line width=.7pt] (12.28,.36) -- (12.28,2.02);
-% Short output arrows are kept separate from the shared computation.
-\draw[flow] (12.28,2.02) -- (ow.west);
-\draw[flow] (12.28,1.19) -- (oa.west);
-\draw[flow] (12.28,.36) -- (oc.west);
-\end{tikzpicture}}
-\caption{\textbf{Learning an interaction through its commands and visible evolution.} Robot commands and available tracked motion supervise generated variables within a shared computation. Reciprocal attention carries their learning signals into the world representation. World, action, and consequence predictions describe the same future interaction.}
+\includegraphics[width=\linewidth]{Figures/teaser_v11.pdf}
+\caption{\textbf{Reciprocal action and world learning.} JAM exchanges video and action
+information at every layer. The lower panels show attention visibility and coupled denoising
+of future video, commands, and visual consequences. Images are schematic. The illustrated
+scene, embodiment, and task shifts denote evaluation settings.}
 \label{fig:teaser}
 \end{figure}

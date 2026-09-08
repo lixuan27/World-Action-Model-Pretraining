@@ -1,6 +1,6 @@
 {
   "artifact": "paper/JAM.pdf",
-  "sha256": "e86d17a27150302f06117d15186f233f4d2c07dc6a25e506f9c6b285acef31dc",
+  "sha256": "6be8e1e4b979905b608a7ee452c39b4275f37bb1acf0ba026ed16336bb747e0b",
   "main_pages": 11,
   "total_pages": 17,
   "setup_paragraphs": 2,
@@ -8,7 +8,7 @@
   "main_benchmarks": 7,
   "appendix_benchmark_tables": 1,
   "scientific_plot_font": "DejaVu Serif, embedded",
-  "visual_review": "Figure 5 rebuilt as two readout comparisons with aligned layerwise gain bars, a shared legend, and embedded serif text. All sampled layers and the copy-first reference are retained. Action sensitivity is preserved as appendix Figure 7 with paired intervals spanning zero. Standalone plots and manuscript pages 9\u201311 and 16 inspected; no overlapping text or clipping. Main text remains 11 pages.",
+  "visual_review": "Figures 1 and 2 refreshed from the supplied two-slide PPT. Teaser remains on page 1 at full text width after outer-margin cropping. Framework is on page 4. A single overlapping teaser label is shifted 8 pt left; all other drawing content is retained. Native figures and pages 1–5, 9–11, and 16 inspected for legibility, clipping, and numbering. Main text remains 11 pages.",
   "source_audit": {
     "export_rows": 113,
     "displayed_export_baselines": 85,
@@ -21,5 +21,8 @@
   "consequence_figure_font": "Toppan Bunkyu Mincho, embedded vector outlines; STIX serif math",
   "framework_figure_font": "Supplied Toppan Mincho and Gothic faces, embedded; native PowerPoint export with Unicode mappings",
   "representation_figure_page": 10,
-  "action_sensitivity_figure_page": 16
+  "action_sensitivity_figure_page": 16,
+  "teaser_figure_page": 1,
+  "framework_figure_page": 4,
+  "teaser_figure_font": "Supplied Toppan Mincho, embedded; native PowerPoint export with Unicode mappings"
 }

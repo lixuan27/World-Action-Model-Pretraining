@@ -3,7 +3,8 @@
 \includegraphics[width=\linewidth]{Figures/framework_v11.pdf}
 \caption{\textbf{How action learning enters world pretraining.}
 Source masks select available video, action, and consequence targets. Encoded future observations
-and projected action and consequence tokens receive independent corruption. Shared attention
+and projected action and consequence tokens receive independent corruption. A shared head geometry
+supports cross-stream attention, which
 carries information and reciprocal gradients through the coupled streams, while the current
 observation remains a clean prefix. Masked velocity matching trains their readouts; joint Euler
 integration produces future video, an action chunk, and visual consequences.

@@ -1,25 +1,35 @@
 {
   "figure": 2,
-  "manuscript_page": 3,
+  "manuscript_page": 4,
   "source": "Figures/source/JAM-framework-v11.pptx",
-  "source_sha256": "ebaed152c82ceb37e3f1b1437d923febd9aee88168a3ca20fa25322bbde26b28",
+  "source_sha256": "c991a0fa788a2a1ba49f6ea668a24a33d67df5051fe410f9a72256f26aa81cf8",
   "supplied_source_identical": true,
-  "slide_count": 1,
+  "slide_count": 2,
+  "source_slide": 1,
   "pdf": "Figures/framework_v11.pdf",
-  "pdf_sha256": "8913d5aaae34276cbc56ddda8eeb2028095424f9b3089afa3a49283c0a67a023",
+  "pdf_sha256": "a507287dc0cc64998b84a0b7a07fd58ab89022e3640a3f66e83e70ffc7cc2e6b",
+  "png": "Figures/framework_v11.png",
   "dimensions_pt": [
+    8.0,
+    9.0,
+    1242.0,
+    440.0
+  ],
+  "native_slide_dimensions_pt": [
     0.0,
     0.0,
     1248.0,
     510.0
   ],
-  "font": "Embedded Toppan Bunkyu Mincho and supplied Toppan Gothic heading",
+  "native_export_sha256": "8d626c738937fcc88a75d77cf3f0864c610320020e70c794fd0b5600b3d14b7f",
+  "drawing_stream_sha256": "e0d522121371fd223c871b560cb1b9989fc9aceb8ea430c801a74c2de8d4f5ca",
+  "font": "Embedded supplied Toppan fonts; Unicode maps added for portable extraction",
   "export": "Microsoft PowerPoint native PDF; vector shapes and mathematical artwork retained",
-  "normalization": "ToUnicode maps only; native page drawing streams verified byte-identical",
+  "normalization": "ToUnicode maps and outer page bounds only; drawing streams verified byte-identical",
   "source_text_labels_verified": 58,
-  "visual_review": "Latest supplied layout and bottom title verified in native export and manuscript page 3. No missing labels, clipping, or overlap introduced by export.",
-  "supplied_source_path": "/Users/lixuan/Desktop/JAM-Figures/Framework/JAM-framework-joint-flow-v11.pptx",
   "artwork_labels_visually_verified": [
     "JAM: Joint Action–World Modeling"
-  ]
+  ],
+  "supplied_source_path": "/Users/lixuan/Desktop/JAM-Figures/Framework/JAM-framework-joint-flow-v11.pptx",
+  "visual_review": "Source artwork and all live labels retained. Only outer blank margins trimmed. Native figure and manuscript rendering inspected."
 }

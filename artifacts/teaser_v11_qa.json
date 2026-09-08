@@ -1,0 +1,42 @@
+{
+  "figure": 1,
+  "manuscript_page": 1,
+  "source": "Figures/source/JAM-framework-v11.pptx",
+  "source_sha256": "c991a0fa788a2a1ba49f6ea668a24a33d67df5051fe410f9a72256f26aa81cf8",
+  "supplied_source_identical": true,
+  "slide_count": 2,
+  "source_slide": 2,
+  "pdf": "Figures/teaser_v11.pdf",
+  "pdf_sha256": "590573fb90311e5d9be9598b2699ee6a674bf66e9572f442e91ec3e75ce70525",
+  "png": "Figures/teaser_v11.png",
+  "dimensions_pt": [
+    280.0,
+    5.0,
+    957.0,
+    485.0
+  ],
+  "native_slide_dimensions_pt": [
+    0.0,
+    0.0,
+    1248.0,
+    510.0
+  ],
+  "native_export_sha256": "8d626c738937fcc88a75d77cf3f0864c610320020e70c794fd0b5600b3d14b7f",
+  "drawing_stream_sha256": "56fadce90f7f25ab260a36cb563a6e8c02ff27fbf6ad8d622b4efe716295c091",
+  "font": "Embedded supplied Toppan fonts; Unicode maps added for portable extraction",
+  "export": "Microsoft PowerPoint native PDF; vector shapes and mathematical artwork retained",
+  "normalization": "ToUnicode maps, outer page bounds, and one 8-point horizontal label shift. All other native drawing bytes unchanged.",
+  "source_text_labels_verified": 26,
+  "artwork_labels_visually_verified": [
+    "JAM: Action-Grounded World Pretraining"
+  ],
+  "supplied_source_path": "/Users/lixuan/Desktop/JAM-Figures/Framework/JAM-framework-joint-flow-v11.pptx",
+  "visual_review": "Supplied artwork retained; outer blank margins trimmed. Independent label separated from One-way. Native figure and homepage inspected.",
+  "spacing_correction": {
+    "label": "Independent",
+    "dx_pt": -8,
+    "dy_pt": 0,
+    "reason": "Original label overlapped One-way by 3.56 pt.",
+    "verified_gap_pt": 4.445404744799987
+  }
+}
