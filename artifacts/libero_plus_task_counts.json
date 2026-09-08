@@ -1,0 +1,16 @@
+{
+  "source_url": "https://raw.githubusercontent.com/sylvestf/LIBERO-plus/32b043fbeb929ced31334b7b4b554b1cbf7a2baf/libero/libero/benchmark/task_classification.json",
+  "source_revision": "32b043fbeb929ced31334b7b4b554b1cbf7a2baf",
+  "source_sha256": "faa87cce3e3ba434da01df7c77523a391b5f2912e4774330b0aa1be5f6a999e6",
+  "category_counts": {
+    "Background Textures": 1076,
+    "Robot Initial States": 1550,
+    "Camera Viewpoints": 1599,
+    "Language Instructions": 1537,
+    "Sensor Noise": 1601,
+    "Objects Layout": 1525,
+    "Light Conditions": 1142
+  },
+  "total_tasks": 10030,
+  "purpose": "Task-count weights for the estimated JAM aggregate; external published means remain unchanged."
+}

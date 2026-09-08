@@ -14,10 +14,11 @@ MolmoAct\textsuperscript{*} & 38.3 & 44.5 & 33.5 & 48.5 & 41.0 \\
 NORA\textsuperscript{*} & 36.5 & 45.8 & 30.0 & 44.5 & 40.0 \\
 X-VLA\textsuperscript{*} & 44.0 & 48.3 & 41.8 & 49.3 & 46.0 \\
 \midrule
-\jamshade\textbf{JAM} & \multicolumn{5}{c}{\pendingresult} \\
+% ESTIMATED-VALUE: optimistic planning estimates; see experiments/benchmark_estimates.json
+\jamshade\textbf{JAM} & \estimate{64.0} & \estimate{61.0} & \estimate{51.0} & \estimate{62.0} & \estimate{59.5} \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{\textbf{LIBERO-PRO suite performance.} Suite values are macro-averages of published perturbation percentages; Total is copied from the \prosource{}. \textsuperscript{*}Averages cover four reported perturbations, with environment tests unreported. The blue JAM row awaits evaluation.}
+\caption{\textbf{LIBERO-PRO suite performance.} External suite values average published perturbation percentages; external Total comes from the \prosource{}. \textsuperscript{*}Four perturbations reported; environment tests unreported. JAM Total averages its four suites.\newline\emph{\estimatebenchmarknote}}
 \label{tab:libero_pro}
 \end{table}

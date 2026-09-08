@@ -1,0 +1,22 @@
+{
+  "audited_at": "2026-09-09T04:17:36.145631+08:00",
+  "revision": "131ea0507209f2653b5e05d87f2ee4b2beaf4e6f",
+  "pilot_last_metric": {
+    "loss/world": 0.15405619144439697,
+    "loss/action": 0.014774772338569164,
+    "loss/consequence": 0.029274005442857742,
+    "loss/total": 0.19810497760772705,
+    "step": 13250
+  },
+  "pilot_stage_configs": "configs/base.yaml configs/experiments/jam_base_v1_s3_robomind.yaml",
+  "formal_run_directory_exists": false,
+  "formal_training_config": "configs/experiments/jam_base_full_v1.yaml",
+  "formal_mixture_config": "configs/data/pretrain_full_v1.yaml",
+  "formal_config_hashes": {
+    "configs/experiments/jam_base_full_v1.yaml": "a45666eb5cb9e5b832957c2daf7a2fe8b714cb6f77534ce8fcd4b8a2975ed7a0",
+    "configs/data/pretrain_full_v1.yaml": "4ebcc2c39bece67bd52b6fd985a38f67e6013ee45406245e92ca8c38a210cd92"
+  },
+  "source_root": "/public/home/lixuan/lixuan/JAM",
+  "scope": "Read-only training-state audit for subjective benchmark planning estimates; separate from the fixed manuscript evidence snapshot.",
+  "benchmark_measurements": "No completed JAM LIBERO-Plus, LIBERO-PRO, or VLABench result file found in the inspected evidence; estimates are not measurements."
+}

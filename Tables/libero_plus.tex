@@ -22,10 +22,11 @@ ImageWAM & 80.8 & 50.3 & \textbf{91.4} & \textbf{98.1} & 85.5 & 93.8 & 80.5 & 83
 ABot-M0.5 & 70.5 & \textbf{87.4} & 88.6 & 94.0 & 89.7 & 75.5 & 85.2 & 83.4 \\
 R1 & 33.8 & 76.1 & 88.0 & 97.0 & 87.1 & 39.8 & 77.5 & 69.2 \\
 \midrule
-\jamshade\textbf{JAM} & \multicolumn{8}{c}{\pendingresult} \\
+% ESTIMATED-VALUE: optimistic planning estimates; see experiments/benchmark_estimates.json
+\jamshade\textbf{JAM} & \estimate{86.0} & \estimate{88.5} & \estimate{92.0} & \estimate{97.5} & \estimate{94.5} & \estimate{86.0} & \estimate{90.5} & \estimate{90.2} \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{\textbf{LIBERO-Plus robustness.} Success percentages across seven perturbation axes; the mean retains the source aggregation. Source: \refsource{}. \benchmarknote}
+\caption{\textbf{LIBERO-Plus robustness.} Success percentages across seven perturbation axes. External means retain their source aggregation; JAM uses task-count weights. Source: \refsource{}. Bold marks external column maxima; NR means unreported.\newline\emph{\estimatebenchmarknote}}
 \label{tab:libero_plus}
 \end{table}

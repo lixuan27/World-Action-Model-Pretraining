@@ -1,6 +1,6 @@
 {
   "artifact": "paper/JAM.pdf",
-  "sha256": "6be8e1e4b979905b608a7ee452c39b4275f37bb1acf0ba026ed16336bb747e0b",
+  "sha256": "57748c784d18ee60881d512647141d4f6e52484eeb4cd8c3b375a00a9ac65d2a",
   "main_pages": 11,
   "total_pages": 17,
   "setup_paragraphs": 2,
@@ -8,7 +8,7 @@
   "main_benchmarks": 7,
   "appendix_benchmark_tables": 1,
   "scientific_plot_font": "DejaVu Serif, embedded",
-  "visual_review": "Figures 1 and 2 refreshed from the supplied two-slide PPT. Teaser remains on page 1 at full text width after outer-margin cropping. Framework is on page 4. A single overlapping teaser label is shifted 8 pt left; all other drawing content is retained. Native figures and pages 1–5, 9–11, and 16 inspected for legibility, clipping, and numbering. Main text remains 11 pages.",
+  "visual_review": "Figures 1 and 2 refreshed from the supplied two-slide PPT. Teaser remains on page 1 at full text width after outer-margin cropping. Framework is on page 4. A single overlapping teaser label is shifted 8 pt left; all other drawing content is retained. Native figures and pages 1\u20135, 9\u201311, and 16 inspected for legibility, clipping, and numbering. Main text remains 11 pages. Tables 1\u20133 now contain explicitly labeled optimistic JAM estimates. Pages 6\u20138 and 16\u201317 reviewed after this revision; each italic estimate caption occupies exactly one line, with no overlap or clipping. Main text remains 11 pages and all figures retain their previous numbering.",
   "source_audit": {
     "export_rows": 113,
     "displayed_export_baselines": 85,
@@ -24,5 +24,29 @@
   "action_sensitivity_figure_page": 16,
   "teaser_figure_page": 1,
   "framework_figure_page": 4,
-  "teaser_figure_font": "Supplied Toppan Mincho, embedded; native PowerPoint export with Unicode mappings"
+  "teaser_figure_font": "Supplied Toppan Mincho, embedded; native PowerPoint export with Unicode mappings",
+  "benchmark_estimate_qa": {
+    "tables": [
+      1,
+      2,
+      3
+    ],
+    "pages": [
+      7,
+      7,
+      8
+    ],
+    "status": "estimated",
+    "caption_note_lines_per_table": 1,
+    "source": "experiments/benchmark_estimates.json",
+    "baseline_cells_unchanged": true,
+    "main_pages": 11,
+    "reviewed_pages": [
+      6,
+      7,
+      8,
+      16,
+      17
+    ]
+  }
 }

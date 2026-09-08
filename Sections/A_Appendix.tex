@@ -221,6 +221,12 @@ External reference results retain their own provenance and evaluation scope. The
 scaling figure use design values inherited or extended from the working manuscript; they are layout
 targets rather than preregistered outcomes or model predictions.
 
+Tables~\ref{tab:libero_plus}--\ref{tab:vlabench} additionally contain optimistic planning estimates
+for completion of the full-corpus foundation schedule and task adaptation. Their captions identify
+this status. The planning audit observes the seven-source pilot at update 13,250; the broader formal
+run remains planned. The estimates express a favorable scenario rather than a forecast calibrated
+from the training losses. Their source file records assumptions and aggregation weights.
+
 The data audit identified extreme displacement labels in some human-video windows. A displacement
 mask rejects magnitudes above 8 from the 8,400-update resume onward. The same resume changes the
 source mixture, maps absent modalities to pure-noise inputs, and changes the sharding topology.
@@ -241,14 +247,14 @@ model labels, source revisions, and a cell-level rendering map. The official exp
 LIBERO-PRO table, so Table~\ref{tab:libero_pro} uses the benchmark maintainers' own leaderboard.
 Its normalized values are multiplied by 100 exactly. The four displayed suite scores are
 unweighted means of their reported perturbation rates, rounded to one decimal. Missing environment
-tests are excluded from these means and flagged on the affected models. Total retains the published
+tests are excluded from these means and flagged on the affected models. External Total retains the published
 aggregate. This summary preserves the difference between derived suite averages and source-reported totals. External protocol scopes remain attached to their
 values until a matched JAM evaluation is available.
 \input{Tables/libero}
 \FloatBarrier
 
 \subsection{Reproduction and experiment ledger}
-Measured logs, external references, and layout targets occupy separate artifact files. The README gives the complete build procedure. The commands \texttt{python3} \path{scripts/build_artifacts.py} and \texttt{python3} \path{scripts/validate.py} regenerate the numerical displays and check evidence consistency, respectively.
+Measured logs, external references, layout targets, and benchmark estimates occupy separate artifact files. The README gives the complete build procedure. The commands \texttt{python3} \path{scripts/build_artifacts.py} and \texttt{python3} \path{scripts/validate.py} regenerate the numerical displays and check evidence consistency, respectively.
 
 The protocol ledger links each scientific question to inspected source configurations and required
 result artifacts. It identifies controls that still require implementation changes. Promoting a

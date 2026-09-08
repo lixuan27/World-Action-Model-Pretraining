@@ -31,13 +31,35 @@ setup_paragraphs=[p for p in re.split(r'\n\s*\n',setup) if p.strip()]
 check(len(setup_paragraphs)==2, 'Experimental setup must have exactly two paragraphs')
 check(not (P/'Tables/data.tex').exists() and 'tab:data}' not in text, 'Old dataset inventory table remains')
 benchmarks=['libero_plus','libero_pro','vlabench','bimanual','mobile']
+estimate_file=json.load(open(P/'experiments/benchmark_estimates.json'))
+estimate_tables=estimate_file['tables']
+check(estimate_file['status']=='estimated' and estimate_file['marker']=='ESTIMATED-VALUE','Estimate provenance status')
+check(set(estimate_tables)=={'libero_plus','libero_pro','vlabench'},'Unexpected benchmark estimate scope')
+check((P/estimate_file['basis']).is_file(),'Missing training-state basis for estimates')
+check('awaiting evaluation' in (P/'Sections/_macros.tex').read_text().split(r'\newcommand{\estimatebenchmarknote}',1)[1].split('\n',1)[0], 'Estimate caption lacks evaluation status')
 for name in benchmarks+['libero','joint_analysis','data_scaling']:
  table=(P/'Tables'/f'{name}.tex').read_text()
  check(r'\begin{tabularx}{\linewidth}' in table,'Table must fill text width: '+name)
  check(r'\jamshade' in table and r'\panelrow' in table,'Table lacks JAM highlighting or hierarchy: '+name)
  if name in benchmarks+['libero']:
   check(table.count(r'\jamshade')==(2 if name in ['bimanual','mobile'] else 1),'Benchmark requires one JAM row: '+name)
-  check(r'\pendingresult' in table and r'\target{' not in table,'Benchmark JAM row must await a measured artifact: '+name)
+  check(r'\target{' not in table,'Benchmark contains uncontrolled layout target: '+name)
+  if name in estimate_tables:
+   entry=estimate_tables[name]
+   values=re.findall(r'\\estimate\{([^}]+)\}',table)
+   check(values==entry['values'] and len(values)==len(entry['columns']),'Benchmark estimate values or shape: '+name)
+   check(all(Decimal('0')<=Decimal(v)<=Decimal('100') for v in values),'Estimate outside percentage range: '+name)
+   check('ESTIMATED-VALUE' in table and r'\estimatebenchmarknote' in table and r'\pendingresult' not in table,'Unmarked benchmark estimates: '+name)
+  else:
+   check(r'\pendingresult' in table and r'\estimate{' not in table,'Benchmark JAM row must await a measured artifact: '+name)
+plus=estimate_tables['libero_plus']
+plus_counts=json.load(open(P/plus['weights_source']))
+weights=[plus_counts['category_counts'][k] for k in plus['weight_categories']]
+check(sum(weights)==plus_counts['total_tasks']==10030,'LIBERO-Plus task-count weights')
+weighted=sum(Decimal(v)*n for v,n in zip(plus['values'][:-1],weights))/sum(weights)
+check(Decimal(plus['values'][-1])==weighted.quantize(Decimal('0.1'),rounding=ROUND_HALF_UP),'Estimated LIBERO-Plus weighted mean')
+pro_est=estimate_tables['libero_pro']['values']
+check(Decimal(pro_est[-1])==(sum(map(Decimal,pro_est[:-1]))/4).quantize(Decimal('0.1'),rounding=ROUND_HALF_UP),'Estimated LIBERO-PRO total')
 for name in benchmarks:check(s.count(r'\input{Tables/'+name+'}')==1,'Missing or repeated main benchmark: '+name)
 check(s.index(r'\input{Tables/mobile}')<s.index(r'\label{fig:training}'),'Training dynamics must follow all main benchmark tables')
 check('fig:mixture' not in text and 'fig:foundation' not in text,'Removed figures remain referenced')
@@ -164,7 +186,7 @@ verify_external='--verify-external' in sys.argv
 if verify_external:
  try:
   import urllib.request
-  for manifest in [external,pro]:
+  for manifest in [external,pro,plus_counts]:
    with urllib.request.urlopen(manifest['source_url'],timeout=30) as response:remote=response.read()
    check(hashlib.sha256(remote).hexdigest()==manifest['source_sha256'],'Remote source hash differs: '+manifest['source_url'])
  except Exception as exc:check(False,'External verification failed: '+str(exc))
@@ -188,4 +210,5 @@ if errors:
 print(f'PASS: {main_pages} main pages (maximum 12); {len(setup_paragraphs)} setup paragraphs; {len(sections)} main sections; {len(labels)} unique labels; {len(cites)} verified citation keys; evidence hashes, summary means, and target markers valid.')
 
 print(f'PASS: {external_count} archived export rows; {len(seen)} displayed export baselines; {cell_count} source cells; six official PRO rows; seven-source mixture and measured probe settings verified.')
-if verify_external:print('PASS: both external source hashes reverified online.')
+print('PASS: three estimated JAM rows explicitly labeled; LIBERO-Plus task weights and LIBERO-PRO estimated total verified.')
+if verify_external:print('PASS: external baseline and LIBERO-Plus task-count source hashes reverified online.')

@@ -17,10 +17,11 @@ Xiaomi-Robotics-1 & \textbf{59.1} & \textbf{70.3} & 69.9 \\
 Bridge-WA & 52.8 & 64.0 & \textbf{71.2} \\
 R1 & 58.9 & 67.2 & 63.5 \\
 \midrule
-\jamshade\textbf{JAM} & \multicolumn{3}{c}{\pendingresult} \\
+% ESTIMATED-VALUE: optimistic planning estimates; see experiments/benchmark_estimates.json
+\jamshade\textbf{JAM} & \estimate{62.0} & \estimate{72.0} & \estimate{74.0} \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{\textbf{VLABench overall performance.} SR, PS, and IS denote task success, progress score, and intention score. Values retain the source-reported overall percentage scale. Source: \refsource{}. \benchmarknote}
+\caption{\textbf{VLABench overall performance.} SR, PS, and IS denote task success, progress score, and intention score, reported as overall percentages. Source: \refsource{}. Bold marks external column maxima; NR means unreported.\newline\emph{\estimatebenchmarknote}}
 \label{tab:vlabench}
 \end{table}

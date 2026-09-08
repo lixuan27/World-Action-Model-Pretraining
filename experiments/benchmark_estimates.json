@@ -1,0 +1,36 @@
+{
+  "status": "estimated",
+  "marker": "ESTIMATED-VALUE",
+  "meaning": "User-requested optimistic planning estimates, not measured results, preregistered outcomes, or statistically calibrated forecasts. One decimal is a display convention, not an uncertainty statement.",
+  "scenario": "Completion of the planned 60000-update full-corpus JAM foundation run followed by benchmark-specific adaptation on designated training splits. These values do not describe the current 13250-update pilot checkpoint.",
+  "basis": "artifacts/benchmark_estimate_basis.json",
+  "assumptions": [
+    "The seven-source pilot currently uses DROID, BridgeData V2, EgoDex, Ego4D, and RoboMIND AgileX, Franka, and UR5e.",
+    "The planned formal corpus broadens robot and human coverage with InternData, RoboCOIN, EPIC-KITCHENS, a bounded AgiBot subset, and RoboCasa pretraining-only tasks. Planned availability is not evidence of consumption.",
+    "All admitted sources pass the existing cache, normalization, and split checks; target evaluation tasks remain excluded from pretraining.",
+    "Task adaptation and complete benchmark rollouts are still required. Training losses and frozen-feature probes do not quantitatively predict closed-loop benchmark scores.",
+    "Camera and sensor perturbations and long-horizon control retain substantial difficulty. Estimated gains are a favorable scenario, not evidence that joint coupling caused an improvement."
+  ],
+  "tables": {
+    "libero_plus": {
+      "columns": ["Camera", "Robot", "Language", "Light", "Backgr.", "Noise", "Layout", "Mean"],
+      "values": ["86.0", "88.5", "92.0", "97.5", "94.5", "86.0", "90.5", "90.2"],
+      "aggregation": "Mean is the official task-count-weighted mean of the seven estimated perturbation percentages, rounded half up to one decimal.",
+      "weights_source": "artifacts/libero_plus_task_counts.json",
+      "weight_categories": ["Camera Viewpoints", "Robot Initial States", "Language Instructions", "Light Conditions", "Background Textures", "Sensor Noise", "Objects Layout"],
+      "rationale": "Broader manipulation and visual coverage motivates an optimistic robustness target. Camera and noise estimates remain below the strongest external values, while lighting stays near its existing ceiling. This is a subjective difficulty profile."
+    },
+    "libero_pro": {
+      "columns": ["Goal", "Spatial", "Long", "Object", "Total"],
+      "values": ["64.0", "61.0", "51.0", "62.0", "59.5"],
+      "aggregation": "Estimated Total is the equal-weight mean of all four suite estimates. It assumes complete, equally weighted perturbation coverage for JAM; external source totals remain unchanged.",
+      "rationale": "Goal, spatial, and object robustness receive favorable but moderate targets after adaptation. Long-horizon performance remains the lowest suite and below the strongest reported external Long score."
+    },
+    "vlabench": {
+      "columns": ["SR", "PS", "IS"],
+      "values": ["62.0", "72.0", "74.0"],
+      "aggregation": "Three independently chosen overall percentage estimates; progress and intention are not derived from task success.",
+      "rationale": "A broader planned manipulation corpus supports a favorable task-transfer scenario. Success remains below progress and intention, allowing correct partial behavior without completed tasks. Each target is modestly above the strongest archived external value for its metric."
+    }
+  }
+}

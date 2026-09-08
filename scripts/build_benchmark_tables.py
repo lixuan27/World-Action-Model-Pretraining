@@ -7,7 +7,16 @@ P=Path(__file__).resolve().parents[1]
 export=json.loads((P/'artifacts/source_reports/benchmark_export.json').read_text())
 tables={x['id']:x for x in export['simulation']}
 pro=json.loads((P/'artifacts/external_libero_pro.json').read_text())
+estimates=json.loads((P/'experiments/benchmark_estimates.json').read_text())['tables']
 audit=[]
+
+def jam_row(key,n):
+    if key in estimates:
+        values=estimates[key]['values']
+        assert len(values)==n
+        return ('% ESTIMATED-VALUE: optimistic planning estimates; see experiments/benchmark_estimates.json\n'+
+                r'\jamshade\textbf{JAM} & '+' & '.join(r'\estimate{'+v+'}' for v in values)+r' \\')
+    return r'\jamshade\textbf{JAM} & \multicolumn{'+str(n)+r'}{c}{\pendingresult} \\'
 
 def name(s):
     if s.startswith('OpenWAM'):return r'R1'
@@ -35,14 +44,23 @@ def panel(t,indices,headers,title,include_jam=False,model_width='1.43in'):
             rows.append(name(r['model'])+' & '+' & '.join(rendered)+r' \\')
             audit.append({'table':t['id'],'model':r['model'],'indices':indices,'source_cells':cells})
     if include_jam:
-        rows += [r'\midrule',r'\jamshade\textbf{JAM} & \multicolumn{'+str(n-1)+r'}{c}{\pendingresult} \\']
+        rows += [r'\midrule',jam_row(t['id'],n-1)]
     rows += [r'\bottomrule',r'\end{tabularx}']
     return '\n'.join(rows)
 
 def write(key,panels,caption,size=9.2,source=True):
+    if source:
+        if key in estimates:
+            caption+=r' Source: \refsource{}. Bold marks external column maxima; NR means unreported.'
+        elif key in ['bimanual','mobile']:
+            caption+=r' Source: \refsource{}. Bold marks column maxima; blue rows await JAM evaluation.'
+        else:
+            caption+=r' Source: \refsource{}. \benchmarknote'
+    if key in estimates:
+        caption+=r'\newline\emph{\estimatebenchmarknote}'
     out=[r'\begin{table}[H]',r'\centering',r'\begingroup\fontsize{'+str(size)+'}{'+str(size+1.3)+r'}\selectfont',
          r'\setlength{\tabcolsep}{2.5pt}\renewcommand{\arraystretch}{'+('1.0' if key in ['bimanual','mobile'] else '1.08')+'}',
-         '\n\\vspace{3pt}\n'.join(panels),r'\endgroup',r'\caption{'+caption+(' '+(r'Source: \refsource{}. Bold marks column maxima; blue rows await JAM evaluation.' if key in ['bimanual','mobile'] else r'Source: \refsource{}. \benchmarknote') if source else '')+'}',
+         '\n\\vspace{3pt}\n'.join(panels),r'\endgroup',r'\caption{'+caption+'}',
          r'\label{tab:'+key+'}',r'\end{table}']
     (P/'Tables'/f'{key}.tex').write_text('\n'.join(out)+'\n')
 
@@ -50,13 +68,13 @@ specs=[
  ('libero','LIBERO',['Spatial','Object','Goal','Long','Mean'],
   r'\textbf{LIBERO task success.} The four suites measure spatial, object, goal, and long-horizon control.'),
  ('libero_plus','LIBERO-Plus',['Camera','Robot','Language','Light','Backgr.','Noise','Layout','Mean'],
-  r'\textbf{LIBERO-Plus robustness.} Success percentages across seven perturbation axes; the mean retains the source aggregation.')]
+  r'\textbf{LIBERO-Plus robustness.} Success percentages across seven perturbation axes. External means retain their source aggregation; JAM uses task-count weights.')]
 for key,title,headers,caption in specs:
     write(key,[panel(tables[key],list(range(len(headers))),headers,title,True)],caption)
 
 # The incomplete metric request defaults to the three overall VLABench metrics.
 write('vlabench',[panel(tables['vlabench'],[15,16,17],['SR','PS','IS'],'VLABench',True)],
-      r'\textbf{VLABench overall performance.} SR, PS, and IS denote task success, progress score, and intention score. Values retain the source-reported overall percentage scale.')
+      r'\textbf{VLABench overall performance.} SR, PS, and IS denote task success, progress score, and intention score, reported as overall percentages.')
 
 def pair(left,right):
     return (r'\begin{minipage}[t]{.51\linewidth}\vspace{0pt}'+'\n'+left+'\n'+r'\end{minipage}\hfill'+
@@ -91,9 +109,9 @@ for r in pro['rows']:
     if incomplete:label+=r'\textsuperscript{*}'
     lines.append(label+' & '+' & '.join(suites+[total])+r' \\')
     derived.append({'model':r['model'],'suites':details,'reported_total_percent':r['percent_cells'][-1],'display_total':total})
-lines += [r'\midrule',r'\jamshade\textbf{JAM} & \multicolumn{5}{c}{\pendingresult} \\',r'\bottomrule',r'\end{tabularx}']
+lines += [r'\midrule',jam_row('libero_pro',5),r'\bottomrule',r'\end{tabularx}']
 write('libero_pro',['\n'.join(lines)],
-      r'\textbf{LIBERO-PRO suite performance.} Suite values are macro-averages of published perturbation percentages; Total is copied from the \prosource{}. \textsuperscript{*}Averages cover four reported perturbations, with environment tests unreported. The blue JAM row awaits evaluation.',source=False)
+      r'\textbf{LIBERO-PRO suite performance.} External suite values average published perturbation percentages; external Total comes from the \prosource{}. \textsuperscript{*}Four perturbations reported; environment tests unreported. JAM Total averages its four suites.',source=False)
 (P/'artifacts/libero_pro_aggregation.json').write_text(json.dumps({'method':'Unweighted mean of reported perturbation percentages, rounded half up to one decimal; source-reported Total retained','rows':derived},indent=2)+'\n')
 (P/'artifacts/rendered_baseline_cells.json').write_text(json.dumps(audit,indent=2)+'\n')
 print('Built compact single-arm, bimanual and mobile benchmark tables.')
