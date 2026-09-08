@@ -1,6 +1,7 @@
 """Serif, vector-first scientific figures with explicit evidence provenance."""
 from pathlib import Path
 import json
+import hashlib
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
@@ -81,35 +82,84 @@ fig.text(.105,.972,'Raw batches and local averages',fontsize=9.2,weight='bold',v
 fig.text(.99,.972,'Measured training records',fontsize=8.1,color='#677B89',ha='right',va='top')
 save(fig,'training')
 
-# 3. Plot every sampled layer, rather than selecting the layer with best test R2.
+# 3. Compare representation readout and its gain over the video initialization.
+# Keep all sampled depths and the simple consequence floor. Input sensitivity
+# answers a separate question and is preserved in the appendix figure below.
 root=P/'artifacts/measurements/analysis'
-fig,axes=plt.subplots(1,3,figsize=(6.5,2.95));fig.subplots_adjust(left=.085,right=.985,bottom=.29,top=.73,wspace=.48)
-series=[('JAM, update 5,100',BLUE,'base_v1_m5100',''),('Video prior',SAND,'floors','_bare_prior'),('Random world',GREY,'floors','_random_init')]
+fig=plt.figure(figsize=(6.5,3.05))
+axes=[fig.add_axes([.095,.405,.365,.405]),fig.add_axes([.605,.405,.365,.405])]
+gains=[fig.add_axes([.095,.135,.365,.16]),fig.add_axes([.605,.135,.365,.16])]
+series=[('JAM',BLUE,'base_v1_m5100',''),('Video prior',SAND,'floors','_bare_prior'),('Random init.',GREY,'floors','_random_init')]
+records={};source_hashes={}
 for label,color,folder,suffix in series:
-    d=json.loads((root/folder/f'probes_droid{suffix}.json').read_text());xx=list(map(int,d['layers']));rr=[d['layers'][str(i)]['actions'] for i in xx]
-    axes[0].plot(xx,[r['r2'] for r in rr],'-o',color=color,lw=1.4,ms=3)
-    axes[0].fill_between(xx,[r['r2_ci'][0] for r in rr],[r['r2_ci'][1] for r in rr],color=color,alpha=.13,lw=0)
-    d=json.loads((root/folder/f'probes_egodex{suffix}.json').read_text());rr=[d['layers'][str(i)]['consequence'] for i in xx]
-    axes[1].plot(xx,[r['metrics']['ade'] for r in rr],'-o',color=color,lw=1.4,ms=3)
-    if suffix=='':floor=d['targets']['consequence']['floors']['copy_first']['ade']
-axes[1].axhline(floor,color=ROSE,ls=':',lw=1.2)
-axes[0].set_title('A. Action readout\nDROID',loc='left');axes[0].set_ylabel('R-squared')
-axes[1].set_title('B. Consequence readout\nEgoDex',loc='left');axes[1].set_ylabel('Displacement error')
-for ax in axes[:2]:
-    style(ax);ax.set_xticks([5,15,29]);ax.set_xlabel('World layer');ax.yaxis.set_major_locator(MaxNLocator(4))
-axes[0].set_ylim(0,.85)
-cf=json.loads((root/'base_v1_m5100/counterfactual_libero.json').read_text())
-for i,(key,lab) in enumerate([('donor','Donor'),('hold','Hold'),('shuffled_time','Time shuffle')]):
-    v=cf['conditions'][key]['sensitivity_vs_true'];val=v['delta']*1000;lo,hi=np.array(v['ci'])*1000
-    axes[2].errorbar(i,val,yerr=[[val-lo],[hi-val]],fmt='o',color=BLUE,ms=4,capsize=3,lw=1.3)
-style(axes[2]);axes[2].axhline(0,color=INK,lw=.9);axes[2].set_xticks([0,1,2],['Donor','Hold','Shuffle']);axes[2].set_xlim(-.5,2.5)
-axes[2].set_title('C. Action sensitivity\nLIBERO',loc='left');axes[2].set_ylabel('Change in error (×0.001)');axes[2].set_xlabel('Action-input change');axes[2].set_ylim(-2.05,2.05)
-handles=[Line2D([],[],color=c,marker='o',lw=1.4,ms=3,label=l) for l,c,_,_ in series]
-handles.append(Line2D([],[],color=ROSE,ls=':',lw=1.2,label='Copy-first floor'))
-fig.legend(handles=handles,loc='lower center',bbox_to_anchor=(.53,.035),ncol=2,frameon=False,columnspacing=1.8,handlelength=1.6)
-fig.text(.085,.985,'World-feature diagnostics at a fixed milestone',va='top',fontsize=9.5,weight='bold')
-fig.text(.085,.905,'Partially noised future observations; generated action and consequence inputs are noise.',va='top',fontsize=8)
+    reports={}
+    for dataset in ['droid','egodex']:
+        path=root/folder/f'probes_{dataset}{suffix}.json'
+        reports[dataset]=json.loads(path.read_text())
+        source_hashes[str(path.relative_to(P))]=hashlib.sha256(path.read_bytes()).hexdigest()
+    xx=sorted(map(int,reports['droid']['layers']))
+    assert xx==sorted(map(int,reports['egodex']['layers']))
+    action=[reports['droid']['layers'][str(i)]['actions'] for i in xx]
+    ade=np.array([reports['egodex']['layers'][str(i)]['consequence']['metrics']['ade'] for i in xx])
+    r2=np.array([r['r2'] for r in action])
+    records[label]={'action_r2':r2.tolist(),'consequence_ade':ade.tolist()}
+    zorder=4 if label=='JAM' else 2
+    for ax,values in zip(axes,[r2,ade]):
+        ax.plot(xx,values,color=color,marker='o' if label=='JAM' else 's',
+                lw=1.8 if label=='JAM' else 1.1,ms=3.6 if label=='JAM' else 2.7,
+                markeredgewidth=.65,mfc=color if label=='JAM' else 'white',zorder=zorder)
+    axes[0].fill_between(xx,[r['r2_ci'][0] for r in action],[r['r2_ci'][1] for r in action],color=color,alpha=.15,lw=0)
+    if label=='JAM':floor=reports['egodex']['targets']['consequence']['floors']['copy_first']['ade']
+axes[1].axhline(floor,color=ROSE,ls=(0,(2,2)),lw=1.2,zorder=1)
+axes[0].set_ylabel('Action $R^2$ ↑',labelpad=4)
+axes[1].set_ylabel('Consequence ADE ↓',labelpad=5)
+axes[0].set_ylim(0,.85);axes[0].set_yticks([0,.2,.4,.6,.8])
+axes[1].set_ylim(.098,.162);axes[1].set_yticks([.10,.12,.14,.16])
+axes[1].yaxis.set_major_formatter(FuncFormatter(lambda v,pos:f'{v:.2f}'))
+for ax in axes:
+    style(ax);ax.set_xticks(xx);ax.tick_params(labelbottom=False)
+    ax.set_xlim(3,31)
+action_gain=np.array(records['JAM']['action_r2'])-np.array(records['Video prior']['action_r2'])
+prior_ade=np.array(records['Video prior']['consequence_ade'])
+ade_reduction=100*(prior_ade-np.array(records['JAM']['consequence_ade']))/prior_ade
+for ax,values,title in zip(gains,[action_gain,ade_reduction],['$R^2$ gain over video prior ↑','ADE reduction vs video prior (%) ↑']):
+    style(ax);ax.set_facecolor('#F0F5F8')
+    ax.bar(xx,values,width=2.5,color=BLUE,alpha=.85,zorder=3)
+    ax.axhline(0,color=INK,lw=.7)
+    ax.set_title(title,loc='left',fontsize=8.2,weight='normal',pad=5)
+    ax.set_xticks(xx);ax.set_xlim(3,31);ax.set_xlabel('World layer',labelpad=3)
+gains[0].set_ylim(0,.66);gains[0].set_yticks([0,.3,.6])
+gains[1].set_ylim(0,22);gains[1].set_yticks([0,10,20])
+fig.text(.095,.98,'A  Motor-action readout · DROID',va='top',fontsize=9.2,weight='bold')
+fig.text(.605,.98,'B  Visual consequence · EgoDex',va='top',fontsize=9.2,weight='bold')
+handles=[Line2D([],[],color=c,marker='o' if l=='JAM' else 's',lw=1.5,
+                mfc=c if l=='JAM' else 'white',ms=3.2,label=l) for l,c,_,_ in series]
+handles.append(Line2D([],[],color=ROSE,ls=(0,(2,2)),lw=1.2,label='Copy-first (B)'))
+fig.legend(handles=handles,loc='upper center',bbox_to_anchor=(.53,.921),ncol=4,
+           frameon=False,columnspacing=1.3,handlelength=1.8,fontsize=8)
 save(fig,'representation')
+comparison={'checkpoint_update':5100,'layers':xx,'source_sha256':source_hashes,
+            'readouts':records,'copy_first_consequence_ade':floor,
+            'jam_action_r2_gain_vs_video_prior':action_gain.tolist(),
+            'jam_consequence_ade_reduction_percent_vs_video_prior':ade_reduction.tolist(),
+            'jam_beats_copy_first_layers':[layer for layer,ade in zip(xx,records['JAM']['consequence_ade']) if ade<floor],
+            'gain_uncertainty':'Point estimates; joint bootstrap samples are unavailable.',
+            'scope':'Frozen-world ridge readout; partially visible future; window splits may share episodes.'}
+(P/'artifacts/representation_comparison.json').write_text(json.dumps(comparison,indent=2)+'\n')
+
+# Preserve the inconclusive action-input intervention in a separate display.
+cf=json.loads((root/'base_v1_m5100/counterfactual_libero.json').read_text())
+fig,ax=plt.subplots(figsize=(6.5,1.85));fig.subplots_adjust(left=.225,right=.94,bottom=.30,top=.84)
+for i,(key,lab) in enumerate([('donor','Donor action'),('hold','Hold action'),('shuffled_time','Time shuffle')]):
+    v=cf['conditions'][key]['sensitivity_vs_true'];val=v['delta']*1000;lo,hi=np.array(v['ci'])*1000
+    ax.errorbar(val,i,xerr=[[val-lo],[hi-val]],fmt='o',color=BLUE,ms=4.2,capsize=3,lw=1.5)
+style(ax);ax.grid(False);ax.grid(axis='x',color='#DDE5EA',lw=.55)
+ax.axvline(0,color=INK,lw=.9);ax.set_xlim(-2.1,2.1);ax.set_xticks([-2,-1,0,1,2])
+ax.set_yticks([0,1,2],['Donor action','Hold action','Time shuffle']);ax.set_ylim(2.45,-.45)
+ax.set_xlabel('Consequence error change from the recorded action (×10⁻³)',labelpad=5)
+fig.text(.225,.98,'LIBERO · 300 windows',va='top',fontsize=9.2,weight='bold')
+fig.text(.94,.98,'Paired 95% intervals include zero',va='top',ha='right',fontsize=8.2,color='#677B89')
+save(fig,'action_sensitivity')
 
 # 4. Planned scaling displays remain visibly separate from all measurements.
 plans=json.loads((P/'experiments/layout_targets.json').read_text())['tables'];s=plans['scaling'];scale=list(plans['scale_controls']['rows'].values())
@@ -126,4 +176,4 @@ fig.text(.08,.975,'PLANNED DISPLAY  |  Values await measurement',fontsize=9.1,co
 fig.text(.08,.865,'LIBERO-Plus; one factor varies in each panel while the remaining budgets are fixed.',fontsize=8,va='top')
 save(fig,'scaling_targets')
 (P/'artifacts/figure_qa.json').write_text(json.dumps(qa,indent=2)+'\n')
-print('Built three serif vector figures with measured / planned separation.')
+print('Built four serif vector figures with measured / planned separation.')

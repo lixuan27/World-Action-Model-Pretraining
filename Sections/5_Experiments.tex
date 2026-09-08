@@ -46,12 +46,13 @@ Figure~\ref{fig:training} records the joint objectives during foundation pretrai
 
 \FloatBarrier
 \subsection{Representation and reciprocal computation}
-Figure~\ref{fig:representation} measures accessible action and consequence information alongside sensitivity to action-input changes.
-\begin{figure}[H]
+Figure~\ref{fig:representation} compares motor-action and visual-consequence readout from JAM world features with video and random initialization.
+\begin{figure}[!t]
 \centering\includegraphics[width=\linewidth]{Figures/representation.pdf}
-\caption{\textbf{What is accessible in the world features?} A--B: frozen-world ridge probes at every sampled depth, using partially noised future observations and fully corrupted action and consequence inputs. The held-out corpus windows are split into 2,800 probe-training and 1,200 probe-test windows; these probe splits can share episodes. Action-readout bands use 1,000 window-bootstrap resamples. C: consequence-error changes under substituted actions on 300 LIBERO windows, with paired 95\% intervals. These intervals include zero. This panel measures input sensitivity; executed alternative-action futures are required for a causal prediction test.}
+\caption{\textbf{Reading actions and visual consequences from world features.} Frozen-world ridge probes compare JAM at update 5,100 with video and random initialization at every sampled layer. Top: action R-squared (higher is better) and consequence average displacement error, ADE (lower is better). Bottom: JAM's gain over the video prior, shown as point estimates. The copy-first reference remains visible in B. Action bands use 1,000 window-bootstrap resamples. Future observations are partly visible; the 2,800/1,200 probe-training/test windows can share episodes (Appendix~\ref{app:controls}). Action-input sensitivity is evaluated separately in Figure~\ref{fig:action_sensitivity}, where all paired intervals include zero.}
 \label{fig:representation}
 \end{figure}
+
 Table~\ref{tab:joint} separates the value of embodied pretraining from the information and gradient paths within joint computation.
 \input{Tables/joint_analysis}
 

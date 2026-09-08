@@ -133,8 +133,24 @@ cf=json.load(open(P/'artifacts/measurements/analysis/base_v1_m5100/counterfactua
 for key in ['donor','hold','shuffled_time']:
  lo,hi=cf['conditions'][key]['sensitivity_vs_true']['ci'];check(lo<=0<=hi,'Sensitivity statement must be reviewed')
 check(cf['n_windows']==300,'Sensitivity sample count')
+comparison=json.load(open(P/'artifacts/representation_comparison.json'))
+layers=comparison['layers']
+check(layers==[5,10,15,20,25,29],'Derived comparison must include every sampled depth')
+for source,digest in comparison['source_sha256'].items():
+ check(hashlib.sha256((P/source).read_bytes()).hexdigest()==digest,'Representation source hash '+source)
+for label,folder,suffix in [('JAM','base_v1_m5100',''),('Video prior','floors','_bare_prior'),('Random init.','floors','_random_init')]:
+ action=json.load(open(P/f'artifacts/measurements/analysis/{folder}/probes_droid{suffix}.json'))
+ consequence=json.load(open(P/f'artifacts/measurements/analysis/{folder}/probes_egodex{suffix}.json'))
+ check(comparison['readouts'][label]['action_r2']==[action['layers'][str(i)]['actions']['r2'] for i in layers],'Action readout '+label)
+ check(comparison['readouts'][label]['consequence_ade']==[consequence['layers'][str(i)]['consequence']['metrics']['ade'] for i in layers],'Consequence readout '+label)
+ if label=='JAM':check(comparison['copy_first_consequence_ade']==consequence['targets']['consequence']['floors']['copy_first']['ade'],'Copy-first floor')
+jam=comparison['readouts']['JAM'];prior=comparison['readouts']['Video prior']
+for i in range(len(layers)):
+ check(abs(comparison['jam_action_r2_gain_vs_video_prior'][i]-(jam['action_r2'][i]-prior['action_r2'][i]))<1e-12,'Action gain derivation')
+ check(abs(comparison['jam_consequence_ade_reduction_percent_vs_video_prior'][i]-100*(prior['consequence_ade'][i]-jam['consequence_ade'][i])/prior['consequence_ade'][i])<1e-12,'Consequence gain derivation')
+check(comparison['jam_beats_copy_first_layers']==[layers[i] for i,v in enumerate(jam['consequence_ade']) if v<comparison['copy_first_consequence_ade']],'Copy-first comparison')
 qa=json.load(open(P/'artifacts/figure_qa.json'))
-check(len(qa)==3 and all(x['font']=='DejaVu Serif' and x['text_bounds']=='PASS' for x in qa),'Figure typography or bounds audit')
+check(len(qa)==4 and {x['figure'] for x in qa}=={'training','representation','action_sensitivity','scaling_targets'} and all(x['font']=='DejaVu Serif' and x['text_bounds']=='PASS' for x in qa),'Figure typography or bounds audit')
 verify_external='--verify-external' in sys.argv
 if verify_external:
  try:

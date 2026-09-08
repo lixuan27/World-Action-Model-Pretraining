@@ -12,6 +12,12 @@
     "text_bounds": "PASS"
   },
   {
+    "figure": "action_sensitivity",
+    "font": "DejaVu Serif",
+    "format": "vector PDF",
+    "text_bounds": "PASS"
+  },
+  {
     "figure": "scaling_targets",
     "font": "DejaVu Serif",
     "format": "vector PDF",

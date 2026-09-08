@@ -1,0 +1,99 @@
+{
+  "checkpoint_update": 5100,
+  "layers": [
+    5,
+    10,
+    15,
+    20,
+    25,
+    29
+  ],
+  "source_sha256": {
+    "artifacts/measurements/analysis/base_v1_m5100/probes_droid.json": "180cfc12f8ee09952f0c19ae6c516c6c4cb1e6c28c4d4469af544c467e8dbc9d",
+    "artifacts/measurements/analysis/base_v1_m5100/probes_egodex.json": "3b8743a8129b1f7b42524ed6c2d79b7b9d892fbf16489765e24f0699d036209b",
+    "artifacts/measurements/analysis/floors/probes_droid_bare_prior.json": "3be446caaaf2c472aa15d1c9545132504fc8a7266da991f85e1af79c294e662f",
+    "artifacts/measurements/analysis/floors/probes_egodex_bare_prior.json": "673b722793ec4efe83f30397aab29e772a4a3d028979cc7c99618b255f2c65c0",
+    "artifacts/measurements/analysis/floors/probes_droid_random_init.json": "919c1a9b8735b0b0db7d269b12d362cb68240a316fdbbfed29b39274d314387a",
+    "artifacts/measurements/analysis/floors/probes_egodex_random_init.json": "cb8267f07824e41d2a0b99e5f3375a104c32c9da2ba56f22aaa6892a717c9341"
+  },
+  "readouts": {
+    "JAM": {
+      "action_r2": [
+        0.34022051381410656,
+        0.5412748056366651,
+        0.7699142637803493,
+        0.6460407395683343,
+        0.5530864837872709,
+        0.5490312962111925
+      ],
+      "consequence_ade": [
+        0.12856101441482354,
+        0.1148983664905049,
+        0.10391854930200681,
+        0.11331162137446103,
+        0.12394336987567205,
+        0.12407995658751864
+      ]
+    },
+    "Video prior": {
+      "action_r2": [
+        0.18829667572922182,
+        0.20172040891200405,
+        0.1826047941994624,
+        0.21116213298890962,
+        0.19199655316739328,
+        0.2043608495063246
+      ],
+      "consequence_ade": [
+        0.12976258760263626,
+        0.12840793592968167,
+        0.13002193340868864,
+        0.13487640189170128,
+        0.1355805187373576,
+        0.13549431705708373
+      ]
+    },
+    "Random init.": {
+      "action_r2": [
+        0.07961124295958888,
+        0.08107379025668382,
+        0.08231353409332764,
+        0.08338911337195343,
+        0.08470807508392031,
+        0.0851595352189739
+      ],
+      "consequence_ade": [
+        0.1550807475688345,
+        0.1489761662815727,
+        0.12832057761597732,
+        0.12832246201875733,
+        0.1283084004752542,
+        0.12828309749447728
+      ]
+    }
+  },
+  "copy_first_consequence_ade": 0.12079309028748136,
+  "jam_action_r2_gain_vs_video_prior": [
+    0.15192383808488474,
+    0.33955439672466103,
+    0.5873094695808869,
+    0.4348786065794247,
+    0.3610899306198776,
+    0.3446704467048679
+  ],
+  "jam_consequence_ade_reduction_percent_vs_video_prior": [
+    0.9259781343850991,
+    10.520821272740362,
+    20.076139019278337,
+    15.988549675691702,
+    8.583201310970555,
+    8.42423558233533
+  ],
+  "jam_beats_copy_first_layers": [
+    10,
+    15,
+    20
+  ],
+  "gain_uncertainty": "Point estimates; joint bootstrap samples are unavailable.",
+  "scope": "Frozen-world ridge readout; partially visible future; window splits may share episodes."
+}

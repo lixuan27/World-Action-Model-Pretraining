@@ -151,8 +151,13 @@ probe-test windows. These internal splits operate on windows and can share episo
 regularization is selected on a quarter of the probe-training windows and the final readout is
 refitted on that training split. The grid spans 1 through 100,000. Action R-squared intervals use
 1,000 bootstrap resamples over test windows. Figure~\ref{fig:representation} reports every sampled
-layer for JAM, the video prior, and a randomly initialized world stream. Copy-first and shuffled-label
-controls accompany the archived reports. Consequence displacement above magnitude 8 is masked.
+layer for JAM, the video prior, and a randomly initialized world stream. Its lower panels report
+the action R-squared difference and the percentage reduction in consequence average displacement
+error relative to the video prior at each layer. These derived gains are point estimates;
+the archive provides individual-model action intervals and consequence error estimates.
+The copy-first consequence reference is plotted alongside all three models. JAM's consequence
+error falls below this reference at layers 10, 15, and 20. Shuffled-label controls accompany the
+archived reports. Consequence displacement above magnitude 8 is masked.
 
 This diagnostic tests readout from partially observed future dynamics. Establishing a pretraining
 effect under matched coupling controls additionally requires episode-disjoint probe fitting,
@@ -180,11 +185,22 @@ continue integrating unobserved consequences. The updated sampler implements tha
 consequence schedule, correcting the earlier coupling to the clamped action level. The archived
 post-correction test uses the update-5,100 checkpoint, 300 LIBERO holdout windows, and 10 Euler steps.
 Donor, hold, and time-shuffled actions produce small consequence-error changes whose paired
-95\% intervals all include zero. Figure~\ref{fig:representation} uses this corrected report. It
+95\% intervals all include zero. Figure~\ref{fig:action_sensitivity} uses this corrected report. It
 measures action-input sensitivity against the observed future, while counterfactual fidelity
 requires the separately executed futures described above. Conditional benchmark evaluation remains
 pending. Independent corruption levels define a training family; each deployment path also requires
 a fidelity check.
+
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{Figures/action_sensitivity.pdf}
+\caption{\textbf{Does changing the action input change consequence error?} At update 5,100,
+donor actions, held actions, and time-shuffled actions are compared with the recorded action
+on the same 300 LIBERO windows using 10 Euler steps. Positive values indicate higher consequence
+error. Points show mean changes and bars show paired 95\% intervals. All intervals include zero,
+leaving the direction of each effect unresolved. This input-sensitivity check uses the observed
+future as its target; intervention fidelity requires separately executed alternative-action futures.}
+\label{fig:action_sensitivity}
+\end{figure}
 
 \FloatBarrier
 
