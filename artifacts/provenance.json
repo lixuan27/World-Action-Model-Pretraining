@@ -1,7 +1,7 @@
 {
   "snapshot_date": "2026-09-08",
   "source_root": "/public/home/lixuan/lixuan/JAM",
-  "source_head": "27a9703989073c12ef50f8ad2d4f733ea2bf4fe1",
+  "source_head": "8d715ee7624a3731a2d364bbb7664390523acae6",
   "note": "Live audit revision; individual runs may have launched at earlier revisions. File hashes identify archived evidence.",
   "files": [
     {
@@ -132,9 +132,9 @@
     {
       "source": "runs/jam_base_v1/metrics.jsonl",
       "source_sha256": "026cdc5eac2c57c332d8b4ffc552c386b526fa3efe487c5d164c3c05497c4e40",
-      "published": "artifacts/measurements/jam_base_v1.jsonl",
+      "published": "artifacts/measurements/history/jam_base_v1_through_8600.jsonl",
       "published_sha256": "026cdc5eac2c57c332d8b4ffc552c386b526fa3efe487c5d164c3c05497c4e40",
-      "status": "measured",
+      "status": "superseded",
       "snapshot": "2026-09-08T08:47:32.513946"
     },
     {
@@ -256,11 +256,36 @@
       "published": "artifacts/measurements/foundation_s2b_startup.txt",
       "published_sha256": "de4d806a0162cc69138636d247642fc3145984ed7efd155b0f790482e88c3e00",
       "status": "measured_runtime_excerpt"
+    },
+    {
+      "source": "runs/jam_base_v1/config.yaml",
+      "source_sha256": "811cafe6aff7fa4bcddb9649cede75fd5f88756c7b6a670c4bb204e013338ebe",
+      "published": "artifacts/configs/jam_base_v1_s3.json",
+      "published_sha256": "45e4ce8dccbbaccf33993784a22da8d4349c936f87f9c8ec7271b54bd5478e3b",
+      "snapshot": "2026-09-08T11:56:51.808371+08:00",
+      "status": "resolved_configuration"
+    },
+    {
+      "source": "runs/jam_base_v1/metrics.jsonl",
+      "source_sha256": "c0d76d6f99bcaa70d11c0e373df72077fd0799a9870e70fcc63bcc70aaeae58b",
+      "published": "artifacts/measurements/jam_base_v1.jsonl",
+      "published_sha256": "c0d76d6f99bcaa70d11c0e373df72077fd0799a9870e70fcc63bcc70aaeae58b",
+      "snapshot": "2026-09-08T11:56:51.808371+08:00",
+      "status": "measured"
+    },
+    {
+      "source": "logs/train/jam_base_v1_n8_retry2_282356.out",
+      "source_sha256": "28d14c3b4506a41ec4fe61da897d8199c8f46f97a645fdfab40ce7c37b6daee5",
+      "published": "artifacts/measurements/foundation_s3_startup.txt",
+      "published_sha256": "28d14c3b4506a41ec4fe61da897d8199c8f46f97a645fdfab40ce7c37b6daee5",
+      "snapshot": "2026-09-08T11:56:51.808371+08:00",
+      "status": "measured",
+      "excerpt": "first 15 lines"
     }
   ],
   "latest_read_only_snapshot": {
-    "captured_at": "2026-09-08T08:47:32.513946",
-    "source_revision": "27a9703989073c12ef50f8ad2d4f733ea2bf4fe1"
+    "captured_at": "2026-09-08T11:56:51.808371+08:00",
+    "source_revision": "8d715ee7624a3731a2d364bbb7664390523acae6"
   },
-  "previous_snapshot_head": "9bb88f9dd77bf01d523c367991556ac0df7129d7"
+  "previous_snapshot_head": "27a9703989073c12ef50f8ad2d4f733ea2bf4fe1"
 }

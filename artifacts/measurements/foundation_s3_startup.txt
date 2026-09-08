@@ -1,0 +1,11 @@
+Job 282356 on server31 start 2026-09-08T11:49:05+08:00
+stage pointer runs/jam_base_v1/STAGE_CONFIGS -> CONFIGS=configs/base.yaml configs/experiments/jam_base_v1_s3_robomind.yaml
+NCCL version 2.21.5+cuda12.4
+[jam] 11:50:00 run jam_base_v1 fingerprint d859e1b1ab85 world_size 8
+[jam] 11:50:58 params: {"world": 4999787712, "agent": 1021420768, "total": 6021208480, "trainable": 6021208480} (built in 58s)
+[jam] 11:51:14 fsdp strategy FULL_SHARD mesh (8,) reduce fp32
+[jam] 11:51:14 optimizer groups: world: 703.8M @ lr 5.00e-05, agent: 48.9M @ lr 1.00e-04; schedule wsd (warmup 1500, decay 6000)
+[jam] 11:51:41 resumed from runs/jam_base_v1/checkpoints/train/step_0010500
+[jam] 11:52:52 mixture: [{"source": "droid", "windows": 1674648, "p": 0.29168738319693704}, {"source": "bridge", "windows": 454690, "p": 0.11710405984179394}, {"source": "egodex", "windows": 738550, "p": 0.16445122067277188}, {"source": "ego4d", "windows": 436116, "p": 0.11373459457279517}, {"source": "robomind_agilex", "windows": 741886, "p": 0.16497084263974326}, {"source": "robomind_franka", "windows": 76446, "p": 0.033613946615328155}, {"source": "robomind_ur", "windows": 439974, "p": 0.11443795246063054}]
+[jam] 11:56:22 training from step 10500 to 60000
+[jam] 11:56:28 step 10501 loss 0.4360 world 0.1999 action 0.2362 gnorm 0.73 lr 5.00e-05 91.3 samp/s data_wait 8% mem 30GB

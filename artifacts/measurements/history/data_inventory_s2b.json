@@ -1,0 +1,140 @@
+{
+  "status": "audited_stage_inventory",
+  "snapshot": "2026-09-08T08:47:32.513946",
+  "source_revision": "27a9703989073c12ef50f8ad2d4f733ea2bf4fe1",
+  "source_document_sha256": "7ac0c41e8950632140fe7a1bc8ed2c731995da34845c84a50b2aa0804795596d",
+  "active_stage": "s2b",
+  "active_from_update": 8400,
+  "source_counts": {
+    "droid": 1674648,
+    "bridge": 454690,
+    "egodex": 738550,
+    "robomind_franka": 76446,
+    "robomind_ur": 439974
+  },
+  "temperature": 0.7,
+  "probabilities": {
+    "droid": 0.40439426310064447,
+    "bridge": 0.1623526169242733,
+    "egodex": 0.2279945380944588,
+    "robomind_franka": 0.04660224594710126,
+    "robomind_ur": 0.15865633593352224
+  },
+  "previous_stage": {
+    "through_update": 8400,
+    "source_counts": {
+      "droid": 1674648,
+      "bridge": 454690,
+      "egodex": 738550
+    },
+    "probabilities": [
+      0.5088375336692232,
+      0.20428357352817195,
+      0.28687889280260487
+    ]
+  },
+  "sources": [
+    {
+      "id": "droid",
+      "status": "consumed",
+      "train_windows": 1674648,
+      "probability": 0.40439426310064447
+    },
+    {
+      "id": "bridge",
+      "status": "consumed",
+      "train_windows": 454690,
+      "probability": 0.1623526169242733
+    },
+    {
+      "id": "egodex",
+      "status": "consumed",
+      "train_windows": 738550,
+      "probability": 0.2279945380944588
+    },
+    {
+      "id": "robomind_franka",
+      "status": "consumed",
+      "train_windows": 76446,
+      "probability": 0.04660224594710126
+    },
+    {
+      "id": "robomind_ur",
+      "status": "consumed",
+      "train_windows": 439974,
+      "probability": 0.15865633593352224
+    }
+  ],
+  "next_sources": [
+    {
+      "id": "ego4d",
+      "display": "Ego4D",
+      "status": "ready",
+      "train_windows": 436116,
+      "all_windows": 486972,
+      "holdout_group": "video_uid",
+      "shared_video_uids": 0,
+      "supervision": "world"
+    },
+    {
+      "id": "robomind_agilex",
+      "display": "RoboMIND AgileX",
+      "status": "encoding",
+      "hours": 91.3,
+      "supervision": "world + action"
+    },
+    {
+      "id": "interndata_a1",
+      "display": "InternData-A1",
+      "status": "acquiring",
+      "supervision": "world + action"
+    },
+    {
+      "id": "robocoin",
+      "display": "RoboCOIN",
+      "status": "encoding_initial_subset",
+      "supervision": "world + action"
+    },
+    {
+      "id": "epic_kitchens",
+      "display": "EPIC-KITCHENS-100",
+      "status": "acquiring",
+      "supervision": "world"
+    }
+  ],
+  "conditional_candidates": [
+    "AgiBotWorld-Beta subset",
+    "Additional Ego4D"
+  ],
+  "not_selected_current": [
+    "RT-1",
+    "CALVIN",
+    "RoboSet",
+    "RH20T"
+  ],
+  "temporal_audit": {
+    "egodex_train_hz": 10,
+    "egodex_official_hz": 30,
+    "egodex_export_stride": 3,
+    "franka_hz_range": [
+      15,
+      20
+    ],
+    "ur_hz_range": [
+      15,
+      20
+    ]
+  },
+  "benchmark_training_only": [
+    "LIBERO",
+    "RoboTwin 2.0 Full",
+    "VLABench",
+    "RoboCasa365 target",
+    "RoboDojo"
+  ],
+  "evaluation_only": [
+    "LIBERO-Plus",
+    "LIBERO-PRO"
+  ],
+  "scope_note": "Next sources are not included in consumed counts. Raw downloads, cache windows and optimization exposure are separate quantities."
+}

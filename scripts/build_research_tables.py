@@ -29,3 +29,20 @@ for i, (_, vals) in enumerate(pn['scale_controls']['rows'].items()):
 b = panel('B. Capacity and supervision density', ['Axis', 'Setting', 'Corpus', 'Updates', 'Plus'], rows)
 table('data_scaling.tex', 'tab:data_scaling', [a, b],
       r'\textbf{Which data and scale choices support action grounding?} Panel A matches robot exposure; Panel B fixes the backbone, corpus, and update budget. Success is in percent and C error is image-normalized ADE. Blue rows identify reference settings.')
+
+
+# Current mixture, generated directly from the audited runtime inventory.
+inv=json.loads((P/'artifacts/data_inventory.json').read_text())
+rows=[]
+names={'droid':'DROID','bridge':'BridgeData V2','egodex':'EgoDex','ego4d':'Ego4D',
+       'robomind_franka':'RoboMIND Franka','robomind_ur':'RoboMIND UR5e','robomind_agilex':'RoboMIND AgileX'}
+for label,ids in [('Robot demonstrations',['droid','bridge','robomind_franka','robomind_ur','robomind_agilex']),
+                  ('Human video',['egodex','ego4d'])]:
+    rows.append(r'\panelrow{4}{'+label+'}')
+    for key in ids:
+        target_name='World + consequence' if key=='egodex' else ('World' if key=='ego4d' else 'World + action')
+        rows.append(names[key]+' & '+target_name+' & '+f"{inv['source_counts'][key]:,}"+' & '+f"{inv['probabilities'][key]*100:.2f}"+r' \\')
+body=[r'\begin{table}[H]',r'\centering\small',r'\begin{tabularx}{\linewidth}{@{}lYRR@{}}',r'\toprule',
+      r'Source & Targets & Train windows & Sampling (\%) \\',r'\midrule']+rows+[r'\bottomrule',r'\end{tabularx}',
+      r'\caption{\textbf{Current pretraining mixture.} Sampling probabilities follow cached training-window counts with temperature 0.7. Counts describe windows rather than unique episodes or duration.}',r'\label{tab:corpus}',r'\end{table}']
+(T/'corpus.tex').write_text('\n'.join(body)+'\n')

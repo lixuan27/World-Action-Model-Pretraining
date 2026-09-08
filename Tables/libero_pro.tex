@@ -1,41 +1,23 @@
 \begin{table}[H]
 \centering
-\begingroup\fontsize{8.7}{10.0}\selectfont
+\begingroup\fontsize{9.2}{10.5}\selectfont
 \setlength{\tabcolsep}{2.5pt}\renewcommand{\arraystretch}{1.08}
-\begin{tabularx}{\linewidth}{@{}p{.92in}CCCCCCCCCC@{}}
+\begin{tabularx}{\linewidth}{@{}p{1.43in}CCCCC@{}}
 \toprule
-\panelrow{11}{A. Goal and spatial control}
-Model & \multicolumn{5}{c}{Goal} & \multicolumn{5}{c}{Spatial} \\
-\cmidrule(lr){2-6}\cmidrule(lr){7-11}
- & Obj. & Pos. & Sem. & Task & Env. & Obj. & Pos. & Sem. & Task & Env. \\
+\panelrow{6}{LIBERO-PRO}
+Model & Goal & Spatial & Long & Object & Total \\
 \midrule
-OpenVLA & 96 & 0 & 98 & 0 & 98 & 97 & 0 & 97 & 0 & 89 \\
-$\pi_0$ & 94 & 0 & 93 & 0 & 39 & 95 & 0 & 97 & 0 & 60 \\
-$\pi_{0.5}$ & 97 & 38 & 97 & 0 & 46 & 97 & 20 & 97 & 1 & 46 \\
-MolmoAct & 68 & 0 & 85 & 0 & \nr & 90 & 0 & 88 & 0 & \nr \\
-NORA & 58 & 0 & 88 & 0 & \nr & 92 & 0 & 91 & 0 & \nr \\
-X-VLA & 68 & 1 & 98 & 9 & \nr & 97 & 0 & 96 & 0 & \nr \\
-\bottomrule
-\end{tabularx}
-\vspace{3pt}
-\begin{tabularx}{\linewidth}{@{}p{.92in}CCCCCCCCCCC@{}}
-\toprule
-\panelrow{12}{B. Long-horizon and object control}
-Model & \multicolumn{5}{c}{Long} & \multicolumn{5}{c}{Object} & Total \\
-\cmidrule(lr){2-6}\cmidrule(lr){7-11}
- & Obj. & Pos. & Sem. & Task & Env. & Obj. & Pos. & Sem. & Task & Env. & Rep. \\
+OpenVLA & 58.4 & 56.6 & 52.4 & 39.2 & 52.0 \\
+$\pi_0$ & 45.2 & 50.4 & 37.6 & 42.6 & 44.0 \\
+$\pi_{0.5}$ & 55.6 & 52.2 & 48.0 & 57.0 & 53.0 \\
+MolmoAct\textsuperscript{*} & 38.3 & 44.5 & 33.5 & 48.5 & 41.0 \\
+NORA\textsuperscript{*} & 36.5 & 45.8 & 30.0 & 44.5 & 40.0 \\
+X-VLA\textsuperscript{*} & 44.0 & 48.3 & 41.8 & 49.3 & 46.0 \\
 \midrule
-OpenVLA & 81 & 0 & 96 & 0 & 85 & 98 & 0 & 98 & 0 & 0 & 52 \\
-$\pi_0$ & 79 & 0 & 82 & 0 & 27 & 94 & 0 & 90 & 0 & 29 & 44 \\
-$\pi_{0.5}$ & 92 & 8 & 93 & 1 & 46 & 98 & 17 & 96 & 1 & 73 & 53 \\
-MolmoAct & 54 & 0 & 74 & 6 & \nr & 92 & 6 & 96 & 0 & \nr & 41 \\
-NORA & 46 & 0 & 74 & 0 & \nr & 86 & 0 & 92 & 0 & \nr & 40 \\
-X-VLA & 62 & 0 & 95 & 10 & \nr & 89 & 2 & 98 & 8 & \nr & 46 \\
-\midrule
-\jamshade\textbf{JAM} & \multicolumn{11}{c}{\pendingresult} \\
+\jamshade\textbf{JAM} & \multicolumn{5}{c}{\pendingresult} \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{\textbf{LIBERO-PRO perturbation tests.} The \prosource{} reports normalized success, displayed here as percentages. Obj., Pos., Sem., and Env. denote object, position, semantic, and environment shifts. Reported totals are copied, including the differing coverage: MolmoAct, NORA, and X-VLA omit environment tests. \nr{} means unreported. The reference website has no PRO table. Pale blue identifies JAM; its results await evaluation.}
+\caption{\textbf{LIBERO-PRO suite performance.} Suite values are macro-averages of published perturbation percentages; Total is copied from the \prosource{}. \textsuperscript{*}Averages cover four reported perturbations, with environment tests unreported. The blue JAM row awaits evaluation.}
 \label{tab:libero_pro}
 \end{table}

@@ -1,7 +1,7 @@
-"""One complete table per benchmark; preserve every published baseline cell."""
+"""Compact benchmark summaries; preserve source rows and audit all aggregation."""
 from pathlib import Path
 import json
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 P=Path(__file__).resolve().parents[1]
 export=json.loads((P/'artifacts/source_reports/benchmark_export.json').read_text())
@@ -18,9 +18,9 @@ def fmt(s,best=False):
     if s in ['—','-',None]:return r'\nr'
     return r'\textbf{'+s+'}' if best else s
 
-def panel(t,indices,headers,title,include_jam=False):
+def panel(t,indices,headers,title,include_jam=False,model_width='1.43in'):
     n=len(indices)+1
-    rows=[r'\begin{tabularx}{\linewidth}{@{}p{1.43in}'+('C'*len(indices))+r'@{}}',
+    rows=[r'\begin{tabularx}{\linewidth}{@{}p{'+model_width+'}'+('C'*len(indices))+r'@{}}',
           r'\toprule',r'\panelrow{'+str(n)+'}{'+title+'}',
           'Model & '+' & '.join(headers)+r' \\',r'\midrule']
     maxima=[]
@@ -41,8 +41,8 @@ def panel(t,indices,headers,title,include_jam=False):
 
 def write(key,panels,caption,size=9.2,source=True):
     out=[r'\begin{table}[H]',r'\centering',r'\begingroup\fontsize{'+str(size)+'}{'+str(size+1.3)+r'}\selectfont',
-         r'\setlength{\tabcolsep}{2.5pt}\renewcommand{\arraystretch}{1.08}',
-         '\n\\vspace{3pt}\n'.join(panels),r'\endgroup',r'\caption{'+caption+(' '+r'Source: \refsource{}. \benchmarknote' if source else '')+'}',
+         r'\setlength{\tabcolsep}{2.5pt}\renewcommand{\arraystretch}{'+('1.0' if key in ['bimanual','mobile'] else '1.08')+'}',
+         '\n\\vspace{3pt}\n'.join(panels),r'\endgroup',r'\caption{'+caption+(' '+(r'Source: \refsource{}. Bold marks column maxima; blue rows await JAM evaluation.' if key in ['bimanual','mobile'] else r'Source: \refsource{}. \benchmarknote') if source else '')+'}',
          r'\label{tab:'+key+'}',r'\end{table}']
     (P/'Tables'/f'{key}.tex').write_text('\n'.join(out)+'\n')
 
@@ -50,48 +50,50 @@ specs=[
  ('libero','LIBERO',['Spatial','Object','Goal','Long','Mean'],
   r'\textbf{LIBERO task success.} The four suites measure spatial, object, goal, and long-horizon control.'),
  ('libero_plus','LIBERO-Plus',['Camera','Robot','Language','Light','Backgr.','Noise','Layout','Mean'],
-  r'\textbf{LIBERO-Plus robustness.} Success percentages across all seven perturbation axes; the reported mean retains the source aggregation.'),
- ('robotwin','RoboTwin2.0-Full',['Clean','Randomized','Mean'],
-  r'\textbf{RoboTwin2.0-Full bimanual control.} Success percentages after adaptation on the Full training mixture. Clean-to-randomized adaptation is a separate protocol.'),
- ('robocasa_365','RoboCasa365',['Atomic','Composite seen','Composite unseen','Mean'],
-  r'\textbf{RoboCasa365 household manipulation.} The full-suite protocol separates atomic skills from seen and unseen compositions.')]
+  r'\textbf{LIBERO-Plus robustness.} Success percentages across seven perturbation axes; the mean retains the source aggregation.')]
 for key,title,headers,caption in specs:
     write(key,[panel(tables[key],list(range(len(headers))),headers,title,True)],caption)
 
-t=tables['vlabench'];panels=[]
-for j,(metric,abbr) in enumerate([('Task success','SR'),('Progress score','PS'),('Intention score','IS')]):
-    panels.append(panel(t,list(range(j,18,3)),['In-dist.','Category','Common-sense','Instruction','Texture','Mean'],
-                        chr(65+j)+'. '+metric+' ('+abbr+')',j==2))
-write('vlabench',panels,
-      r'\textbf{VLABench semantic and visual generalization.} SR, PS, and IS retain the benchmark\textquotesingle s task-success, progress, and intention metrics across five settings. All values use the source\textquotesingle s percentage scale.')
+# The incomplete metric request defaults to the three overall VLABench metrics.
+write('vlabench',[panel(tables['vlabench'],[15,16,17],['SR','PS','IS'],'VLABench',True)],
+      r'\textbf{VLABench overall performance.} SR, PS, and IS denote task success, progress score, and intention score. Values retain the source-reported overall percentage scale.')
 
-t=tables['robodojo'];panels=[]
-for j,metric in enumerate(['Task success (SR)','Task score']):
-    panels.append(panel(t,list(range(j,14,2)),['Standard','Random','Precision','Long','Memory','Open','Mean'],
-                        chr(65+j)+'. '+metric,j==1))
-write('robodojo',panels,
-      r'\textbf{RoboDojo capability profile.} Standard and Random denote the two generalization settings; Long denotes long-horizon tasks. Success and partial task score follow the source scale.',size=9.0)
+def pair(left,right):
+    return (r'\begin{minipage}[t]{.51\linewidth}\vspace{0pt}'+'\n'+left+'\n'+r'\end{minipage}\hfill'+
+            '\n'+r'\begin{minipage}[t]{.47\linewidth}\vspace{0pt}'+'\n'+right+'\n'+r'\end{minipage}')
 
-# LIBERO-PRO is absent from the requested website. Its own maintainers publish
-# a four-suite, five-perturbation leaderboard; keep their totals and missingness.
-panels=[]
-for section in range(2):
-    total=section==1;n=12 if total else 11
-    groupnames=pro['suites'][section*2:section*2+2]
-    lines=[r'\begin{tabularx}{\linewidth}{@{}p{.92in}'+('C'*(n-1))+r'@{}}',r'\toprule',
-           r'\panelrow{'+str(n)+'}{'+('A. Goal and spatial control' if not total else 'B. Long-horizon and object control')+'}',
-           r'Model & \multicolumn{5}{c}{'+groupnames[0]+r'} & \multicolumn{5}{c}{'+groupnames[1]+'}'+(' & Total' if total else '')+r' \\',
-           r'\cmidrule(lr){2-6}\cmidrule(lr){7-11}',
-           ' & '+' & '.join(['Obj.','Pos.','Sem.','Task','Env.']*2)+(' & Rep.' if total else '')+r' \\',r'\midrule']
-    for r in pro['rows']:
-        vals=r['percent_cells'][section*10:section*10+10]+([r['percent_cells'][-1]] if total else [])
-        pretty=[fmt(None if v is None else f'{Decimal(v):.0f}') for v in vals]
-        label={'Pi0':r'$\pi_0$','Pi0.5':r'$\pi_{0.5}$','Molmoact':'MolmoAct','x-VLA':'X-VLA'}.get(r['model'],r['model'])
-        lines.append(label+' & '+' & '.join(pretty)+r' \\')
-    if total:lines += [r'\midrule',r'\jamshade\textbf{JAM} & \multicolumn{11}{c}{\pendingresult} \\']
-    lines += [r'\bottomrule',r'\end{tabularx}'];panels.append('\n'.join(lines))
-write('libero_pro',panels,
-      r'\textbf{LIBERO-PRO perturbation tests.} The \prosource{} reports normalized success, displayed here as percentages. Obj., Pos., Sem., and Env. denote object, position, semantic, and environment shifts. Reported totals are copied, including the differing coverage: MolmoAct, NORA, and X-VLA omit environment tests. \nr{} means unreported. The reference website has no PRO table. Pale blue identifies JAM; its results await evaluation.',size=8.7,source=False)
+left=panel(tables['robotwin'],[0,1,2],['Clean','Rand.','Mean'],'A. RoboTwin2.0-Full',True,'1.25in')
+right=panel(tables['robodojo'],[12,13],['SR','Score'],'B. RoboDojo',True,'1.40in')
+write('bimanual',[pair(left,right)],
+      r'\textbf{Bimanual manipulation.} RoboTwin2.0-Full reports clean and randomized success; RoboDojo reports overall success rate (SR) and task score.',size=8.4)
 
+left=panel(tables['robocasa_365'],[0,1,2,3],['Atomic','Seen','Unseen','Mean'],'A. RoboCasa365',True,'1.20in')
+right=panel(tables['ebench'],[6,7],['SR','Score'],'B. EBench',True,'1.40in')
+write('mobile',[pair(left,right)],
+      r'\textbf{Mobile manipulation.} RoboCasa365 separates atomic skills from seen and unseen compositions. EBench reports overall success rate (SR) and task score.',size=8.4)
+
+# Requested suite summaries are derived from the published perturbation rates.
+# Total remains the source value; no missing condition is replaced with zero.
+lines=[r'\begin{tabularx}{\linewidth}{@{}p{1.43in}CCCCC@{}}',r'\toprule',
+       r'\panelrow{6}{LIBERO-PRO}',r'Model & Goal & Spatial & Long & Object & Total \\',r'\midrule']
+derived=[]
+for r in pro['rows']:
+    suites=[];details=[]
+    for i,suite in enumerate(pro['suites']):
+        source_values=r['percent_cells'][5*i:5*i+5]
+        valid=[Decimal(v) for v in source_values if v is not None]
+        mean=sum(valid)/len(valid);display=f'{mean.quantize(Decimal("0.1"),rounding=ROUND_HALF_UP):.1f}'
+        suites.append(display);details.append({'suite':suite,'source_indices':list(range(5*i,5*i+5)),
+                   'n_reported':len(valid),'macro_mean_percent':str(mean),'display':display})
+    total=f'{Decimal(r["percent_cells"][-1]):.1f}'
+    label={'Pi0':r'$\pi_0$','Pi0.5':r'$\pi_{0.5}$','Molmoact':'MolmoAct','x-VLA':'X-VLA'}.get(r['model'],r['model'])
+    incomplete=any(d['n_reported']<5 for d in details)
+    if incomplete:label+=r'\textsuperscript{*}'
+    lines.append(label+' & '+' & '.join(suites+[total])+r' \\')
+    derived.append({'model':r['model'],'suites':details,'reported_total_percent':r['percent_cells'][-1],'display_total':total})
+lines += [r'\midrule',r'\jamshade\textbf{JAM} & \multicolumn{5}{c}{\pendingresult} \\',r'\bottomrule',r'\end{tabularx}']
+write('libero_pro',['\n'.join(lines)],
+      r'\textbf{LIBERO-PRO suite performance.} Suite values are macro-averages of published perturbation percentages; Total is copied from the \prosource{}. \textsuperscript{*}Averages cover four reported perturbations, with environment tests unreported. The blue JAM row awaits evaluation.',source=False)
+(P/'artifacts/libero_pro_aggregation.json').write_text(json.dumps({'method':'Unweighted mean of reported perturbation percentages, rounded half up to one decimal; source-reported Total retained','rows':derived},indent=2)+'\n')
 (P/'artifacts/rendered_baseline_cells.json').write_text(json.dumps(audit,indent=2)+'\n')
-print('Built seven benchmark-specific tables with complete source baseline rows.')
+print('Built compact single-arm, bimanual and mobile benchmark tables.')

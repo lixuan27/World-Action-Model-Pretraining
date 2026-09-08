@@ -1,40 +1,35 @@
 # Experiment revision audit, 8 September 2026
 
-This revision updates the experimental account from a fixed, read-only snapshot of JAM. The main scientific question and formulation remain intact. Source revision: `27a9703989073c12ef50f8ad2d4f733ea2bf4fe1`; evidence cutoff: foundation update 8,600 at 08:47 UTC+8. The earlier 5,200-update prefix is preserved in `artifacts/measurements/history/`.
+This revision updates the experimental account from a fixed, read-only snapshot of JAM. The main scientific question and formulation remain intact. The current source revision and evidence cutoff are specified below. The earlier 5,200-update prefix is preserved in `artifacts/measurements/history/`.
 
-## Verified changes
+## Current experiment revision
 
-| Topic | Evidence | Manuscript decision |
-|---|---|---|
-| Consumed data | Five-source runtime mixture after resume at 8,400 | Add RoboMIND Franka and UR5e; show initial and current probabilities |
-| Dataset expansion | Merged Ego4D cache; ongoing AgileX/InternData/RoboCOIN/EPIC preparation | Name the full selected pipeline and mark admission status separately |
-| EgoDex timing | Training export keeps every third original frame | Correct 30 Hz to 10 Hz |
-| Ego4D split | 436,116 train and 50,856 holdout windows; no shared video identifiers | Record grouping and counts; world-only initial admission |
-| Runtime topology | Startup excerpt records FULL_SHARD, mesh (8,) | Separate actual single-node runtime from the config's hybrid strategy request |
-| Recipe boundary | Mixture, outlier mask, missing-modality inputs, and sharding all change at 8,400 | Preserve the boundary and avoid single-cause attribution |
-| Probes | Frozen-world layer sweep with ridge readouts and reference initializations | Plot every sampled layer instead of selecting the best test layer |
-| Probe information | Future-world corruption 0.5; action/consequence corruption 1 | State visible future context and restrict interpretation to readout |
-| Probe split | Up to 4,000 holdout-corpus windows internally split by window | Report possible shared episodes; require episode-disjoint confirmation |
-| Conditional sampler | Unobserved consequences now integrate independently of clamped actions | Replace obsolete unresolved-sampler statement; retain fidelity evaluation as pending |
-| Action sensitivity | Corrected 300-window report has all non-oracle intervals spanning zero | Plot the measured negative/weak signal without a causal-prediction claim |
-| Benchmark provenance | Full immutable source export and official PRO leaderboard | Preserve numeric strings, missingness, and model-dependent evaluation scope |
-| JAM benchmark results | No completed full-suite artifact in this snapshot | Use one blue Awaiting evaluation row per benchmark |
-| Direct adaptation | Public video initialization plus fresh agent, followed by task adaptation | Rename as Without embodied pretraining and place only in initialization ablation |
+The current runtime snapshot is `b46fd1b330593082995849f51a77ef51152751ab`, captured at 11:56 UTC+8 on 8 September 2026. Foundation evidence extends to update 10,501. The startup log confirms seven-source sampling after the 10,500-update resume. Historical prefixes remain archived.
 
-## Benchmark organization
+| Request | Final manuscript change |
+|---|---|
+| Remove data-mixture figure | Delete its PDF/PNG and generator; put current source counts and probabilities in the appendix |
+| Use the latest recipe | Seven active sources, read from the resolved runtime mixture; no preparation roadmap in the manuscript |
+| Consolidate training dynamics | One six-panel plot after all main benchmark results, covering foundation and task adaptation |
+| Compact LIBERO-PRO | Goal, Spatial, Long, Object, Total; suite means derived from reported perturbation rates |
+| Compact VLABench | Overall SR, PS, IS, preserving all source baseline rows |
+| Merge bimanual benchmarks | One table, with RoboTwin2.0-Full and RoboDojo side-by-side; RoboDojo reports overall SR and Score |
+| Merge mobile benchmarks | One table, with RoboCasa365 and EBench side-by-side; EBench reports overall SR and Score |
 
-The six requested benchmarks each have one main-text table. Multi-panel tables keep distinct metrics within the same benchmark: VLABench has success/progress/intention panels; RoboDojo has success/score panels; LIBERO-PRO separates its four suites. Standard LIBERO appears in one appendix table. Every available source baseline is retained for these benchmarks.
+## Numeric provenance
 
-The requested website contains no LIBERO-PRO table. Its official benchmark-maintainer leaderboard is the separately attributed fallback. Percentage conversion multiplies the original normalized values by 100, preserving reported totals and unreported environment tests. R1 remains the external system identified by the immutable source link. It is not a renamed JAM result. Source-reported scores may come from different original evaluation implementations.
+All 85 source baseline rows for the selected export benchmarks are retained, with 344 copied source cells. Side-by-side panels keep each benchmark's own model coverage and avoid manufacturing values for a model absent from another benchmark. EBench comes from the same pinned export as the other reference benchmarks.
 
-## Visual and layout checks
+LIBERO-PRO's four suite values are arithmetic means of the published perturbation percentages, rounded half up to one decimal. Its reported Total is copied. Unreported environment tests are excluded from the corresponding suite mean, with affected rows flagged by an asterisk. The derivation is written to `artifacts/libero_pro_aggregation.json` and independently checked during validation. The reduced table therefore distinguishes derived summaries from published totals.
 
-Experimental setup remains two paragraphs. Tables span the text width, use short headers, hierarchical rules, and a pale-blue JAM row. Matplotlib figures use DejaVu Serif with embedded vector fonts. New main figures show data admission, measured foundation optimization, and measured representation diagnostics. The appendix retains the complete six-panel optimization record. The scaling figure remains explicitly planned. The main text includes the existing teaser, framework, and consequence schematic within 12 pages.
+## Scientific boundaries
 
-Validation checks source hashes, every copied baseline row and displayed cell, PRO percentage conversion, mixture probabilities, actual loss records, measured-probe settings, superscript target markers, references, citations, and the compiled page limit. PDF pages are rasterized for visual review after compilation. No training work is launched or changed.
+The update-5,100 probes precede the current recipe. Their heldout-corpus windows are split internally by window and can share episodes; future-world inputs are partly observed. They remain preliminary readout diagnostics. The corrected action-input sensitivity intervals all span zero. Executed alternative-action futures are required for a causal prediction claim.
 
-## Evidence boundaries
+At update 8,400, the mixture, displacement mask, missing-modality inputs, and runtime topology change together. At update 10,500, the current seven-source mixture begins. The archived final segment contains one logged update. Curves preserve raw outliers and restart smoothing across these boundaries. JAM benchmark rows await completed evaluations; controlled-study targets remain explicitly marked T.
 
-Only the controlled pretraining/scaling designs retain layout targets. Their superscript T and captions identify them as awaiting measurement; they are not preregistered outcomes. The abstract and conclusion continue limiting empirical conclusions to supported implementation and optimization evidence. Probes add preliminary readout measurements, not a closed-loop or causal pretraining claim.
+## Layout and validation
 
-Remaining research includes completed foundation releases, full-suite adaptation/evaluation, condition-matched coupling controls, episode-disjoint probes, executed alternative-action futures, conditional fidelity, and data-overlap audits for newly admitted sources. These belong to the active training project.
+Experimental setup remains two paragraphs. All main benchmark tables precede the Joint optimization subsection. Main text is 10 pages, with references and appendix separate. Tables use full-width composition, hierarchical rules, short labels, and pale-blue JAM rows. Scientific plots retain embedded DejaVu Serif vector fonts.
+
+Validation checks source hashes, copied cells, PRO aggregation, current mixture probabilities, measured records, references, citations, target markers, and the main-page limit. Final PDF pages are rasterized and reviewed for overlaps and clipping. No source-project code or training jobs are changed.

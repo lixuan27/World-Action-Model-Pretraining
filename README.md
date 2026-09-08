@@ -21,47 +21,48 @@ tectonic -X compile main.tex --keep-logs --keep-intermediates
 python3 scripts/validate.py --verify-external
 ```
 
-The first Tectonic build downloads standard TeX packages. Framework diagrams use editable TikZ. Five scientific figures are generated with Matplotlib in DejaVu Serif and exported as vector PDFs plus PNG previews. Paper builds launch no training.
+The first Tectonic build downloads standard TeX packages. Framework diagrams use editable TikZ. Three scientific figures are generated with Matplotlib in DejaVu Serif and exported as vector PDFs plus PNG previews. Paper builds launch no training.
 
 ## Experimental organization
 
-The main text occupies **12 pages**, including the homepage teaser, framework, consequence interface, and all main experimental displays. References and appendix follow separately. Experimental setup contains exactly two paragraphs.
+The main text occupies **10 pages**, including the homepage teaser, framework, consequence interface, and all main experimental displays. References and appendix follow separately. Experimental setup contains exactly two paragraphs.
 
 | Table | Benchmark or question | Contents |
 |---|---|---|
-| 1 | LIBERO-Plus | All seven perturbation axes and all 13 external baselines |
-| 2 | LIBERO-PRO | Four suites, five perturbations, six external baselines |
-| 3 | VLABench | Success, progress, and intention; eight external baselines |
-| 4 | RoboTwin2.0-Full | Clean and randomized control; 14 external baselines |
-| 5 | RoboCasa365 | Atomic and compositional tasks; 10 external baselines |
-| 6 | RoboDojo | Six capability groups, success and score; 13 external baselines |
-| 7 | Pretraining and reciprocal computation | Initialization and coupling controls, marked layout targets |
-| 8 | Data and supervision | Mixture, capacity, and annotation-density controls, marked layout targets |
-| Appendix | Pretraining inventory; LIBERO | Data admission status; all 18 standard LIBERO baselines |
+| 1 | LIBERO-Plus | Seven perturbations and all 13 source baselines |
+| 2 | LIBERO-PRO | Goal, Spatial, Long, Object, Total; six source baselines |
+| 3 | VLABench | Overall SR, PS, IS; eight source baselines |
+| 4 | Bimanual manipulation | RoboTwin2.0-Full and RoboDojo in side-by-side panels |
+| 5 | Mobile manipulation | RoboCasa365 and EBench in side-by-side panels |
+| 6 | Pretraining and reciprocal computation | Initialization and coupling controls, marked targets |
+| 7 | Data and supervision | Mixture, capacity, and annotation density, marked targets |
+| Appendix | Current recipe; LIBERO | Seven-source probabilities; all 18 standard LIBERO baselines |
 
-Each benchmark has one full-width table. Panels separate metrics within that benchmark. Short headers, horizontal rules, and a pale-blue JAM row keep the organization consistent. The old mixed-benchmark summary tables are removed.
+The dataset-mixture figure is removed. The appendix reports the current runtime recipe directly. The full six-panel training-dynamics figure follows all main benchmark tables in a single Joint optimization subsection. Compact benchmark panels preserve their own baseline coverage, with pale-blue JAM rows and short headers.
+
+RoboDojo reports overall success rate and overall task score, corresponding to the aggregate values from the former A and B panels. EBench reports overall success rate and task score. VLABench reports the source-reported overall SR, PS, and IS metrics.
 
 `JAM direct` meant task adaptation from public video weights and a newly initialized agent, without JAM embodied pretraining. It was an initialization control, not a separate JAM method. Main benchmark tables now contain a single JAM row. The control appears only in the pretraining ablation, named **Without embodied pretraining**. Its displayed target scores remain marked T.
 
 ## Fixed evidence snapshot
 
-The source project was inspected read-only at `/public/home/lixuan/lixuan/JAM`. The latest snapshot is **8 September 2026, 08:47 cluster time (UTC+8)**, revision `27a9703989073c12ef50f8ad2d4f733ea2bf4fe1`, with foundation logs through update **8,600**. Live training continues independently. `artifacts/provenance.json` records exact source and published hashes; a source HEAD identifies the audit rather than every run's launch revision.
+The source project was inspected read-only at `/public/home/lixuan/lixuan/JAM`. The latest snapshot is **8 September 2026, 11:56 cluster time (UTC+8)**, revision `b46fd1b330593082995849f51a77ef51152751ab`, with foundation logs through update **10,501**. The current stage resumes from update 10,500. `artifacts/provenance.json` records source and published hashes; runtime configuration and logs identify the evidence cutoff.
 
-The consumed mixture now contains DROID, BridgeData V2, EgoDex, RoboMIND Franka, and RoboMIND UR5e. The RoboMIND sources enter after update 8,400. Their five sampling probabilities are 40.44%, 16.24%, 22.80%, 4.66%, and 15.87%. Ego4D is merged; RoboMIND AgileX, InternData-A1, RoboCOIN, and EPIC-KITCHENS-100 remain in preparation or acquisition. Access-gated candidates are recorded separately. Prepared data is not counted as consumed exposure. The EgoDex training export operates at **10 Hz**, correcting the earlier 30 Hz description.
+The current mixture contains DROID (29.17%), BridgeData V2 (11.71%), EgoDex (16.45%), Ego4D (11.37%), RoboMIND AgileX (16.50%), RoboMIND Franka (3.36%), and RoboMIND UR5e (11.44%). These probabilities come from the runtime startup record and temperature-0.7 sampling over training-window counts. The manuscript appendix contains only this current recipe. Historical configurations and log prefixes remain archived for interpreting the training curves. EgoDex training data is sampled at 10 Hz.
 
 Three evidence classes remain explicit:
 
-- **Measured:** complete 20,000-update LIBERO adaptation losses; the foundation prefix through update 8,600; world-feature probes at update 5,100; and a corrected action-input sensitivity report. These diagnostics do not establish closed-loop performance or causal pretraining gains. The internal probe train/test split is window-based and can share episodes; future observations are partly visible during extraction. All non-oracle sensitivity intervals include zero.
+- **Measured:** complete 20,000-update LIBERO adaptation losses; the foundation prefix through update 10,501; world-feature probes at update 5,100; and a corrected action-input sensitivity report. These diagnostics do not establish closed-loop performance or causal pretraining gains. The internal probe train/test split is window-based and can share episodes; future observations are partly visible during extraction. All non-oracle sensitivity intervals include zero.
 - **External:** source-reported baseline values, with original strings, immutable revisions, hashes, and cell pointers. No external value is a JAM measurement. Missing source entries are NR, never zero.
 - **Planned:** only controlled-study tables and the scaling display retain marked layout values from `experiments/layout_targets.json`. Superscript T and explicit plot labels identify them. They are neither measured results nor preregistered predictions. JAM benchmark rows instead say **Awaiting evaluation**.
 
-The recipe boundary also activates the displacement outlier mask and pure-noise inputs for absent modalities. Runtime sharding changes to single-node FULL_SHARD. Curves retain outliers and do not smooth across this boundary. These simultaneous changes require separate controls before attributing a loss change to one cause.
+The 8,400-update configuration boundary activates the displacement outlier mask and pure-noise inputs for absent modalities. Runtime sharding changes to single-node FULL_SHARD. Curves retain outliers and do not smooth across this boundary. The 10,500-update boundary changes to the current seven-source recipe. Its first update is the only logged point in this final segment; the display makes no claim about this segment's convergence.
 
 ## External attribution
 
-The requested reference website's immutable benchmark export is archived in `artifacts/source_reports/benchmark_export.json`. Its 113 rows across nine simulation tables are indexed in `artifacts/external_baselines.json`. The seven manuscript benchmark tables contain 76 distinct rows from this export plus six LIBERO-PRO rows. R1 denotes the external method named in that source; it is never a JAM alias. The website aggregates source-reported evaluations, so the manuscript does not assert that its authors reran every baseline under one protocol.
+The requested reference website's immutable benchmark export is archived in `artifacts/source_reports/benchmark_export.json`. Its 113 rows across nine simulation tables are indexed in `artifacts/external_baselines.json`. The manuscript contains 85 distinct source rows across seven export benchmarks, plus six LIBERO-PRO rows. The rendering audit covers 344 copied numeric/missingness cells. R1 denotes the external method named in that source; it is never a JAM alias. The website aggregates source-reported evaluations, so the manuscript does not assert that its authors reran every baseline under one protocol.
 
-**LIBERO-PRO is absent from that export.** Its table uses the benchmark maintainers' pinned official README leaderboard, recorded in `artifacts/external_libero_pro.json`. Normalized success is converted to percentage exactly. The reported totals are preserved, including differing coverage of environment tests. `artifacts/rendered_baseline_cells.json` maps each displayed source cell back to the archived export.
+**LIBERO-PRO is absent from that export.** Its table uses the benchmark maintainers' pinned official README leaderboard, recorded in `artifacts/external_libero_pro.json`. Normalized success is converted to percentage exactly. The four displayed suite scores are derived as unweighted means of available published perturbation rates, rounded half up to one decimal. An asterisk identifies models whose environment tests are unreported. Total retains the source-reported aggregate. The full derivation is archived in `artifacts/libero_pro_aggregation.json`. `artifacts/rendered_baseline_cells.json` maps each displayed source cell back to the archived export.
 
 ## Repository and result updates
 

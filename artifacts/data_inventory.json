@@ -1,116 +1,71 @@
 {
-  "status": "audited_stage_inventory",
-  "snapshot": "2026-09-08T08:47:32.513946",
-  "source_revision": "27a9703989073c12ef50f8ad2d4f733ea2bf4fe1",
-  "source_document_sha256": "7ac0c41e8950632140fe7a1bc8ed2c731995da34845c84a50b2aa0804795596d",
-  "active_stage": "s2b",
-  "active_from_update": 8400,
+  "status": "audited_current_training_recipe",
+  "snapshot": "2026-09-08T11:56:51.808371+08:00",
+  "source_revision": "8d715ee7624a3731a2d364bbb7664390523acae6",
+  "active_stage": "s3",
+  "active_from_update": 10500,
   "source_counts": {
     "droid": 1674648,
     "bridge": 454690,
     "egodex": 738550,
+    "ego4d": 436116,
+    "robomind_agilex": 741886,
     "robomind_franka": 76446,
     "robomind_ur": 439974
   },
   "temperature": 0.7,
   "probabilities": {
-    "droid": 0.40439426310064447,
-    "bridge": 0.1623526169242733,
-    "egodex": 0.2279945380944588,
-    "robomind_franka": 0.04660224594710126,
-    "robomind_ur": 0.15865633593352224
-  },
-  "previous_stage": {
-    "through_update": 8400,
-    "source_counts": {
-      "droid": 1674648,
-      "bridge": 454690,
-      "egodex": 738550
-    },
-    "probabilities": [
-      0.5088375336692232,
-      0.20428357352817195,
-      0.28687889280260487
-    ]
+    "droid": 0.29168738319693704,
+    "bridge": 0.11710405984179394,
+    "egodex": 0.16445122067277188,
+    "ego4d": 0.11373459457279517,
+    "robomind_agilex": 0.16497084263974326,
+    "robomind_franka": 0.033613946615328155,
+    "robomind_ur": 0.11443795246063054
   },
   "sources": [
     {
       "id": "droid",
-      "status": "consumed",
+      "status": "active",
       "train_windows": 1674648,
-      "probability": 0.40439426310064447
+      "probability": 0.29168738319693704
     },
     {
       "id": "bridge",
-      "status": "consumed",
+      "status": "active",
       "train_windows": 454690,
-      "probability": 0.1623526169242733
+      "probability": 0.11710405984179394
     },
     {
       "id": "egodex",
-      "status": "consumed",
+      "status": "active",
       "train_windows": 738550,
-      "probability": 0.2279945380944588
+      "probability": 0.16445122067277188
     },
-    {
-      "id": "robomind_franka",
-      "status": "consumed",
-      "train_windows": 76446,
-      "probability": 0.04660224594710126
-    },
-    {
-      "id": "robomind_ur",
-      "status": "consumed",
-      "train_windows": 439974,
-      "probability": 0.15865633593352224
-    }
-  ],
-  "next_sources": [
     {
       "id": "ego4d",
-      "display": "Ego4D",
-      "status": "ready",
+      "status": "active",
       "train_windows": 436116,
-      "all_windows": 486972,
-      "holdout_group": "video_uid",
-      "shared_video_uids": 0,
-      "supervision": "world"
+      "probability": 0.11373459457279517
     },
     {
       "id": "robomind_agilex",
-      "display": "RoboMIND AgileX",
-      "status": "encoding",
-      "hours": 91.3,
-      "supervision": "world + action"
+      "status": "active",
+      "train_windows": 741886,
+      "probability": 0.16497084263974326
     },
     {
-      "id": "interndata_a1",
-      "display": "InternData-A1",
-      "status": "acquiring",
-      "supervision": "world + action"
+      "id": "robomind_franka",
+      "status": "active",
+      "train_windows": 76446,
+      "probability": 0.033613946615328155
     },
     {
-      "id": "robocoin",
-      "display": "RoboCOIN",
-      "status": "encoding_initial_subset",
-      "supervision": "world + action"
-    },
-    {
-      "id": "epic_kitchens",
-      "display": "EPIC-KITCHENS-100",
-      "status": "acquiring",
-      "supervision": "world"
+      "id": "robomind_ur",
+      "status": "active",
+      "train_windows": 439974,
+      "probability": 0.11443795246063054
     }
-  ],
-  "conditional_candidates": [
-    "AgiBotWorld-Beta subset",
-    "Additional Ego4D"
-  ],
-  "not_selected_current": [
-    "RT-1",
-    "CALVIN",
-    "RoboSet",
-    "RH20T"
   ],
   "temporal_audit": {
     "egodex_train_hz": 10,
@@ -136,5 +91,9 @@
     "LIBERO-Plus",
     "LIBERO-PRO"
   ],
-  "scope_note": "Next sources are not included in consumed counts. Raw downloads, cache windows and optimization exposure are separate quantities."
+  "scope_note": "Current runtime mixture resumed at update 10500; probabilities are from the startup log. Historical recipes remain in archived provenance.",
+  "recipe_boundaries": [
+    8400,
+    10500
+  ]
 }

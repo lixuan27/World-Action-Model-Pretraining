@@ -2,59 +2,25 @@
 \centering
 \begingroup\fontsize{9.2}{10.5}\selectfont
 \setlength{\tabcolsep}{2.5pt}\renewcommand{\arraystretch}{1.08}
-\begin{tabularx}{\linewidth}{@{}p{1.43in}CCCCCC@{}}
+\begin{tabularx}{\linewidth}{@{}p{1.43in}CCC@{}}
 \toprule
-\panelrow{7}{A. Task success (SR)}
-Model & In-dist. & Category & Common-sense & Instruction & Texture & Mean \\
+\panelrow{4}{VLABench}
+Model & SR & PS & IS \\
 \midrule
-$\pi_0$ & 47.0 & 21.2 & 29.1 & 17.3 & 32.2 & 29.4 \\
-LoHo-Manip & 54.0 & 23.0 & 36.0 & 42.0 & 39.0 & 39.0 \\
-ACoT-VLA & \nr & \nr & \nr & \nr & \nr & \nr \\
-$\pi_{0.5}$ & 65.4 & 38.2 & 43.9 & 48.2 & 44.9 & 48.1 \\
-ERVLA & 69.7 & 47.0 & 44.0 & 58.0 & 47.4 & 53.2 \\
-Xiaomi-Robotics-1 & 75.6 & \textbf{53.0} & 48.4 & 55.8 & \textbf{62.6} & \textbf{59.1} \\
+$\pi_0$ & 29.4 & 44.1 & 55.0 \\
+LoHo-Manip & 39.0 & \nr & \nr \\
+ACoT-VLA & \nr & 47.4 & 63.5 \\
+$\pi_{0.5}$ & 48.1 & 62.3 & 64.9 \\
+ERVLA & 53.2 & 65.9 & 70.4 \\
+Xiaomi-Robotics-1 & \textbf{59.1} & \textbf{70.3} & 69.9 \\
 \midrule
-Bridge-WA & 78.0 & 23.0 & 51.1 & \textbf{67.0} & 45.0 & 52.8 \\
-R1 & \textbf{83.4} & 38.1 & \textbf{58.0} & 53.8 & 61.4 & 58.9 \\
-\bottomrule
-\end{tabularx}
-\vspace{3pt}
-\begin{tabularx}{\linewidth}{@{}p{1.43in}CCCCCC@{}}
-\toprule
-\panelrow{7}{B. Progress score (PS)}
-Model & In-dist. & Category & Common-sense & Instruction & Texture & Mean \\
+Bridge-WA & 52.8 & 64.0 & \textbf{71.2} \\
+R1 & 58.9 & 67.2 & 63.5 \\
 \midrule
-$\pi_0$ & 62.7 & 33.6 & 43.0 & 38.7 & 42.5 & 44.1 \\
-LoHo-Manip & \nr & \nr & \nr & \nr & \nr & \nr \\
-ACoT-VLA & 66.1 & 38.9 & 37.8 & 39.6 & 54.6 & 47.4 \\
-$\pi_{0.5}$ & 77.8 & 49.7 & 57.3 & 64.2 & 62.3 & 62.3 \\
-ERVLA & 81.1 & 61.0 & 55.0 & 70.2 & 62.3 & 65.9 \\
-Xiaomi-Robotics-1 & 85.0 & \textbf{66.6} & 58.3 & 66.8 & \textbf{74.9} & \textbf{70.3} \\
-\midrule
-Bridge-WA & 85.8 & 28.8 & 64.4 & \textbf{80.3} & 60.3 & 64.0 \\
-R1 & \textbf{87.9} & 45.9 & \textbf{64.8} & 64.5 & 72.9 & 67.2 \\
-\bottomrule
-\end{tabularx}
-\vspace{3pt}
-\begin{tabularx}{\linewidth}{@{}p{1.43in}CCCCCC@{}}
-\toprule
-\panelrow{7}{C. Intention score (IS)}
-Model & In-dist. & Category & Common-sense & Instruction & Texture & Mean \\
-\midrule
-$\pi_0$ & 67.8 & 44.0 & 54.9 & 58.0 & 50.6 & 55.0 \\
-LoHo-Manip & \nr & \nr & \nr & \nr & \nr & \nr \\
-ACoT-VLA & 79.8 & 54.1 & 52.3 & 56.8 & 74.6 & 63.5 \\
-$\pi_{0.5}$ & 80.4 & 52.0 & 60.0 & 67.0 & 65.0 & 64.9 \\
-ERVLA & 84.2 & \textbf{66.4} & 57.2 & 73.8 & 70.6 & 70.4 \\
-Xiaomi-Robotics-1 & 79.8 & \textbf{66.4} & 58.2 & 70.2 & 74.8 & 69.9 \\
-\midrule
-Bridge-WA & \textbf{85.0} & 39.0 & \textbf{74.2} & \textbf{82.0} & \textbf{76.0} & \textbf{71.2} \\
-R1 & 75.2 & 45.9 & 57.9 & 66.5 & 71.6 & 63.5 \\
-\midrule
-\jamshade\textbf{JAM} & \multicolumn{6}{c}{\pendingresult} \\
+\jamshade\textbf{JAM} & \multicolumn{3}{c}{\pendingresult} \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{\textbf{VLABench semantic and visual generalization.} SR, PS, and IS retain the benchmark\textquotesingle s task-success, progress, and intention metrics across five settings. All values use the source\textquotesingle s percentage scale. Source: \refsource{}. \benchmarknote}
+\caption{\textbf{VLABench overall performance.} SR, PS, and IS denote task success, progress score, and intention score. Values retain the source-reported overall percentage scale. Source: \refsource{}. \benchmarknote}
 \label{tab:vlabench}
 \end{table}

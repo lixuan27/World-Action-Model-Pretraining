@@ -1,58 +1,48 @@
 \clearpage
+\setlength{\intextsep}{6pt}
 \section{Experiments}
 \label{sec:experiments}
 \subsection{Experimental setup}
-JAM begins embodied pretraining on DROID \citep{droid}, BridgeData V2 \citep{bridge}, and
-EgoDex \citep{egodex}, then admits RoboMIND \citep{robomind} Franka and UR5e at update 8,400.
-Figure~\ref{fig:mixture} separates the consumed mixture from the next data admissions.
-The 6.02-billion-parameter model combines a public video initialization with a newly initialized
-agent stream. Foundation training uses eight H200 accelerators and global batch 512;
-episode-level holdouts separate training windows from open-loop checks. Benchmark adaptation
-uses the designated training partitions, with LIBERO-Plus and LIBERO-PRO reserved for evaluation.
-Appendix~\ref{app:setup} records the complete data inventory, schedules, and evaluation protocols.
+JAM combines robot demonstrations with human video in embodied pretraining. The current mixture
+uses DROID \citep{droid}, BridgeData V2 \citep{bridge}, EgoDex \citep{egodex}, Ego4D \citep{ego4d}, and the
+Franka, UR5e, and AgileX portions of RoboMIND \citep{robomind}. Appendix~\ref{app:setup} gives
+source counts and sampling probabilities. The 6.02-billion-parameter model combines public video
+initialization with a newly initialized agent stream, trained on eight H200 accelerators with
+global batch 512. Episode-level holdouts separate training windows from open-loop checks;
+benchmark adaptation uses designated training splits, with LIBERO-Plus and LIBERO-PRO reserved
+for evaluation.
 
-The evidence snapshot contains foundation optimization through update \FoundationSteps{},
-a completed 20,000-update LIBERO adaptation, and frozen-world diagnostics at update 5,100.
-Training behavior appears in Figure~\ref{fig:foundation}; benchmark tables retain source-reported
-baseline values and reserve a blue row for JAM evaluation. Paired comparisons fix demonstrations,
-adaptation budgets, and environment resets. Success measures closed-loop control; action readout,
-consequence displacement, and input sensitivity assess representation content. Controlled
-pretraining and scaling displays retain explicit target markers while their measurements are
-pending. Probe sampling, uncertainty, and evidence boundaries appear in Appendix~\ref{app:controls}.
+The evidence snapshot contains foundation optimization through update \FoundationSteps{}, a
+completed 20,000-update LIBERO adaptation, and frozen-world diagnostics at update 5,100.
+The benchmark tables retain source-reported baseline values and reserve blue rows for JAM
+evaluation. Paired comparisons fix demonstrations, adaptation budgets, and environment resets.
+Success measures closed-loop control; frozen-feature readouts and input sensitivity assess
+representation content. Controlled pretraining and scaling displays retain target markers
+while measurements are pending. Appendix~\ref{app:controls} specifies probe sampling and uncertainty.
 
-\begin{figure}[H]
-\centering\includegraphics[width=\linewidth]{Figures/data_mixture.pdf}
-\caption{\textbf{Which sources have entered pretraining?} Sampling probabilities follow training-window counts with temperature 0.7. RoboMIND Franka and UR5e enter after the 8,400-update checkpoint. Ego4D has a merged cache; the other listed expansions remain in encoding or acquisition. Admission into training requires a validated cache and a new resolved mixture.}
-\label{fig:mixture}
-\end{figure}
-\begin{figure}[H]
-\centering\includegraphics[width=\linewidth]{Figures/foundation.pdf}
-\caption{\textbf{How do the three objectives evolve?} Measured foundation losses retain raw outliers and local averages. The dotted line marks the 8,400-update recipe boundary. Appendix Figure~\ref{fig:training} includes the completed adaptation and the smoothing protocol.}
-\label{fig:foundation}
-\end{figure}
-
-
-
-\clearpage
 \subsection{Benchmark control and generalization}
-Table~\ref{tab:libero_plus} resolves visual and semantic robustness into seven perturbation axes.
+Table~\ref{tab:libero_plus} resolves robustness across seven perturbation axes.
 \input{Tables/libero_plus}
-Table~\ref{tab:libero_pro} separates perturbations across four task suites using the benchmark-maintainer leaderboard.
+\clearpage
+Table~\ref{tab:libero_pro} summarizes robustness within four task suites.
 \input{Tables/libero_pro}
 
-\clearpage
-Table~\ref{tab:vlabench} evaluates task completion, progress, and intention under semantic and visual shifts.
+Table~\ref{tab:vlabench} summarizes task success, progress, and intention on VLABench.
 \input{Tables/vlabench}
+Table~\ref{tab:bimanual} compares bimanual control on RoboTwin2.0-Full and RoboDojo.
+\input{Tables/bimanual}
 
 \clearpage
-Table~\ref{tab:robotwin} compares bimanual manipulation in clean and randomized environments.
-\input{Tables/robotwin}
-Table~\ref{tab:robocasa_365} separates household skills from their seen and unseen compositions.
-\input{Tables/robocasa_365}
+Table~\ref{tab:mobile} compares mobile manipulation on RoboCasa365 and EBench.
+\input{Tables/mobile}
 
-\clearpage
-Table~\ref{tab:robodojo} compares generalization, precision, long-horizon control, memory, and open tasks.
-\input{Tables/robodojo}
+\subsection{Joint optimization}
+Figure~\ref{fig:training} records the joint objectives during foundation pretraining and task adaptation.
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{Figures/training.pdf}
+\caption{\textbf{Joint optimization of world, action, and consequence prediction.} Foundation pretraining (top) and completed LIBERO adaptation (bottom). Thin traces retain logged batches; thick traces average up to 11 records with available supervision. Each objective uses a logarithmic scale. Vertical rules mark configuration boundaries, where smoothing restarts. The last foundation segment contains one logged update. Appendix~\ref{app:details} records the changes at each boundary.}
+\label{fig:training}
+\end{figure}
 
 \clearpage
 \subsection{Representation and reciprocal computation}

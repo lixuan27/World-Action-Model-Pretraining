@@ -37,13 +37,16 @@
       "status": "running",
       "source_configs": [
         "configs/experiments/jam_base_v1.yaml",
-        "configs/experiments/jam_base_v1_s2b_ready.yaml"
+        "configs/experiments/jam_base_v1_s2b_ready.yaml",
+        "configs/experiments/jam_base_v1_s3_robomind.yaml"
       ],
       "published_artifacts": [
         "artifacts/measurements/jam_base_v1.jsonl",
         "artifacts/configs/jam_base_v1_s2b.json",
         "artifacts/data_inventory.json",
-        "artifacts/measurements/foundation_s2b_startup.txt"
+        "artifacts/measurements/foundation_s2b_startup.txt",
+        "artifacts/configs/jam_base_v1_s3.json",
+        "artifacts/measurements/foundation_s3_startup.txt"
       ],
       "pending_requirements": [
         "Complete foundation training; archive each recipe segment and milestone hash."
@@ -84,7 +87,8 @@
         "Foundation milestone release",
         "Three training seeds and pinned task/reset manifests",
         "Completed per-episode closed-loop results",
-        "Align subset and full-suite protocols before comparison to external references"
+        "Align subset and full-suite protocols before comparison to external references",
+        "Completed EBench evaluation with the source protocol and task manifest"
       ],
       "paper_reproduction_command": "python3 scripts/build_artifacts.py",
       "launch_status": "reference_only; cluster launch parameters belong to source project and require its current resource policy",
@@ -400,5 +404,5 @@
       ]
     }
   ],
-  "foundation_cutoff": 8600
+  "foundation_cutoff": 10501
 }

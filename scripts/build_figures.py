@@ -44,25 +44,8 @@ def save(fig,key):
     qa.append({'figure':key,'font':'DejaVu Serif','format':'vector PDF','text_bounds':'PASS'})
     plt.close(fig)
 
-# 1. Admission and actual source sampling are different quantities.
 inv=json.loads((P/'artifacts/data_inventory.json').read_text())
-fig=plt.figure(figsize=(6.5,2.30));gs=fig.add_gridspec(1,2,width_ratios=[1.45,1],left=.18,right=.99,bottom=.18,top=.78,wspace=.40)
-a=fig.add_subplot(gs[0]);b=fig.add_subplot(gs[1]);style(a)
-ids=list(inv['source_counts']);names=['DROID','Bridge V2','EgoDex','RoboMIND Franka','RoboMIND UR5e']
-old=inv['previous_stage']['probabilities']+[0,0];new=[inv['probabilities'][k] for k in ids];y=np.arange(5)
-a.barh(y-.15,np.array(old)*100,height=.27,color='#D2DFE8',label='Initial mixture')
-a.barh(y+.15,np.array(new)*100,height=.27,color=BLUE,label='After 8.4k updates')
-for yy,v in zip(y,new):a.text(v*100+1,yy+.15,f'{v*100:.1f}%',va='center',fontsize=8.1)
-a.set_yticks(y,names);a.invert_yaxis();a.set_xlim(0,62);a.set_xticks([0,20,40,60]);a.set_xlabel('Source sampling probability (%)')
-a.set_title('A. Consumed by training',loc='left',pad=28)
-a.legend(loc='lower left',bbox_to_anchor=(-.02,1.015),ncol=1,frameon=False,handlelength=1.2,borderaxespad=0,labelspacing=.25)
-b.set_axis_off();b.set_title('B. Next admissions',loc='left',pad=28)
-stages=[('Ego4D','Merged',BLUE),('RoboMIND AgileX','Encoding',SAND),('InternData-A1','Acquiring',GREY),('RoboCOIN','Encoding',SAND),('EPIC-KITCHENS','Acquiring',GREY)]
-for yy,(nm,state,color) in zip(np.linspace(.88,.08,5),stages):
-    b.text(0,yy,nm,va='center',fontsize=8.0,transform=b.transAxes)
-    b.text(1.03,yy,state,va='center',ha='right',fontsize=8.0,color=color,transform=b.transAxes)
-fig.text(.985,.032,'Snapshot: 8 September 2026',ha='right',fontsize=8,color='#6F7E87')
-save(fig,'data_mixture')
+boundaries=inv['recipe_boundaries']
 
 # 2. Preserve raw outliers; do not smooth across the recipe / masking boundary.
 logs={r:[json.loads(x) for x in (P/f'artifacts/measurements/{r}.jsonl').read_text().splitlines()]
@@ -78,41 +61,25 @@ for row,run in enumerate(logs):
         smooth=[]
         for i in range(len(y)):
             start=max(0,i-10)
-            if run=='jam_base_v1' and x[i]>8400:start=max(start,int(np.searchsorted(x,8400,side='right')))
+            if run=='jam_base_v1':
+                prior=[q for q in boundaries if x[i]>q]
+                if prior:start=max(start,int(np.searchsorted(x,max(prior),side='right')))
             z=y[start:i+1];smooth.append(np.nanmean(z) if np.isfinite(z).any() else np.nan)
         ax.plot(x,y,color=color,alpha=.30,lw=.6);ax.plot(x,smooth,color=color,lw=1.45)
         ax.set_yscale('log');ax.yaxis.set_minor_formatter(NullFormatter());
         if key=='world':
-            ticks=[.15,.2,.3] if row==0 else [.05,.1,.2,.4];ax.set_yticks(ticks,[f'{t:g}' for t in ticks])
+            ticks=[.1,.2,.3] if row==0 else [.05,.1,.2,.4];ax.set_yticks(ticks,[f'{t:g}' for t in ticks])
         ax.set_xlim(0,last if row==0 else 20000)
         if row==0:
             ax.set_title(key.capitalize(),color=color,pad=7)
-            ax.axvline(8400,color=INK,lw=.7,ls=':')
-            ax.set_xticks([0,4000,last],['0','4k',f'{last/1000:g}k'])
+            for q in boundaries:ax.axvline(q,color=INK,lw=.7,ls=':')
+            ax.set_xticks([0,4000,last],['0','4k',f'{last/1000:.1f}k'])
         else:ax.set_xticks([0,10000,20000],['0','10k','20k'])
         if col==0:ax.set_ylabel('Foundation loss' if row==0 else 'Adaptation loss',labelpad=3)
         if row==1:ax.set_xlabel('Optimizer updates',labelpad=2)
 fig.text(.105,.972,'Raw batches and local averages',fontsize=9.2,weight='bold',va='top')
 fig.text(.99,.972,'Measured training records',fontsize=8.1,color='#677B89',ha='right',va='top')
 save(fig,'training')
-
-# Compact foundation prefix for the main-text training panel.
-fig,axes=plt.subplots(1,3,figsize=(6.5,1.88));fig.subplots_adjust(left=.105,right=.965,bottom=.29,top=.76,wspace=.38)
-data=logs['jam_base_v1'];x=np.array([r['step'] for r in data])
-for ax,key,color in zip(axes,['world','action','consequence'],[BLUE,SAND,ROSE]):
-    style(ax); y=np.array([r['loss/'+key] if r.get('frac/'+key+'_supervised',1)>0 else np.nan for r in data]);smooth=[]
-    for i in range(len(y)):
-        start=max(0,i-10)
-        if x[i]>8400:start=max(start,int(np.searchsorted(x,8400,side='right')))
-        z=y[start:i+1];smooth.append(np.nanmean(z) if np.isfinite(z).any() else np.nan)
-    ax.plot(x,y,color=color,lw=.55,alpha=.28);ax.plot(x,smooth,color=color,lw=1.25)
-    ax.set_yscale('log');ax.yaxis.set_minor_formatter(NullFormatter());
-    if key=='world':ax.set_yticks([.15,.2,.3],['0.15','0.20','0.30'])
-    ax.axvline(8400,color=INK,lw=.7,ls=':')
-    ax.set_xlim(0,last);ax.set_xticks([0,4000,last],['0','4k',f'{last/1000:g}k'])
-    ax.set_title(key.capitalize(),loc='left',color=color,pad=7);ax.set_xlabel('Updates',labelpad=2)
-axes[0].set_ylabel('Training loss',labelpad=3)
-save(fig,'foundation')
 
 # 3. Plot every sampled layer, rather than selecting the layer with best test R2.
 root=P/'artifacts/measurements/analysis'
@@ -159,4 +126,4 @@ fig.text(.08,.975,'PLANNED DISPLAY  |  Values await measurement',fontsize=9.1,co
 fig.text(.08,.865,'LIBERO-Plus; one factor varies in each panel while the remaining budgets are fixed.',fontsize=8,va='top')
 save(fig,'scaling_targets')
 (P/'artifacts/figure_qa.json').write_text(json.dumps(qa,indent=2)+'\n')
-print('Built five serif vector figures with measured / planned separation.')
+print('Built three serif vector figures with measured / planned separation.')

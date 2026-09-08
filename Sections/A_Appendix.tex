@@ -29,8 +29,8 @@ $384\times256$ pixels for the two-view template and $384\times320$ for the three
 template reserves positions for unavailable views rather than inventing additional observations.
 DROID and Bridge are sampled at 15 and 5 Hz. The EgoDex training export retains every third
 frame of the original 30 Hz stream, giving 10 Hz. This corrects the earlier 30 Hz description.
-The RoboMIND sources lack native timestamps in the inspected export; their duration audit retains
-a 15--20 Hz range rather than asserting a single measured rate.
+The RoboMIND Franka and UR5e exports lack native timestamps; their duration audit retains
+a 15--20 Hz range. The AgileX and Ego4D adapters are configured at 20 and 30 Hz, respectively.
 Consequently, a step horizon corresponds to different elapsed durations across sources.
 Duration-matched comparisons are a separate control for cross-source transfer.
 
@@ -54,9 +54,10 @@ The stage resumed at update 8,400 uses full sharding on a single eight-accelerat
 with the same global batch. The video backbone
 is initialized from released video weights; embodied foundation training is performed within JAM.
 
-The initial foundation configuration contains DROID, Bridge, and the EgoDex training export
-from its first optimizer update. RoboMIND Franka and UR5e join at the 8,400-update resume; the
-first update on this mixture is 8,401. An earlier robot-only stage pointer was replaced before training began.
+The archived training record spans two configuration boundaries. At update 8,400, the run changes
+to a five-source mixture and activates the displacement filter and pure-noise treatment of missing
+modalities. At update 10,500, the run switches to the current seven-source mixture in
+Table~\ref{tab:corpus}. The snapshot includes its first logged update, 10,501.
 Checkpoints are saved every 300 updates. The first retained milestone release is at update 5,100,
 and the archived log extends to \FoundationSteps{}. The intended downstream launch point is the
 15,000-update foundation milestone. These milestones describe training duration rather than
@@ -65,57 +66,24 @@ final-window summary averages the last 10\% of those points. A zero consequence 
 microbatch indicates absent supervision, so foundation summaries condition on the recorded
 supervised fraction.
 
-\begin{figure}[H]
-\centering\includegraphics[width=\linewidth]{Figures/training.pdf}
-\caption{\textbf{How do the joint objectives optimize?} Measured foundation training (top) and completed LIBERO adaptation (bottom). Thin traces retain logged batches and outliers; thick traces average up to 11 records with available supervision. Each objective uses a logarithmic scale. The dotted boundary marks the concurrent mixture, label-mask, and sharding changes at update 8,400; smoothing starts anew there.}
-\label{fig:training}
-\end{figure}
+
 
 \subsection{Experimental setup and evaluation}
 \label{app:setup}
 \textbf{Data and splits.}
-Table~\ref{tab:corpus} distinguishes data consumed by the archived run from prepared and acquired
-expansions. The first mixture samples DROID, Bridge, and EgoDex with probabilities 50.88\%, 20.43\%,
-and 28.69\%. The five-source stage uses temperature 0.7 on training-window counts and probabilities
-40.44\%, 16.24\%, 22.80\%, 4.66\%, and 15.87\% in table order. The cache reserves an episode-level
-holdout using a deterministic one-in-ten partition. All windows from an episode follow that
-partition. Ego4D instead groups clips by source video: its merged cache contains 436,116 training
-and 50,856 holdout windows from 592 and 72 video identifiers, with zero shared identifiers.
-The first Ego4D cache supplies world supervision; consequence supervision requires an admitted
-tracking pipeline. Dataset availability and exposure during optimization are recorded separately.
+Table~\ref{tab:corpus} gives the current seven-source training mixture, verified against the resolved
+configuration and runtime sampling probabilities. Sources are sampled by cached training-window
+counts raised to temperature 0.7. The cache reserves an episode-level holdout using a deterministic
+one-in-ten partition, with every window from an episode following that assignment. Ego4D groups
+clips by source video: 436,116 training and 50,856 holdout windows come from 592 and 72 video
+identifiers, respectively, with zero shared identifiers. The Ego4D adapter supplies world targets;
+EgoDex additionally supplies projected hand-motion consequences.
+\input{Tables/corpus}
 
-\begin{table}[H]
-\centering\small
-\begin{tabularx}{\linewidth}{@{}lCCC@{}}
-\toprule
-Source & Stage & Targets & Train windows \\
-\midrule
-\panelrow{4}{A. Consumed after the 8,400-update resume}
-DROID & Active & World, action & 1,674,648 \\
-BridgeData V2 & Active & World, action & 454,690 \\
-EgoDex & Active & World, consequence & 738,550 \\
-RoboMIND Franka & Active & World, action & 76,446 \\
-RoboMIND UR5e & Active & World, action & 439,974 \\
-\midrule
-\panelrow{4}{B. Next admissions; outside the consumed mixture}
-Ego4D & Merged & World & 436,116 \\
-RoboMIND AgileX & Encoding & World, action & Pending \\
-InternData-A1 & Acquiring & World, action & Pending \\
-RoboCOIN subset & Encoding & World, action & Pending \\
-EPIC-KITCHENS-100 & Acquiring & World & Pending \\
-\bottomrule
-\end{tabularx}
-\caption{\textbf{Pretraining inventory at the evidence snapshot.} Counts are cached training windows, not unique trajectories or duration. Targets describe the admitted or intended adapter. The expansion rows carry no sampling probability until training admission.}
-\label{tab:corpus}
-\end{table}
-
-RoboMIND AgileX supplies the next bimanual data source. Its inspected export covers 10,269 episodes,
-with encoding still in progress. InternData-A1 acquisition spans multiple embodiments; the first
-RoboCOIN tranche contains 38 selected corpus repositories. Additional Ego4D access and an
-AgiBotWorld-Beta subset remain conditional on access and validation. The current selection omits
-RT-1, CALVIN, RoboSet, and RH20T. LIBERO, RoboTwin2.0-Full, VLABench, RoboCasa365 target tasks,
-and RoboDojo are reserved for downstream training. LIBERO-Plus and LIBERO-PRO supply evaluation
-only. Future corpus revisions must preserve these evaluation boundaries.
+LIBERO, RoboTwin2.0-Full, VLABench, RoboCasa365 target tasks, and RoboDojo use their designated
+downstream training portions. LIBERO-Plus and LIBERO-PRO supply evaluation only. EBench adds the
+source-reported mobile manipulation comparison; the JAM row requires the corresponding completed
+evaluation. Pretraining uses the corpus in Table~\ref{tab:corpus}.
 
 \textbf{Model and optimization.}
 The world stream uses Wan2.2-TI2V-5B through its released Diffusers implementation, initialized with
@@ -132,8 +100,7 @@ global batch 64, and a cosine learning-rate schedule; Appendix~\ref{app:details}
 
 \textbf{Tasks and comparison protocol.}
 The core downstream arenas are LIBERO \citep{libero}, RoboTwin 2.0 Full \citep{robotwin}, VLABench
-\citep{vlabench}, and the RoboCasa365 target-task split \citep{robocasa365}, with RoboDojo supplying additional
-capability tests. Direct adaptation
+\citep{vlabench}, and the RoboCasa365 target-task split \citep{robocasa365}, with RoboDojo and EBench supplying additional capability tests. Direct adaptation
 starts from the public video initialization plus a fresh agent; pretrained adaptation starts from a
 JAM foundation release. The paired comparison fixes the demonstrations, action adapter, training
 budget, sampler, and environment version. LIBERO-Plus \citep{liberoplus} and LIBERO-PRO
@@ -248,15 +215,18 @@ failure settings.
 
 \subsection{External reference results}
 \label{app:reference}
-Each main benchmark has a dedicated table with all baseline rows present in its source export.
+Main results group benchmarks by manipulation setting, retaining all source baseline rows
+within their respective panels.
 Table~\ref{tab:libero} supplies the standard LIBERO suites alongside the robustness tables in the
 main text. R1 is the external method identified by the immutable source link, distinct from JAM.
 The website aggregates source-reported evaluations; its presence alone does not establish that
 all baseline runs share one evaluation implementation. The archive retains original numeric strings,
 model labels, source revisions, and a cell-level rendering map. The official export contains no
 LIBERO-PRO table, so Table~\ref{tab:libero_pro} uses the benchmark maintainers' own leaderboard.
-Its normalized values are multiplied by 100 exactly. Its reported totals are preserved despite
-model-dependent coverage of environment tests. External protocol scopes remain attached to their
+Its normalized values are multiplied by 100 exactly. The four displayed suite scores are
+unweighted means of their reported perturbation rates, rounded to one decimal. Missing environment
+tests are excluded from these means and flagged on the affected models. Total retains the published
+aggregate. This summary preserves the difference between derived suite averages and source-reported totals. External protocol scopes remain attached to their
 values until a matched JAM evaluation is available.
 \input{Tables/libero}
 \FloatBarrier

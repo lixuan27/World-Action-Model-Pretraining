@@ -1,0 +1,20 @@
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}lYRR@{}}
+\toprule
+Source & Targets & Train windows & Sampling (\%) \\
+\midrule
+\panelrow{4}{Robot demonstrations}
+DROID & World + action & 1,674,648 & 29.17 \\
+BridgeData V2 & World + action & 454,690 & 11.71 \\
+RoboMIND Franka & World + action & 76,446 & 3.36 \\
+RoboMIND UR5e & World + action & 439,974 & 11.44 \\
+RoboMIND AgileX & World + action & 741,886 & 16.50 \\
+\panelrow{4}{Human video}
+EgoDex & World + consequence & 738,550 & 16.45 \\
+Ego4D & World & 436,116 & 11.37 \\
+\bottomrule
+\end{tabularx}
+\caption{\textbf{Current pretraining mixture.} Sampling probabilities follow cached training-window counts with temperature 0.7. Counts describe windows rather than unique episodes or duration.}
+\label{tab:corpus}
+\end{table}

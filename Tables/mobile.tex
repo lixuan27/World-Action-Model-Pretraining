@@ -1,0 +1,51 @@
+\begin{table}[H]
+\centering
+\begingroup\fontsize{8.4}{9.700000000000001}\selectfont
+\setlength{\tabcolsep}{2.5pt}\renewcommand{\arraystretch}{1.0}
+\begin{minipage}[t]{.51\linewidth}\vspace{0pt}
+\begin{tabularx}{\linewidth}{@{}p{1.20in}CCCC@{}}
+\toprule
+\panelrow{5}{A. RoboCasa365}
+Model & Atomic & Seen & Unseen & Mean \\
+\midrule
+Diffusion Policy & 15.7 & 0.2 & 1.3 & 6.1 \\
+$\pi_0$ & 36.3 & 5.2 & 0.7 & 15.0 \\
+$\pi_{0.5}$ & 39.6 & 7.1 & 1.2 & 16.9 \\
+GR00T-N1.5 & 50.7 & 14.8 & 2.7 & 23.9 \\
+Qwen-RobotManip & 68.6 & 20.1 & 14.9 & 35.9 \\
+RLDX-1 & 67.6 & 27.9 & 8.5 & 36.0 \\
+Xiaomi-Robotics-1 & \textbf{80.2} & \textbf{57.1} & \textbf{32.1} & \textbf{57.4} \\
+\midrule
+GigaWorld-Policy & 44.4 & 11.8 & 2.9 & 20.7 \\
+ABot-M0.5 & 75.9 & 38.3 & 2.7 & 40.4 \\
+R1 & 69.7 & 32.1 & 8.9 & 38.2 \\
+\midrule
+\jamshade\textbf{JAM} & \multicolumn{4}{c}{\pendingresult} \\
+\bottomrule
+\end{tabularx}
+\end{minipage}\hfill
+\begin{minipage}[t]{.47\linewidth}\vspace{0pt}
+\begin{tabularx}{\linewidth}{@{}p{1.40in}CC@{}}
+\toprule
+\panelrow{3}{B. EBench}
+Model & SR & Score \\
+\midrule
+StarVLA-OFT & 0.0 & 0.2 \\
+$\pi_0$ & 23.6 & 37.0 \\
+X-VLA & 23.7 & 36.0 \\
+InternVLA-A1 & 23.9 & 36.0 \\
+$\pi_{0.5}$ & 27.1 & 41.0 \\
+GigaBrain-0.7 & 33.3 & 46.0 \\
+Qwen-RobotManip & 45.6 & 60.0 \\
+\midrule
+Fast-WAM & 4.7 & 7.6 \\
+R1 & \textbf{49.4} & \textbf{64.7} \\
+\midrule
+\jamshade\textbf{JAM} & \multicolumn{2}{c}{\pendingresult} \\
+\bottomrule
+\end{tabularx}
+\end{minipage}
+\endgroup
+\caption{\textbf{Mobile manipulation.} RoboCasa365 separates atomic skills from seen and unseen compositions. EBench reports overall success rate (SR) and task score. Source: \refsource{}. Bold marks column maxima; blue rows await JAM evaluation.}
+\label{tab:mobile}
+\end{table}

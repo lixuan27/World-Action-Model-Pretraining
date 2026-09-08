@@ -1,0 +1,359 @@
+{
+  "method": "Unweighted mean of reported perturbation percentages, rounded half up to one decimal; source-reported Total retained",
+  "rows": [
+    {
+      "model": "OpenVLA",
+      "suites": [
+        {
+          "suite": "Goal",
+          "source_indices": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "n_reported": 5,
+          "macro_mean_percent": "58.40",
+          "display": "58.4"
+        },
+        {
+          "suite": "Spatial",
+          "source_indices": [
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "n_reported": 5,
+          "macro_mean_percent": "56.60",
+          "display": "56.6"
+        },
+        {
+          "suite": "Long",
+          "source_indices": [
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          "n_reported": 5,
+          "macro_mean_percent": "52.40",
+          "display": "52.4"
+        },
+        {
+          "suite": "Object",
+          "source_indices": [
+            15,
+            16,
+            17,
+            18,
+            19
+          ],
+          "n_reported": 5,
+          "macro_mean_percent": "39.20",
+          "display": "39.2"
+        }
+      ],
+      "reported_total_percent": "52.00",
+      "display_total": "52.0"
+    },
+    {
+      "model": "Pi0",
+      "suites": [
+        {
+          "suite": "Goal",
+          "source_indices": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "n_reported": 5,
+          "macro_mean_percent": "45.20",
+          "display": "45.2"
+        },
+        {
+          "suite": "Spatial",
+          "source_indices": [
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "n_reported": 5,
+          "macro_mean_percent": "50.40",
+          "display": "50.4"
+        },
+        {
+          "suite": "Long",
+          "source_indices": [
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          "n_reported": 5,
+          "macro_mean_percent": "37.60",
+          "display": "37.6"
+        },
+        {
+          "suite": "Object",
+          "source_indices": [
+            15,
+            16,
+            17,
+            18,
+            19
+          ],
+          "n_reported": 5,
+          "macro_mean_percent": "42.60",
+          "display": "42.6"
+        }
+      ],
+      "reported_total_percent": "44.00",
+      "display_total": "44.0"
+    },
+    {
+      "model": "Pi0.5",
+      "suites": [
+        {
+          "suite": "Goal",
+          "source_indices": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "n_reported": 5,
+          "macro_mean_percent": "55.60",
+          "display": "55.6"
+        },
+        {
+          "suite": "Spatial",
+          "source_indices": [
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "n_reported": 5,
+          "macro_mean_percent": "52.20",
+          "display": "52.2"
+        },
+        {
+          "suite": "Long",
+          "source_indices": [
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          "n_reported": 5,
+          "macro_mean_percent": "48.00",
+          "display": "48.0"
+        },
+        {
+          "suite": "Object",
+          "source_indices": [
+            15,
+            16,
+            17,
+            18,
+            19
+          ],
+          "n_reported": 5,
+          "macro_mean_percent": "57.00",
+          "display": "57.0"
+        }
+      ],
+      "reported_total_percent": "53.00",
+      "display_total": "53.0"
+    },
+    {
+      "model": "Molmoact",
+      "suites": [
+        {
+          "suite": "Goal",
+          "source_indices": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "n_reported": 4,
+          "macro_mean_percent": "38.25",
+          "display": "38.3"
+        },
+        {
+          "suite": "Spatial",
+          "source_indices": [
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "n_reported": 4,
+          "macro_mean_percent": "44.50",
+          "display": "44.5"
+        },
+        {
+          "suite": "Long",
+          "source_indices": [
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          "n_reported": 4,
+          "macro_mean_percent": "33.50",
+          "display": "33.5"
+        },
+        {
+          "suite": "Object",
+          "source_indices": [
+            15,
+            16,
+            17,
+            18,
+            19
+          ],
+          "n_reported": 4,
+          "macro_mean_percent": "48.50",
+          "display": "48.5"
+        }
+      ],
+      "reported_total_percent": "41.00",
+      "display_total": "41.0"
+    },
+    {
+      "model": "NORA",
+      "suites": [
+        {
+          "suite": "Goal",
+          "source_indices": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "n_reported": 4,
+          "macro_mean_percent": "36.50",
+          "display": "36.5"
+        },
+        {
+          "suite": "Spatial",
+          "source_indices": [
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "n_reported": 4,
+          "macro_mean_percent": "45.75",
+          "display": "45.8"
+        },
+        {
+          "suite": "Long",
+          "source_indices": [
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          "n_reported": 4,
+          "macro_mean_percent": "30.00",
+          "display": "30.0"
+        },
+        {
+          "suite": "Object",
+          "source_indices": [
+            15,
+            16,
+            17,
+            18,
+            19
+          ],
+          "n_reported": 4,
+          "macro_mean_percent": "44.50",
+          "display": "44.5"
+        }
+      ],
+      "reported_total_percent": "40.00",
+      "display_total": "40.0"
+    },
+    {
+      "model": "x-VLA",
+      "suites": [
+        {
+          "suite": "Goal",
+          "source_indices": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "n_reported": 4,
+          "macro_mean_percent": "44.00",
+          "display": "44.0"
+        },
+        {
+          "suite": "Spatial",
+          "source_indices": [
+            5,
+            6,
+            7,
+            8,
+            9
+          ],
+          "n_reported": 4,
+          "macro_mean_percent": "48.25",
+          "display": "48.3"
+        },
+        {
+          "suite": "Long",
+          "source_indices": [
+            10,
+            11,
+            12,
+            13,
+            14
+          ],
+          "n_reported": 4,
+          "macro_mean_percent": "41.75",
+          "display": "41.8"
+        },
+        {
+          "suite": "Object",
+          "source_indices": [
+            15,
+            16,
+            17,
+            18,
+            19
+          ],
+          "n_reported": 4,
+          "macro_mean_percent": "49.25",
+          "display": "49.3"
+        }
+      ],
+      "reported_total_percent": "46.00",
+      "display_total": "46.0"
+    }
+  ]
+}

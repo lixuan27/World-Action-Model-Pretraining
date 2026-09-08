@@ -2,7 +2,7 @@
 """Evidence and manuscript checks. Run after build_artifacts.py and compilation."""
 from pathlib import Path
 import json,re,hashlib,statistics,sys
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from html.parser import HTMLParser
 from pypdf import PdfReader
 P=Path(__file__).resolve().parents[1]
@@ -26,19 +26,25 @@ for name,want in [('1_Introduction.tex',(4,5)),('2_RelatedWork.tex',(3,3))]:
  if name.startswith('1_'):check(not re.search(r'\d|\$|\\begin\{(?:equation|table)\}',re.sub(r'\\cite\w*\{[^}]*\}','',s)), 'Intro contains a number or math')
 s=(P/'Sections/5_Experiments.tex').read_text()
 check('$' not in s and not re.search(r'\\begin\{(?:equation|align)',s),'Experiments contains formulas')
-setup=s.split(r'\subsection{Experimental setup}',1)[1].split(r'\begin{figure}',1)[0].strip()
+setup=s.split(r'\subsection{Experimental setup}',1)[1].split(r'\subsection{',1)[0].strip()
 setup_paragraphs=[p for p in re.split(r'\n\s*\n',setup) if p.strip()]
 check(len(setup_paragraphs)==2, 'Experimental setup must have exactly two paragraphs')
 check(not (P/'Tables/data.tex').exists() and 'tab:data}' not in text, 'Old dataset inventory table remains')
-benchmarks=['libero_plus','libero_pro','vlabench','robotwin','robocasa_365','robodojo']
+benchmarks=['libero_plus','libero_pro','vlabench','bimanual','mobile']
 for name in benchmarks+['libero','joint_analysis','data_scaling']:
  table=(P/'Tables'/f'{name}.tex').read_text()
  check(r'\begin{tabularx}{\linewidth}' in table,'Table must fill text width: '+name)
  check(r'\jamshade' in table and r'\panelrow' in table,'Table lacks JAM highlighting or hierarchy: '+name)
  if name in benchmarks+['libero']:
-  check(table.count(r'\jamshade')==1,'Benchmark requires one JAM row: '+name)
+  check(table.count(r'\jamshade')==(2 if name in ['bimanual','mobile'] else 1),'Benchmark requires one JAM row: '+name)
   check(r'\pendingresult' in table and r'\target{' not in table,'Benchmark JAM row must await a measured artifact: '+name)
 for name in benchmarks:check(s.count(r'\input{Tables/'+name+'}')==1,'Missing or repeated main benchmark: '+name)
+check(s.index(r'\input{Tables/mobile}')<s.index(r'\label{fig:training}'),'Training dynamics must follow all main benchmark tables')
+check('fig:mixture' not in text and 'fig:foundation' not in text,'Removed figures remain referenced')
+check(not (P/'Figures/data_mixture.pdf').exists(),'Removed mixture figure remains')
+check('Next admission' not in text,'Dataset roadmap remains in manuscript')
+check('Model & Goal & Spatial & Long & Object & Total' in (P/'Tables/libero_pro.tex').read_text(),'PRO summary columns')
+check('Model & SR & PS & IS' in (P/'Tables/vlabench.tex').read_text(),'VLABench overall columns')
 check('JAM direct' not in text,'Ambiguous direct label remains')
 check('Without embodied pretraining' in (P/'Tables/joint_analysis.tex').read_text(),'Initialization control missing')
 # URLs retain exact provenance. Naming rules apply to displayed prose.
@@ -77,7 +83,7 @@ for row in json.load(open(P/'artifacts/rendered_baseline_cells.json')):
  check(row['source_cells']==[original['cells'][i]['text'] for i in row['indices']],'Rendered-cell audit mismatch')
  seen.add((row['table'],row['model']));cell_count+=len(row['indices'])
 # All source baselines in all six selected export benchmarks must be shown.
-expected={(key,r['model']) for key in ['libero','libero_plus','vlabench','robotwin','robocasa_365','robodojo'] for g in st[key]['groups'] for r in g['rows']}
+expected={(key,r['model']) for key in ['libero','libero_plus','vlabench','robotwin','robocasa_365','robodojo','ebench'] for g in st[key]['groups'] for r in g['rows']}
 check(seen==expected,'Missing benchmark baseline rows')
 pro=json.load(open(P/'artifacts/external_libero_pro.json'))
 excerpt=(P/pro['local_source']).read_bytes()
@@ -100,13 +106,24 @@ for row in pro['rows']:
  for src,pct in zip(row['source_cells'],row['percent_cells']):
   check((pct is None and src=='-') or (pct is not None and Decimal(pct)==Decimal(src)*100),'PRO percentage conversion')
 
+aggregation=json.load(open(P/'artifacts/libero_pro_aggregation.json'))
+for row in aggregation['rows']:
+ original=next(r for r in pro['rows'] if r['model']==row['model'])
+ for i,entry in enumerate(row['suites']):
+  values=[Decimal(v) for v in original['percent_cells'][i*5:i*5+5] if v is not None]
+  mean=sum(values)/len(values)
+  check(Decimal(entry['macro_mean_percent'])==mean,'PRO macro mean '+row['model'])
+  check(entry['display']==f'{mean.quantize(Decimal("0.1"),rounding=ROUND_HALF_UP):.1f}','PRO rounding '+row['model'])
+  check(entry['n_reported']==len(values),'PRO missingness')
+ check(Decimal(row['display_total'])==Decimal(original['percent_cells'][-1]),'PRO reported Total changed')
+
 inv=json.load(open(P/'artifacts/data_inventory.json'));counts=inv['source_counts'];den=sum(n**inv['temperature'] for n in counts.values())
-check(len(counts)==5 and inv['active_from_update']==8400,'Consumed-mixture stage changed')
+check(len(counts)==7 and inv['active_from_update']==10500,'Consumed-mixture stage changed')
 for k,n in counts.items():check(abs(inv['probabilities'][k]-n**inv['temperature']/den)<1e-12,'Mixture probability '+k)
 check(inv['temporal_audit']['egodex_train_hz']==10,'EgoDex training timing')
 foundation=[json.loads(x) for x in (P/'artifacts/measurements/jam_base_v1.jsonl').read_text().splitlines()]
-check(foundation[-1]['step']==8600,'Foundation snapshot mismatch')
-check('8,600' in (P/'Tables/evidence_macros.tex').read_text(),'Foundation macro mismatch')
+check(foundation[-1]['step']==10501,'Foundation snapshot mismatch')
+check('10,501' in (P/'Tables/evidence_macros.tex').read_text(),'Foundation macro mismatch')
 for n in ['droid','egodex']:
  d=json.load(open(P/f'artifacts/measurements/analysis/base_v1_m5100/probes_{n}.json'))
  check(d['config']['s_world']==.5 and d['config']['s_action']==1,'Probe visibility differs from caption')
@@ -117,7 +134,7 @@ for key in ['donor','hold','shuffled_time']:
  lo,hi=cf['conditions'][key]['sensitivity_vs_true']['ci'];check(lo<=0<=hi,'Sensitivity statement must be reviewed')
 check(cf['n_windows']==300,'Sensitivity sample count')
 qa=json.load(open(P/'artifacts/figure_qa.json'))
-check(len(qa)==5 and all(x['font']=='DejaVu Serif' and x['text_bounds']=='PASS' for x in qa),'Figure typography or bounds audit')
+check(len(qa)==3 and all(x['font']=='DejaVu Serif' and x['text_bounds']=='PASS' for x in qa),'Figure typography or bounds audit')
 verify_external='--verify-external' in sys.argv
 if verify_external:
  try:
@@ -145,5 +162,5 @@ if errors:
  print('\n'.join('FAIL: '+e for e in errors));sys.exit(1)
 print(f'PASS: {main_pages} main pages (maximum 12); {len(setup_paragraphs)} setup paragraphs; {len(sections)} main sections; {len(labels)} unique labels; {len(cites)} verified citation keys; evidence hashes, summary means, and target markers valid.')
 
-print(f'PASS: {external_count} archived export rows; {len(seen)} displayed export baselines; {cell_count} source cells; six official PRO rows; five-source mixture and measured probe settings verified.')
+print(f'PASS: {external_count} archived export rows; {len(seen)} displayed export baselines; {cell_count} source cells; six official PRO rows; seven-source mixture and measured probe settings verified.')
 if verify_external:print('PASS: both external source hashes reverified online.')
