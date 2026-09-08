@@ -1,14 +1,14 @@
 {
   "artifact": "paper/JAM.pdf",
-  "sha256": "3e470265849198be363224403c2a21c0e4384b933795544629c7861e67c705ad",
-  "main_pages": 10,
-  "total_pages": 16,
+  "sha256": "cd246d6f2735eef775d007abd441e580e4251c740b5531f1e5a7e61dfe5617fd",
+  "main_pages": 11,
+  "total_pages": 17,
   "setup_paragraphs": 2,
   "main_benchmark_tables": 5,
   "main_benchmarks": 7,
   "appendix_benchmark_tables": 1,
   "scientific_plot_font": "DejaVu Serif, embedded",
-  "visual_review": "Main experimental pages and appendix rasterized and inspected; no text overlap or clipping. Current mixture is in the appendix. All main results precede the training-dynamics figure.",
+  "visual_review": "Updated Figure 3 and surrounding method pages rasterized and inspected; experimental pages reflowed and visually reviewed. No text overlap or clipping. All main results precede the training-dynamics figure.",
   "source_audit": {
     "export_rows": 113,
     "displayed_export_baselines": 85,
@@ -17,5 +17,6 @@
     "pro_derived_suite_values": 24,
     "reported_pro_totals": 6
   },
-  "build_log": "No undefined references/citations, missing glyphs, or overfull boxes"
+  "build_log": "No undefined references/citations, missing glyphs, or overfull boxes",
+  "consequence_figure_font": "Toppan Bunkyu Mincho, embedded vector outlines; STIX serif math"
 }

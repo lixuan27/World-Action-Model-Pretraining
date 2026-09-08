@@ -21,11 +21,15 @@ tectonic -X compile main.tex --keep-logs --keep-intermediates
 python3 scripts/validate.py --verify-external
 ```
 
-The first Tectonic build downloads standard TeX packages. Framework diagrams use editable TikZ. Three scientific figures are generated with Matplotlib in DejaVu Serif and exported as vector PDFs plus PNG previews. Paper builds launch no training.
+The first Tectonic build downloads standard TeX packages. The teaser and framework use editable TikZ. Three numerical figures are generated with Matplotlib in DejaVu Serif. Figure 3 uses Toppan Bunkyu Mincho, with STIX serif mathematical glyphs, and provides a PDF, PNG, editable SVG, and portable outlined SVG. Paper builds launch no training.
+
+To regenerate Figure 3, run `python3 scripts/build_consequence_figure.py` on a Mac with Toppan Bunkyu Mincho installed. Elsewhere, set `JAM_FIGURE_FONT` to the font's `ToppanBunkyuMinchoPr6N-Regular.otf` file. The committed PDF compiles on any supported LaTeX installation without the local font. The SVG with live text preserves editability; the outlined SVG preserves appearance without requiring font installation.
+
+Figure 3 distinguishes current anchors, future image positions, gain-scaled displacement, observability, and coordinate validity. Its examples explicitly separate visible points, occluded points, and missing slots. The mask has its own path into the joint loss. The interaction illustration is reused unchanged from the user-supplied reference drawing and represents a schematic, rather than a measured rollout. Source and drawing provenance are recorded in `artifacts/consequence_figure_qa.json`.
 
 ## Experimental organization
 
-The main text occupies **10 pages**, including the homepage teaser, framework, consequence interface, and all main experimental displays. References and appendix follow separately. Experimental setup contains exactly two paragraphs.
+The main text occupies **11 pages**, including the homepage teaser, framework, consequence interface, and all main experimental displays. References and appendix follow separately. Experimental setup contains exactly two paragraphs.
 
 | Table | Benchmark or question | Contents |
 |---|---|---|

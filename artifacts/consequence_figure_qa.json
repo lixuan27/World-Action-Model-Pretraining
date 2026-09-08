@@ -1,0 +1,39 @@
+{
+  "figure": "consequence_interface",
+  "font": "Toppan Bunkyu Mincho",
+  "math_font": "STIX serif",
+  "formats": [
+    "PDF",
+    "PNG",
+    "editable SVG",
+    "outlined SVG"
+  ],
+  "text_bounds": "PASS",
+  "text_intersections": "PASS",
+  "smallest_text_pt_at_6_5_in": 8.12,
+  "source": "Sections/4_Pretraining.tex and consequence target assembly in the archived source audit",
+  "mask_examples": {
+    "visible": [
+      1,
+      1,
+      1
+    ],
+    "occluded": [
+      0,
+      0,
+      1
+    ],
+    "missing": [
+      0,
+      0,
+      0
+    ]
+  },
+  "illustration": {
+    "status": "Schematic, not an experimental observation or model prediction",
+    "reference": "User-supplied JAM-framework-joint-flow-v9.pptx, slide 1, ppt/media/image36.png",
+    "sha256": "b6c08b47cd0f1e37b6b93a3635c8cc25b64cbffbc70e6bf2c08cd8f033fd05f0",
+    "modification": "Unchanged image placement"
+  },
+  "reference_thread": "01a07e80-5bdf-71f3-b277-99058429ac35"
+}

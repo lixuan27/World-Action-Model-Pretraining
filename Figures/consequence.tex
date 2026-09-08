@@ -1,23 +1,13 @@
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=Latex]
-\node[align=center] at (1.5,2.25) {Observation-time anchors};
-\node[align=center] at (6.1,2.25) {Future tracked motion};
-\node[align=center] at (11.5,2.25) {Consequence target};
-\foreach \x in {0,4.6} {\draw[rounded corners=2pt,draw=stone,fill=stone!6] (\x,0) rectangle +(3,1.8);}
-\draw[fill=action!15,draw=action] (.6,.65) rectangle (1.6,1.3);
-\draw[fill=action!15,draw=action] (5.95,.75) rectangle (6.95,1.4);
-\foreach \x/\y in {.6/.65,.6/1.3,1.6/1.3} {
-\fill[consequence] (\x,\y) circle (.055);
-\draw[consequence,line width=1pt,->] (\x+4.6,\y) -- +(0.75,.10);
-}
-\draw[stone,dashed] (6.2,.65) -- (6.95,.75);
-\draw[consequence,fill=white] (6.95,.75) circle (.06);
-\draw[->,line width=.8pt] (3.2,.9) -- (4.4,.9);
-\draw[->,line width=.8pt] (7.8,.9) -- (8.65,.9);
-\node[draw=consequence,fill=consequence!8,rounded corners=2pt,text width=4.5cm,align=center,minimum height=1.4cm] at (11.2,.9) {Image-space displacement\\+ observability\\\footnotesize valid-coordinate masks};
-\node[font=\footnotesize,text=black!60] at (6.5,-.45) {Schematic: filled points are visible; the open point illustrates an occluded track.};
-\end{tikzpicture}
-\caption{\textbf{What consequence supervision represents.} Motion is expressed relative to an anchor in the current image. Visibility is predicted separately from displacement validity, so an occluded point supplies a visibility target while its displacement is masked. The active human adapter obtains tracks by projecting supplied hand poses; robot annotations can combine actuator tracks and scene queries. This is an explanatory drawing, not a model prediction.}
+\includegraphics[width=\linewidth]{Figures/consequence_interface.pdf}
+\caption{\textbf{What consequence supervision represents.}
+(a) Tracks connect current anchors to future image positions. Robot labels can combine actuator
+and scene tracks; the active human adapter projects supplied hand poses.
+(b) The target contains gain-scaled displacement $d$ and observability.
+(c) Binary visibility examples distinguish visible points, occluded points, and missing slots.
+An occluded point retains visibility supervision; its stored zero displacement is masked.
+A missing slot is fully masked. Consequence tokens enter JAM's joint flow objective, with mask $M$
+selecting supervised coordinates. The interaction and mask cases are explanatory schematics.}
 \label{fig:consequence}
 \end{figure}

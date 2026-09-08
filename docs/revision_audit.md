@@ -30,6 +30,14 @@ At update 8,400, the mixture, displacement mask, missing-modality inputs, and ru
 
 ## Layout and validation
 
-Experimental setup remains two paragraphs. All main benchmark tables precede the Joint optimization subsection. Main text is 10 pages, with references and appendix separate. Tables use full-width composition, hierarchical rules, short labels, and pale-blue JAM rows. Scientific plots retain embedded DejaVu Serif vector fonts.
+Experimental setup remains two paragraphs. All main benchmark tables precede the Joint optimization subsection. The Figure 3 revision brings the main text to 11 pages, with references and appendix separate. Tables use full-width composition, hierarchical rules, short labels, and pale-blue JAM rows. Numerical plots retain embedded DejaVu Serif vector fonts.
 
 Validation checks source hashes, copied cells, PRO aggregation, current mixture probabilities, measured records, references, citations, target markers, and the main-page limit. Final PDF pages are rasterized and reviewed for overlaps and clipping. No source-project code or training jobs are changed.
+
+## Consequence-supervision figure revision
+
+Figure 3 now follows the drawing requirements in the user's reference task, `01a07e80-5bdf-71f3-b277-99058429ac35`: white background, Toppan Bunkyu Mincho text, restrained blue-gray and teal fills, gray local arrows, and dark-red main flow arrows. The gripper-track schematic comes unchanged from slide 1 of the supplied version-9 framework deck. It is an illustration, not an observation or a model prediction.
+
+The diagram separates tracked image motion, anchor-relative displacement, target encoding, and masked joint training. Its binary examples give masks (1,1,1) for a valid visible point, (0,0,1) for an occluded point with a valid anchor, and (0,0,0) for an absent slot. Gray target zeros are stored values excluded from supervision. A separate mask arrow enters the joint loss. Human labels are described as projected supplied hand poses, matching the active adapter; the drawing makes no claim of measured cross-embodiment invariance.
+
+`scripts/build_consequence_figure.py` checks text bounds and text intersections, then exports the PDF, PNG, live-text SVG, and outlined SVG. The smallest text is 8.12 pt at the manuscript's 6.5-inch width. The PDF embeds vector glyph outlines for the CFF/OpenType font. Experimental page breaks become float barriers so the expanded figure does not leave an isolated adaptation paragraph on an otherwise empty page. Experimental content, ordering, and values are preserved.
