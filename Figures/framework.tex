@@ -1,50 +1,13 @@
 \begin{figure}[t]
 \centering
-\resizebox{\linewidth}{!}{%
-\begin{tikzpicture}[x=1cm,y=1cm,font=\small,
- box/.style={draw=stone,rounded corners=2pt,align=center,line width=.6pt,inner sep=5pt},
- flow/.style={-{Latex[length=2mm]},line width=.8pt,draw=black!65},
- exchange/.style={<->,>=Latex,line width=1.2pt,draw=world!60!black}]
-\node[font=\bfseries] at (1.4,6.1) {Demonstrations};
-\node[font=\bfseries] at (8.7,6.1) {Joint Action--World Modeling};
-\node[box,fill=stone!9,minimum width=8.3cm] (cond) at (8.7,5.45) {Conditions: current observation, instruction, state};
-\node[box,fill=stone!10,text width=2.2cm] (robot) at (1.4,4.7) {Robot video\\+ actions};
-\node[box,fill=stone!10,text width=2.2cm] (human) at (1.4,3.25) {Human video\\+ tracked motion};
-\node[box,fill=stone!6,text width=2.2cm,font=\footnotesize] (prep) at (1.4,1.65) {Encode video\\Map targets\\Apply masks};
-\draw[flow] (robot.west) -- (-.05,4.7) -- (-.05,1.65) -- (prep.west);
-\draw[flow] (human.south) -- (prep.north);
-\node[box,fill=world!10,draw=world,minimum width=2.9cm,minimum height=2.7cm] (w) at (5.3,3.15) {};
-\node[box,fill=action!10,draw=action,minimum width=3.4cm,minimum height=2.7cm] (a) at (11.3,3.15) {};
-\node[font=\bfseries] at (5.3,4.18) {World stream};
-\node[font=\bfseries] at (11.3,4.18) {Agent stream};
-\node at (5.3,3.68) {$z_{\tau_w}$};
-\node at (11.3,3.68) {state\quad $a_{\tau_a}$\quad $c_{\tau_c}$};
-\node[font=\footnotesize,align=center] at (8.3,4.16) {Shared attention\\at every layer};
-\foreach \y in {2.35,2.75,3.15} {
- \draw[fill=world!20,draw=world] (4.25,\y) rectangle (6.35,\y+.17);
- \draw[fill=action!22,draw=action] (10.0,\y) rectangle (11.18,\y+.17);
- \draw[fill=consequence!22,draw=consequence] (11.3,\y) rectangle (12.6,\y+.17);
- \draw[exchange] (6.88,\y+.08) -- (9.45,\y+.08);
-}
-\node[font=\footnotesize,align=center,text width=2.2cm] at (8.2,2.02) {Keys / values\\+ gradients};
-\draw[flow] (5.3,5.15) -- (w.north);
-\draw[flow] (11.3,5.15) -- (a.north);
-\node[font=\footnotesize,fill=white] at (5.3,4.78) {$\tau_w$};
-\node[font=\footnotesize,fill=white] at (11.3,4.78) {$\tau_a,\tau_c$};
-\node[font=\footnotesize,text=black!60] at (8.3,4.83) {Independent corruption};
-\draw[flow] (prep.east) -- (3.3,1.65) -- (3.3,3.15) -- (w.west);
-\draw[flow] (3.3,1.65) -- (3.3,1.4) -- (13.5,1.4) -- (13.5,3.15) -- (a.east);
-\node[box,fill=world!10,draw=world,minimum width=2.9cm] (vw) at (5.3,.73) {$v^w$\quad Future world};
-\node[box,fill=action!10,draw=action,minimum width=2.0cm] (va) at (10.05,.73) {$v^a$\quad Actions};
-\node[box,fill=consequence!10,draw=consequence,minimum width=2.35cm] (vc) at (12.7,.73) {$v^c$\quad Consequences};
-\draw[flow,draw=world] (w.south) -- (vw.north);
-\draw[flow,draw=action] (10.05,1.8) -- (va.north);
-\draw[flow,draw=consequence] (12.7,1.8) -- (vc.north);
-\node[box,fill=stone!8,minimum width=10.1cm] (loss) at (8.7,-.35) {Joint rectified-flow matching\quad $\mathcal{L}_w+\mathcal{L}_a+\mathcal{L}_c$\quad (valid labels)};
-\draw[flow,draw=world] (vw.south) -- (5.3,-.1);
-\draw[flow,draw=action] (va.south) -- (10.05,-.1);
-\draw[flow,draw=consequence] (vc.south) -- (12.7,-.1);
-\end{tikzpicture}}
-\caption{\textbf{How action learning enters world pretraining.} Source adapters encode video and map available commands or tracked motion into masked targets. Independently corrupted future latents, actions, and consequences enter coupled world and agent streams. Attention exchanges carry information and gradients throughout the model. Separate velocity readouts receive their corresponding masked targets within the joint loss. World and agent streams share clean observation and language conditions; the state enters through the agent.}
+\includegraphics[width=\linewidth]{Figures/framework_v11.pdf}
+\caption{\textbf{How action learning enters world pretraining.}
+Source masks select available video, action, and consequence targets. Encoded future observations
+and projected action and consequence tokens receive independent corruption. Shared attention
+carries information and reciprocal gradients through the coupled streams, while the current
+observation remains a clean prefix. Masked velocity matching trains their readouts; joint Euler
+integration produces future video, an action chunk, and visual consequences.
+VAE denotes variational autoencoder, AdaLN adaptive layer normalization, FFN feed-forward network,
+and MSE mean squared error. Interaction images are schematic.}
 \label{fig:framework}
 \end{figure}

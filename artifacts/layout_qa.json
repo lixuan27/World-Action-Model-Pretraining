@@ -1,6 +1,6 @@
 {
   "artifact": "paper/JAM.pdf",
-  "sha256": "cd246d6f2735eef775d007abd441e580e4251c740b5531f1e5a7e61dfe5617fd",
+  "sha256": "dcb2598e38e31b55efad7017b74ea1ce0f5b1fb67c41bb604e8c71ffbb2386e6",
   "main_pages": 11,
   "total_pages": 17,
   "setup_paragraphs": 2,
@@ -8,7 +8,7 @@
   "main_benchmarks": 7,
   "appendix_benchmark_tables": 1,
   "scientific_plot_font": "DejaVu Serif, embedded",
-  "visual_review": "Updated Figure 3 and surrounding method pages rasterized and inspected; experimental pages reflowed and visually reviewed. No text overlap or clipping. All main results precede the training-dynamics figure.",
+  "visual_review": "Figure 2 replaced from the supplied version-11 PowerPoint. Standalone export, manuscript page 3 and surrounding pages rasterized and inspected; no clipping, missing labels, or text overlap. Main text remains 11 pages; Figure 3 remains on page 5.",
   "source_audit": {
     "export_rows": 113,
     "displayed_export_baselines": 85,
@@ -18,5 +18,6 @@
     "reported_pro_totals": 6
   },
   "build_log": "No undefined references/citations, missing glyphs, or overfull boxes",
-  "consequence_figure_font": "Toppan Bunkyu Mincho, embedded vector outlines; STIX serif math"
+  "consequence_figure_font": "Toppan Bunkyu Mincho, embedded vector outlines; STIX serif math",
+  "framework_figure_font": "Toppan Bunkyu Mincho, embedded; native PowerPoint vector export with Unicode mappings"
 }

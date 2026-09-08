@@ -21,7 +21,9 @@ tectonic -X compile main.tex --keep-logs --keep-intermediates
 python3 scripts/validate.py --verify-external
 ```
 
-The first Tectonic build downloads standard TeX packages. The teaser and framework use editable TikZ. Three numerical figures are generated with Matplotlib in DejaVu Serif. Figure 3 uses Toppan Bunkyu Mincho, with STIX serif mathematical glyphs, and provides a PDF, PNG, editable SVG, and portable outlined SVG. Paper builds launch no training.
+The first Tectonic build downloads standard TeX packages. The teaser uses editable TikZ. Figure 2 uses the supplied version-11 PowerPoint framework, exported as a vector PDF with embedded Toppan Bunkyu Mincho. Three numerical figures are generated with Matplotlib in DejaVu Serif. Figure 3 uses Toppan Bunkyu Mincho, with STIX serif mathematical glyphs, and provides a PDF, PNG, editable SVG, and portable outlined SVG. Paper builds launch no training.
+
+Figure 2's editable source is `Figures/source/JAM-framework-v11.pptx`, copied byte-for-byte from the supplied desktop presentation. Export that slide from PowerPoint as PDF, then run `python3 scripts/normalize_framework_pdf.py native-export.pdf Figures/framework_v11.pdf --font /path/to/ToppanBunkyuMinchoPr6N-Regular.otf --pptx Figures/source/JAM-framework-v11.pptx`. This adds Unicode mappings for the embedded CID fonts, preserving the slide's drawing streams and avoiding a dependency on external Japanese font maps. The supplied layout, illustrations, formulas, and typography are retained. `artifacts/framework_v11_qa.json` records the source and export hashes.
 
 To regenerate Figure 3, run `python3 scripts/build_consequence_figure.py` on a Mac with Toppan Bunkyu Mincho installed. Elsewhere, set `JAM_FIGURE_FONT` to the font's `ToppanBunkyuMinchoPr6N-Regular.otf` file. The committed PDF compiles on any supported LaTeX installation without the local font. The SVG with live text preserves editability; the outlined SVG preserves appearance without requiring font installation.
 
