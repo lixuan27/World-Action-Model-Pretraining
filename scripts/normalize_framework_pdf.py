@@ -43,8 +43,13 @@ for page in writer.pages:
     for ref in page['/Resources'].get('/Font',{}).values():
         parent=ref.get_object()
         if '/ToUnicode' in parent:continue
-        if 'ToppanBunkyuMincho' not in str(parent.get('/BaseFont','')):continue
+        if 'ToppanBunkyu' not in str(parent.get('/BaseFont','')):continue
         child=parent['/DescendantFonts'][0].get_object()
+        # Both supplied Toppan faces use the registered Adobe-Japan1 CID set.
+        # The Unicode meaning of a CID is shared across these font families.
+        info=child.get('/CIDSystemInfo',{})
+        if str(info.get('/Registry'))!='Adobe' or str(info.get('/Ordering'))!='Japan1':
+            raise ValueError('Unexpected CID character collection')
         stream=child['/FontDescriptor']['/FontFile3'].get_object()
         if stream['/Subtype']!='/CIDFontType0C':raise ValueError('Unexpected embedded font type')
         cff=CFFFontSet();cff.decompile(BytesIO(stream.get_data()),None)
@@ -68,5 +73,5 @@ result=PdfReader(a.output)
 assert len(result.pages)==len(reader.pages)
 for x,y in zip(reader.pages,result.pages):
     assert x.get_contents().get_data()==y.get_contents().get_data(), 'Slide drawing content changed'
-assert 'JAM: Joint Action' in result.pages[0].extract_text()
+assert 'Coupledtransformerlayers' in ''.join(result.pages[0].extract_text().split())
 print(f'Added {count} Unicode maps; drawing streams unchanged.')

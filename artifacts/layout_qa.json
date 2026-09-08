@@ -1,6 +1,6 @@
 {
   "artifact": "paper/JAM.pdf",
-  "sha256": "dcb2598e38e31b55efad7017b74ea1ce0f5b1fb67c41bb604e8c71ffbb2386e6",
+  "sha256": "b16ff24874a590b692b7c6d59f6561a17a1508e4d97537265e5ed19f32f64c54",
   "main_pages": 11,
   "total_pages": 17,
   "setup_paragraphs": 2,
@@ -8,7 +8,7 @@
   "main_benchmarks": 7,
   "appendix_benchmark_tables": 1,
   "scientific_plot_font": "DejaVu Serif, embedded",
-  "visual_review": "Figure 2 replaced from the supplied version-11 PowerPoint. Standalone export, manuscript page 3 and surrounding pages rasterized and inspected; no clipping, missing labels, or text overlap. Main text remains 11 pages; Figure 3 remains on page 5.",
+  "visual_review": "Figure 2 refreshed from the latest Desktop/JAM-Figures/Framework file. Native export and manuscript page 3 inspected; all updated labels and artwork retained. No missing text or clipping. Main text remains 11 pages.",
   "source_audit": {
     "export_rows": 113,
     "displayed_export_baselines": 85,
@@ -19,5 +19,5 @@
   },
   "build_log": "No undefined references/citations, missing glyphs, or overfull boxes",
   "consequence_figure_font": "Toppan Bunkyu Mincho, embedded vector outlines; STIX serif math",
-  "framework_figure_font": "Toppan Bunkyu Mincho, embedded; native PowerPoint vector export with Unicode mappings"
+  "framework_figure_font": "Supplied Toppan Mincho and Gothic faces, embedded; native PowerPoint export with Unicode mappings"
 }

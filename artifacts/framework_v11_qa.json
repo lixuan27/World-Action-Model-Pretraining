@@ -2,20 +2,24 @@
   "figure": 2,
   "manuscript_page": 3,
   "source": "Figures/source/JAM-framework-v11.pptx",
-  "source_sha256": "2146f33544a73356ac1e892e69c12bab0c70c8c64d39f7b8c01d2675bab855b0",
+  "source_sha256": "ebaed152c82ceb37e3f1b1437d923febd9aee88168a3ca20fa25322bbde26b28",
   "supplied_source_identical": true,
   "slide_count": 1,
   "pdf": "Figures/framework_v11.pdf",
-  "pdf_sha256": "7b588d68fbea02c9c4349b79b281dbbe14a7b092e288d5a47d0b508ade411a6a",
+  "pdf_sha256": "8913d5aaae34276cbc56ddda8eeb2028095424f9b3089afa3a49283c0a67a023",
   "dimensions_pt": [
     0.0,
     0.0,
     1248.0,
     510.0
   ],
-  "font": "Embedded Toppan Bunkyu Mincho",
+  "font": "Embedded Toppan Bunkyu Mincho and supplied Toppan Gothic heading",
   "export": "Microsoft PowerPoint native PDF; vector shapes and mathematical artwork retained",
   "normalization": "ToUnicode maps only; native page drawing streams verified byte-identical",
-  "source_text_labels_verified": 60,
-  "visual_review": "Standalone PDF and manuscript page 3 inspected; no missing labels, clipping, or text overlap"
+  "source_text_labels_verified": 58,
+  "visual_review": "Latest supplied layout and bottom title verified in native export and manuscript page 3. No missing labels, clipping, or overlap introduced by export.",
+  "supplied_source_path": "/Users/lixuan/Desktop/JAM-Figures/Framework/JAM-framework-joint-flow-v11.pptx",
+  "artwork_labels_visually_verified": [
+    "JAM: Joint Action–World Modeling"
+  ]
 }
