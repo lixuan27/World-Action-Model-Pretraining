@@ -1,0 +1,18 @@
+{
+  "artifact": "paper/JAM.pdf",
+  "sha256": "35f1e5788cf5cc3242e556a06acc6163f5b5a8cdd1a41a86fd03f6b40bc095d1",
+  "main_pages": 12,
+  "total_pages": 18,
+  "setup_paragraphs": 2,
+  "main_benchmark_tables": 6,
+  "appendix_benchmark_tables": 1,
+  "scientific_plot_font": "DejaVu Serif, embedded",
+  "visual_review": "Rasterized main text and appendix inspected; no plot or table text overlap, clipping, or unfilled numerical source cells",
+  "source_audit": {
+    "export_rows": 113,
+    "displayed_export_baselines": 76,
+    "displayed_export_cells": 602,
+    "official_pro_baselines": 6
+  },
+  "build_log": "No undefined references/citations, missing glyphs, or overfull boxes"
+}

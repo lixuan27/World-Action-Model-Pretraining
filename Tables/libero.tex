@@ -1,0 +1,36 @@
+\begin{table}[H]
+\centering
+\begingroup\fontsize{9.2}{10.5}\selectfont
+\setlength{\tabcolsep}{2.5pt}\renewcommand{\arraystretch}{1.08}
+\begin{tabularx}{\linewidth}{@{}p{1.43in}CCCCC@{}}
+\toprule
+\panelrow{6}{LIBERO}
+Model & Spatial & Object & Goal & Long & Mean \\
+\midrule
+OpenVLA & 84.7 & 88.4 & 79.2 & 53.7 & 76.5 \\
+$\pi_0$ & 98.0 & 96.8 & 94.4 & 88.4 & 94.4 \\
+StarVLA & 97.8 & 98.6 & 96.2 & 93.8 & 96.6 \\
+$\pi_{0.5}$ & 98.8 & 98.2 & 98.0 & 92.4 & 96.9 \\
+GR00T-N1.6 & 97.7 & 98.5 & 97.5 & 94.4 & 97.0 \\
+OpenVLA-OFT & 97.6 & 98.4 & 97.9 & 94.5 & 97.1 \\
+X-VLA & 98.2 & 98.6 & 97.8 & 97.6 & 98.1 \\
+ABot-M0 & 98.8 & 99.8 & 99.0 & 96.6 & 98.6 \\
+Being-H0.5 & 99.2 & 99.6 & 99.4 & 97.4 & 98.9 \\
+Qwen-RobotManip & \nr & \nr & \nr & \nr & 99.2 \\
+\midrule
+Fast-WAM & 98.2 & \textbf{100.0} & 97.0 & 95.2 & 97.6 \\
+Motus & 96.8 & 99.8 & 96.6 & 97.6 & 97.7 \\
+ImageWAM & 97.2 & 99.2 & 98.8 & 98.4 & 98.4 \\
+LingBot-VA & 98.5 & 99.6 & 97.2 & \textbf{98.5} & 98.5 \\
+DiT4DiT & \nr & \nr & \nr & \nr & 98.6 \\
+Being-H0.7 & \nr & \nr & \nr & \nr & 99.2 \\
+ABot-M0.5 & \textbf{100.0} & 99.8 & 99.4 & 98.4 & \textbf{99.4} \\
+R1 & 99.6 & 99.6 & \textbf{99.8} & 98.2 & 99.3 \\
+\midrule
+\jamshade\textbf{JAM} & \multicolumn{5}{c}{\pendingresult} \\
+\bottomrule
+\end{tabularx}
+\endgroup
+\caption{\textbf{LIBERO task success.} The four suites measure spatial, object, goal, and long-horizon control. Source: \refsource{}. \benchmarknote}
+\label{tab:libero}
+\end{table}

@@ -1,0 +1,32 @@
+[
+  {
+    "figure": "data_mixture",
+    "font": "DejaVu Serif",
+    "format": "vector PDF",
+    "text_bounds": "PASS"
+  },
+  {
+    "figure": "training",
+    "font": "DejaVu Serif",
+    "format": "vector PDF",
+    "text_bounds": "PASS"
+  },
+  {
+    "figure": "foundation",
+    "font": "DejaVu Serif",
+    "format": "vector PDF",
+    "text_bounds": "PASS"
+  },
+  {
+    "figure": "representation",
+    "font": "DejaVu Serif",
+    "format": "vector PDF",
+    "text_bounds": "PASS"
+  },
+  {
+    "figure": "scaling_targets",
+    "font": "DejaVu Serif",
+    "format": "vector PDF",
+    "text_bounds": "PASS"
+  }
+]

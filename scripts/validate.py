@@ -2,6 +2,8 @@
 """Evidence and manuscript checks. Run after build_artifacts.py and compilation."""
 from pathlib import Path
 import json,re,hashlib,statistics,sys
+from decimal import Decimal
+from html.parser import HTMLParser
 from pypdf import PdfReader
 P=Path(__file__).resolve().parents[1]
 errors=[]
@@ -24,15 +26,21 @@ for name,want in [('1_Introduction.tex',(4,5)),('2_RelatedWork.tex',(3,3))]:
  if name.startswith('1_'):check(not re.search(r'\d|\$|\\begin\{(?:equation|table)\}',re.sub(r'\\cite\w*\{[^}]*\}','',s)), 'Intro contains a number or math')
 s=(P/'Sections/5_Experiments.tex').read_text()
 check('$' not in s and not re.search(r'\\begin\{(?:equation|align)',s),'Experiments contains formulas')
-setup=s.split(r'\subsection{Experimental setup}',1)[1].split(r'\subsection{',1)[0].strip()
+setup=s.split(r'\subsection{Experimental setup}',1)[1].split(r'\begin{figure}',1)[0].strip()
 setup_paragraphs=[p for p in re.split(r'\n\s*\n',setup) if p.strip()]
 check(len(setup_paragraphs)==2, 'Experimental setup must have exactly two paragraphs')
 check(not (P/'Tables/data.tex').exists() and 'tab:data}' not in text, 'Old dataset inventory table remains')
-for name in ['main_results','robustness','joint_analysis','data_scaling']:
+benchmarks=['libero_plus','libero_pro','vlabench','robotwin','robocasa_365','robodojo']
+for name in benchmarks+['libero','joint_analysis','data_scaling']:
  table=(P/'Tables'/f'{name}.tex').read_text()
- check(r'\begin{tabularx}{\linewidth}' in table, 'Table must fill text width: '+name)
- check(r'\jamshade' in table and r'\panelrow' in table, 'Table lacks row highlighting or hierarchy: '+name)
- check(not re.search(r'&\s*(?:&|\\\\)',table), 'Empty table cell: '+name)
+ check(r'\begin{tabularx}{\linewidth}' in table,'Table must fill text width: '+name)
+ check(r'\jamshade' in table and r'\panelrow' in table,'Table lacks JAM highlighting or hierarchy: '+name)
+ if name in benchmarks+['libero']:
+  check(table.count(r'\jamshade')==1,'Benchmark requires one JAM row: '+name)
+  check(r'\pendingresult' in table and r'\target{' not in table,'Benchmark JAM row must await a measured artifact: '+name)
+for name in benchmarks:check(s.count(r'\input{Tables/'+name+'}')==1,'Missing or repeated main benchmark: '+name)
+check('JAM direct' not in text,'Ambiguous direct label remains')
+check('Without embodied pretraining' in (P/'Tables/joint_analysis.tex').read_text(),'Initialization control missing')
 # URLs retain exact provenance. Naming rules apply to displayed prose.
 prose=re.sub(r'https?://[^}\s]+','',text)
 prose=re.sub(r'%[^\n]*','',prose)
@@ -49,28 +57,74 @@ check(len(d)==summary['n_log_points'] and d[-1]['step']==summary['steps'],'Train
 for k in ['world','action','consequence','total']:
  key='loss/'+k;mean=statistics.mean(r[key] for r in d[-max(1,len(d)//10):]);check(abs(mean-summary[key]['final_mean_last10pct'])<1e-7,'Summary mean mismatch '+key)
 plan=json.load(open(P/'experiments/layout_targets.json'));check(plan['status']=='planned','Layout target status changed')
-for name in ['main_results','robustness','joint_analysis','data_scaling']:
+for name in ['joint_analysis','data_scaling']:
  s=(P/'Tables'/f'{name}.tex').read_text();check('PLANNED-VALUE' in s and '\\targetnote' in s and '\\target{' in s,'Unmarked targets '+name)
-# The independent source export can be verified on demand, or against a supplied archive.
+
+# Verify source rows and each rendered cell from the pinned archive every run.
+external=json.load(open(P/'artifacts/external_baselines.json'))
+raw=(P/'artifacts/source_reports/benchmark_export.json').read_bytes();source=json.loads(raw)
+check(hashlib.sha256(raw).hexdigest()==external['source_sha256'],'External archive hash mismatch')
 external_count=0
-verify_external='--verify-external' in sys.argv or '--external-source' in sys.argv
+for row in external['rows']:
+ node=source
+ for key in row['source_pointer'].split('/')[1:]:node=node[int(key)] if isinstance(node,list) else node[key]
+ check([c['text'] for c in node['cells']]==[c['text'] for c in row['cells']],'External row mismatch: '+row['source_pointer'])
+ check(node['model']==row['original_model'],'Original baseline label mismatch')
+ external_count+=1
+st={x['id']:x for x in source['simulation']};seen=set();cell_count=0
+for row in json.load(open(P/'artifacts/rendered_baseline_cells.json')):
+ original=next(r for g in st[row['table']]['groups'] for r in g['rows'] if r['model']==row['model'])
+ check(row['source_cells']==[original['cells'][i]['text'] for i in row['indices']],'Rendered-cell audit mismatch')
+ seen.add((row['table'],row['model']));cell_count+=len(row['indices'])
+# All source baselines in all six selected export benchmarks must be shown.
+expected={(key,r['model']) for key in ['libero','libero_plus','vlabench','robotwin','robocasa_365','robodojo'] for g in st[key]['groups'] for r in g['rows']}
+check(seen==expected,'Missing benchmark baseline rows')
+pro=json.load(open(P/'artifacts/external_libero_pro.json'))
+excerpt=(P/pro['local_source']).read_bytes()
+check(hashlib.sha256(excerpt).hexdigest()==pro['excerpt_sha256'],'PRO source excerpt hash mismatch')
+class Rows(HTMLParser):
+ def __init__(self):super().__init__();self.rows=[];self.row=[];self.cell=None
+ def handle_starttag(self,tag,attrs):
+  if tag=='tr':self.row=[]
+  if tag in ['td','th']:self.cell=''
+ def handle_data(self,data):
+  if self.cell is not None:self.cell+=data
+ def handle_endtag(self,tag):
+  if tag in ['td','th'] and self.cell is not None:self.row.append(self.cell.strip());self.cell=None
+  if tag=='tr':self.rows.append(self.row)
+parsed=Rows();parsed.feed(excerpt.decode())
+for row in pro['rows']:
+ orig=next(r for r in parsed.rows if r and r[0]==row['model'])
+ check(orig[1:]==row['source_cells'],'PRO source cells mismatch: '+row['model'])
+ check(len(row['percent_cells'])==21,'PRO result shape')
+ for src,pct in zip(row['source_cells'],row['percent_cells']):
+  check((pct is None and src=='-') or (pct is not None and Decimal(pct)==Decimal(src)*100),'PRO percentage conversion')
+
+inv=json.load(open(P/'artifacts/data_inventory.json'));counts=inv['source_counts'];den=sum(n**inv['temperature'] for n in counts.values())
+check(len(counts)==5 and inv['active_from_update']==8400,'Consumed-mixture stage changed')
+for k,n in counts.items():check(abs(inv['probabilities'][k]-n**inv['temperature']/den)<1e-12,'Mixture probability '+k)
+check(inv['temporal_audit']['egodex_train_hz']==10,'EgoDex training timing')
+foundation=[json.loads(x) for x in (P/'artifacts/measurements/jam_base_v1.jsonl').read_text().splitlines()]
+check(foundation[-1]['step']==8600,'Foundation snapshot mismatch')
+check('8,600' in (P/'Tables/evidence_macros.tex').read_text(),'Foundation macro mismatch')
+for n in ['droid','egodex']:
+ d=json.load(open(P/f'artifacts/measurements/analysis/base_v1_m5100/probes_{n}.json'))
+ check(d['config']['s_world']==.5 and d['config']['s_action']==1,'Probe visibility differs from caption')
+ check(d['config']['n_boot']==1000 and d['config']['max_windows']==4000,'Probe sampling differs from caption')
+ check(set(d['layers'])=={'5','10','15','20','25','29'},'Probe layer sweep differs')
+cf=json.load(open(P/'artifacts/measurements/analysis/base_v1_m5100/counterfactual_libero.json'))
+for key in ['donor','hold','shuffled_time']:
+ lo,hi=cf['conditions'][key]['sensitivity_vs_true']['ci'];check(lo<=0<=hi,'Sensitivity statement must be reviewed')
+check(cf['n_windows']==300,'Sensitivity sample count')
+qa=json.load(open(P/'artifacts/figure_qa.json'))
+check(len(qa)==5 and all(x['font']=='DejaVu Serif' and x['text_bounds']=='PASS' for x in qa),'Figure typography or bounds audit')
+verify_external='--verify-external' in sys.argv
 if verify_external:
  try:
-  manifests=[json.load(open(P/'artifacts'/name)) for name in ['external_reference.json','external_baselines.json']]
-  if '--external-source' in sys.argv:
-   raw=Path(sys.argv[sys.argv.index('--external-source')+1]).read_bytes()
-  else:
-   import urllib.request
-   with urllib.request.urlopen(manifests[0]['source_url'],timeout=30) as response:raw=response.read()
-  source=json.loads(raw)
-  for manifest in manifests:
-   check(hashlib.sha256(raw).hexdigest()==manifest['source_sha256'],'External export hash mismatch')
-   for row in manifest['rows']:
-    node=source
-    for key in row['source_pointer'].split('/')[1:]:node=node[int(key)] if isinstance(node,list) else node[key]
-    check([c['text'] for c in node['cells']]==[c['text'] for c in row['cells']], 'External row values differ: '+row['source_pointer'])
-    if row['model']!='R1':check(node['model']==row['model'],'External baseline name mismatch')
-    external_count+=1
+  import urllib.request
+  for manifest in [external,pro]:
+   with urllib.request.urlopen(manifest['source_url'],timeout=30) as response:remote=response.read()
+   check(hashlib.sha256(remote).hexdigest()==manifest['source_sha256'],'Remote source hash differs: '+manifest['source_url'])
  except Exception as exc:check(False,'External verification failed: '+str(exc))
 aux=(P/'main.aux').read_text() if (P/'main.aux').exists() else ''
 end=re.search(r'\\newlabel\{page:mainend\}\{\{[^}]*\}\{(\d+)\}',aux)
@@ -91,4 +145,5 @@ if errors:
  print('\n'.join('FAIL: '+e for e in errors));sys.exit(1)
 print(f'PASS: {main_pages} main pages (maximum 12); {len(setup_paragraphs)} setup paragraphs; {len(sections)} main sections; {len(labels)} unique labels; {len(cites)} verified citation keys; evidence hashes, summary means, and target markers valid.')
 
-if verify_external:print(f'PASS: {external_count} external rows match the immutable source export.')
+print(f'PASS: {external_count} archived export rows; {len(seen)} displayed export baselines; {cell_count} source cells; six official PRO rows; five-source mixture and measured probe settings verified.')
+if verify_external:print('PASS: both external source hashes reverified online.')

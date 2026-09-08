@@ -1,5 +1,5 @@
 {
-  "snapshot": "2026-09-07",
+  "snapshot": "2026-09-08",
   "source_project": "/public/home/lixuan/lixuan/JAM",
   "experiments": [
     {
@@ -36,10 +36,14 @@
       "question": "What is learned as embodied pretraining proceeds?",
       "status": "running",
       "source_configs": [
-        "configs/experiments/jam_base_v1.yaml"
+        "configs/experiments/jam_base_v1.yaml",
+        "configs/experiments/jam_base_v1_s2b_ready.yaml"
       ],
       "published_artifacts": [
-        "artifacts/measurements/jam_base_v1.jsonl"
+        "artifacts/measurements/jam_base_v1.jsonl",
+        "artifacts/configs/jam_base_v1_s2b.json",
+        "artifacts/data_inventory.json",
+        "artifacts/measurements/foundation_s2b_startup.txt"
       ],
       "pending_requirements": [
         "Complete foundation training; archive each recipe segment and milestone hash."
@@ -340,18 +344,31 @@
     {
       "id": "mechanism",
       "question": "Does the world representation encode actions and their visible consequences?",
-      "status": "planned",
+      "status": "measured_diagnostics_with_planned_controls",
       "source_configs": [
         "configs/experiments/e2_libero_w2a_detach.yaml",
         "configs/experiments/e2_libero_bi.yaml"
       ],
-      "published_artifacts": [],
+      "published_artifacts": [
+        "artifacts/measurements/analysis/summary_probes_m5100.json",
+        "artifacts/measurements/analysis/base_v1_m5100/probes_droid.json",
+        "artifacts/measurements/analysis/base_v1_m5100/counterfactual_libero.json",
+        "artifacts/measurements/analysis/base_v1_m5100/probes_libero.json",
+        "artifacts/measurements/analysis/base_v1_m5100/probes_egodex.json",
+        "artifacts/measurements/analysis/base_v1_m5100/probes_bridge.json",
+        "artifacts/measurements/analysis/floors/probes_droid_bare_prior.json",
+        "artifacts/measurements/analysis/floors/probes_libero_bare_prior.json",
+        "artifacts/measurements/analysis/floors/probes_egodex_bare_prior.json",
+        "artifacts/measurements/analysis/floors/probes_egodex_random_init.json",
+        "artifacts/measurements/analysis/floors/probes_libero_random_init.json",
+        "artifacts/measurements/analysis/floors/probes_droid_random_init.json"
+      ],
       "pending_requirements": [
-        "Frozen world probes with no clean action/consequence leakage",
-        "Matched simulator states and alternative-action ground truths",
-        "Conditioning study distinguishes observed and predicted consequences",
-        "Action-clamped sampler must independently integrate unobserved consequences",
-        "Document tracker/projection confidence and outlier-mask revision"
+        "Matched coupling controls with equal static conditioning",
+        "Episode-disjoint probe fitting and observation-only control",
+        "Executed alternative-action futures for causal prediction",
+        "Conditional-sampler fidelity after independent consequence schedule correction",
+        "Observed versus predicted consequence conditioning comparison"
       ],
       "paper_reproduction_command": "python3 scripts/build_artifacts.py",
       "launch_status": "reference_only; cluster launch parameters belong to source project and require its current resource policy",
@@ -374,7 +391,14 @@
           "configs/base.yaml",
           "configs/experiments/e2_libero_bi.yaml"
         ]
+      ],
+      "measurement_limits": [
+        "4000 heldout-corpus windows split internally by window, not episode",
+        "World corruption 0.5 exposes partially noised future observations",
+        "Ridge regularization selected on training validation split; report all layers",
+        "Input sensitivity is not counterfactual prediction; all non-oracle paired intervals include zero"
       ]
     }
-  ]
+  ],
+  "foundation_cutoff": 8600
 }

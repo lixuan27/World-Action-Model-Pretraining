@@ -1,0 +1,70 @@
+{
+ "n_windows": 300,
+ "conditions": {
+  "true": {
+   "ade_vs_true_consequence": 0.16741718395021765
+  },
+  "donor": {
+   "ade_vs_true_consequence": 0.1679438332585314,
+   "sensitivity_vs_true": {
+    "delta": 0.0005266493083137536,
+    "ci": [
+     -0.0007261306177305706,
+     0.0018110285156493877
+    ]
+   },
+   "ade_vs_donor_consequence": 0.15677688203005846
+  },
+  "hold": {
+   "ade_vs_true_consequence": 0.16738153097892572,
+   "sensitivity_vs_true": {
+    "delta": -3.56529712919329e-05,
+    "ci": [
+     -0.00123378500957569,
+     0.001059184617467549
+    ]
+   }
+  },
+  "shuffled_time": {
+   "ade_vs_true_consequence": 0.16704104355160937,
+   "sensitivity_vs_true": {
+    "delta": -0.0003761403986082823,
+    "ci": [
+     -0.0017066067138171844,
+     0.0009599383593742252
+    ]
+   }
+  },
+  "oracle_video": {
+   "ade_vs_true_consequence": 0.033630312913313816,
+   "sensitivity_vs_true": {
+    "delta": -0.13378687103690384,
+    "ci": [
+     -0.14336402769421755,
+     -0.12410552262597892
+    ]
+   }
+  }
+ },
+ "donor_vs_true_consequence_gap": 0.23227706001564882,
+ "checkpoint": "runs/jam_base_v1/checkpoints/release/keep_step_0005100",
+ "source": "libero",
+ "split": "holdout",
+ "steps": 10,
+ "seed": 0,
+ "slots": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6
+ ],
+ "label_steps": [
+  4,
+  8,
+  12,
+  16
+ ]
+}

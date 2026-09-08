@@ -1,0 +1,53 @@
+\begin{table}[H]
+\centering
+\begingroup\fontsize{9.0}{10.3}\selectfont
+\setlength{\tabcolsep}{2.5pt}\renewcommand{\arraystretch}{1.08}
+\begin{tabularx}{\linewidth}{@{}p{1.43in}CCCCCCC@{}}
+\toprule
+\panelrow{8}{A. Task success (SR)}
+Model & Standard & Random & Precision & Long & Memory & Open & Mean \\
+\midrule
+StarVLA-$\alpha$ & 5.00 & 0.00 & 4.33 & 6.50 & 2.44 & 0.58 & 3.24 \\
+X-VLA & 12.00 & 1.00 & 12.00 & 9.75 & 3.56 & 0.50 & 6.52 \\
+$\pi_{0.5}$ & 15.00 & 1.00 & 5.50 & 14.67 & 4.56 & 1.67 & 6.91 \\
+Spatial Forcing & 15.00 & 4.00 & 10.58 & 14.58 & 4.11 & 1.58 & 8.04 \\
+Hy-Embodied-0.5-VLA & 17.00 & 0.00 & 8.00 & 14.92 & 12.11 & 0.58 & 8.80 \\
+Xiaomi-Robotics-1 & \textbf{28.00} & \textbf{6.00} & 18.83 & 23.67 & 6.56 & \textbf{3.58} & 13.93 \\
+Galaxea G0.5 & 20.00 & \textbf{6.00} & \textbf{20.42} & \textbf{32.25} & 7.33 & 1.58 & 14.88 \\
+DM0.5 & 18.00 & 4.00 & 16.75 & 19.50 & \textbf{47.44} & 2.08 & \textbf{19.34} \\
+\midrule
+Fast-WAM & 2.00 & 0.00 & 0.00 & 5.17 & 3.44 & 0.42 & 2.03 \\
+AHA-WAM & 6.00 & 0.00 & 2.42 & 2.67 & 2.78 & 0.83 & 2.39 \\
+GigaWorld-Policy & 6.00 & 0.00 & 1.83 & 8.92 & 2.22 & 0.50 & 3.27 \\
+X-WAM & 5.00 & 1.00 & 1.83 & 9.08 & 4.67 & 0.25 & 3.83 \\
+R1 & 25.56 & 4.11 & 9.25 & 25.33 & 9.11 & 1.08 & 11.92 \\
+\bottomrule
+\end{tabularx}
+\vspace{3pt}
+\begin{tabularx}{\linewidth}{@{}p{1.43in}CCCCCCC@{}}
+\toprule
+\panelrow{8}{B. Task score}
+Model & Standard & Random & Precision & Long & Memory & Open & Mean \\
+\midrule
+StarVLA-$\alpha$ & 7.54 & 0.33 & 9.90 & 14.15 & 3.34 & 0.68 & 6.40 \\
+X-VLA & 17.90 & 3.04 & 18.32 & 16.53 & 4.76 & 0.55 & 10.13 \\
+$\pi_{0.5}$ & 20.93 & 5.82 & 12.40 & 23.54 & 5.78 & 1.98 & 11.41 \\
+Spatial Forcing & 21.25 & 6.98 & 17.33 & 23.26 & 5.43 & 1.78 & 12.38 \\
+Hy-Embodied-0.5-VLA & 21.98 & 1.57 & 13.81 & 25.74 & 13.37 & 0.65 & 13.07 \\
+Xiaomi-Robotics-1 & \textbf{35.65} & \textbf{11.44} & 26.69 & 38.39 & 7.81 & \textbf{3.94} & 20.07 \\
+Galaxea G0.5 & 26.74 & 11.16 & \textbf{28.25} & \textbf{44.12} & 8.61 & 1.73 & 20.23 \\
+DM0.5 & 23.49 & 8.06 & 24.82 & 33.70 & \textbf{47.74} & 2.43 & \textbf{24.90} \\
+\midrule
+Fast-WAM & 4.33 & 0.34 & 1.96 & 9.14 & 3.55 & 0.42 & 3.48 \\
+AHA-WAM & 10.32 & 1.26 & 5.86 & 8.61 & 2.97 & 0.88 & 4.82 \\
+GigaWorld-Policy & 10.28 & 0.41 & 6.15 & 15.51 & 3.46 & 0.54 & 6.20 \\
+X-WAM & 11.24 & 3.54 & 6.72 & 17.47 & 6.32 & 0.57 & 7.69 \\
+R1 & 33.16 & 8.26 & 18.45 & 34.93 & 10.41 & 1.41 & 17.18 \\
+\midrule
+\jamshade\textbf{JAM} & \multicolumn{7}{c}{\pendingresult} \\
+\bottomrule
+\end{tabularx}
+\endgroup
+\caption{\textbf{RoboDojo capability profile.} Standard and Random denote the two generalization settings; Long denotes long-horizon tasks. Success and partial task score follow the source scale. Source: \refsource{}. \benchmarknote}
+\label{tab:robodojo}
+\end{table}

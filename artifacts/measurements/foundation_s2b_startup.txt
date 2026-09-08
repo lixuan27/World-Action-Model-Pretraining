@@ -1,0 +1,15 @@
+Job 282354 on server31 start 2026-09-08T08:26:41+08:00
+stage pointer runs/jam_base_v1/STAGE_CONFIGS -> CONFIGS=configs/base.yaml configs/experiments/jam_base_v1_s2b_ready.yaml
+NCCL version 2.21.5+cuda12.4
+[jam] 08:27:30 run jam_base_v1 fingerprint a87bdc01ec7a world_size 8
+[jam] 08:28:24 params: {"world": 4999787712, "agent": 1021420768, "total": 6021208480, "trainable": 6021208480} (built in 54s)
+[jam] 08:28:39 fsdp strategy FULL_SHARD mesh (8,) reduce fp32
+[jam] 08:28:39 optimizer groups: world: 703.8M @ lr 5.00e-05, agent: 48.9M @ lr 1.00e-04; schedule wsd (warmup 1500, decay 6000)
+[jam] 08:29:25 resumed from runs/jam_base_v1/checkpoints/train/step_0008400
+[jam] 08:30:05 mixture: [{"source": "droid", "windows": 1674648, "p": 0.40439426310064447}, {"source": "bridge", "windows": 454690, "p": 0.1623526169242733}, {"source": "egodex", "windows": 738550, "p": 0.2279945380944588}, {"source": "robomind_franka", "windows": 76446, "p": 0.04660224594710126}, {"source": "robomind_ur", "windows": 439974, "p": 0.15865633593352224}]
+[jam] 08:30:32 training from step 8400 to 60000
+[jam] 08:30:38 step 8401 loss 0.4338 world 0.1426 action 0.1194 gnorm 2.15 lr 5.00e-05 83.4 samp/s data_wait 7% mem 30GB
+[jam] 08:34:30 step 8450 loss 0.2390 world 0.1540 action 0.0414 gnorm 0.86 lr 5.00e-05 108.2 samp/s data_wait 0% mem 30GB
+[jam] 08:38:26 step 8500 loss 0.2287 world 0.1520 action 0.0380 gnorm 1.08 lr 5.00e-05 108.5 samp/s data_wait 0% mem 30GB
+[jam] 08:42:26 step 8550 loss 0.2415 world 0.1276 action 0.0251 gnorm 0.42 lr 5.00e-05 106.8 samp/s data_wait 0% mem 30GB
+[jam] 08:46:26 step 8600 loss 0.2018 world 0.1329 action 0.0401 gnorm 0.63 lr 5.00e-05 106.7 samp/s data_wait 0% mem 30GB

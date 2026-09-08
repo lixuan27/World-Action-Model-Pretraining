@@ -1,4 +1,5 @@
 \section*{Appendix}
+\widowpenalty=10000\clubpenalty=10000
 \addcontentsline{toc}{section}{Appendix}
 \renewcommand{\thesubsection}{\Alph{subsection}}\setcounter{subsection}{0}
 
@@ -26,7 +27,10 @@ A window selects nine frames at a stride of four source steps, spanning 33 time 
 autoencoder produces a clean observation latent followed by future latents. The image canvas is
 $384\times256$ pixels for the two-view template and $384\times320$ for the three-view template. The
 template reserves positions for unavailable views rather than inventing additional observations.
-DROID, Bridge, and EgoDex retain native frame rates of 15, 5, and 30 Hz in the resolved recipe.
+DROID and Bridge are sampled at 15 and 5 Hz. The EgoDex training export retains every third
+frame of the original 30 Hz stream, giving 10 Hz. This corrects the earlier 30 Hz description.
+The RoboMIND sources lack native timestamps in the inspected export; their duration audit retains
+a 15--20 Hz range rather than asserting a single measured rate.
 Consequently, a step horizon corresponds to different elapsed durations across sources.
 Duration-matched comparisons are a separate control for cross-source transfer.
 
@@ -45,11 +49,14 @@ accelerators, one accumulation step, and seed 0. World and agent learning rates 
 with 1,000 warmup updates and cosine decay to 0.01 of the peak. The foundation run uses the settings
 in Appendix~\ref{app:setup}, with a warmup--stable--decay schedule ending at 0.05 of the peak.
 Training uses bfloat16 computation, float32 gradient reduction, and activation checkpointing.
-Foundation training uses hybrid sharding across two nodes of four accelerators. The video backbone
+Foundation training initially uses hybrid sharding across two nodes of four accelerators.
+The stage resumed at update 8,400 uses full sharding on a single eight-accelerator node,
+with the same global batch. The video backbone
 is initialized from released video weights; embodied foundation training is performed within JAM.
 
-The archived foundation configuration contains DROID, Bridge, and full EgoDex from its first
-optimizer update. An earlier robot-only stage pointer was replaced before training began.
+The initial foundation configuration contains DROID, Bridge, and the EgoDex training export
+from its first optimizer update. RoboMIND Franka and UR5e join at the 8,400-update resume; the
+first update on this mixture is 8,401. An earlier robot-only stage pointer was replaced before training began.
 Checkpoints are saved every 300 updates. The first retained milestone release is at update 5,100,
 and the archived log extends to \FoundationSteps{}. The intended downstream launch point is the
 15,000-update foundation milestone. These milestones describe training duration rather than
@@ -58,17 +65,57 @@ final-window summary averages the last 10\% of those points. A zero consequence 
 microbatch indicates absent supervision, so foundation summaries condition on the recorded
 supervised fraction.
 
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{Figures/training.pdf}
+\caption{\textbf{How do the joint objectives optimize?} Measured foundation training (top) and completed LIBERO adaptation (bottom). Thin traces retain logged batches and outliers; thick traces average up to 11 records with available supervision. Each objective uses a logarithmic scale. The dotted boundary marks the concurrent mixture, label-mask, and sharding changes at update 8,400; smoothing starts anew there.}
+\label{fig:training}
+\end{figure}
+
 \subsection{Experimental setup and evaluation}
 \label{app:setup}
 \textbf{Data and splits.}
-The active pretraining mixture contains DROID \citep{droid}, BridgeData V2 \citep{bridge}, and
-EgoDex \citep{egodex}; The active caches contain 1,674,648 DROID, 454,690 Bridge, and 738,550 EgoDex training windows.
-Sampling temperature 0.7 gives source probabilities of approximately 50.9\%, 20.4\%, and 28.7\%. The cache reserves an episode-level holdout using a deterministic one-in-ten
-partition. All windows from an episode follow that partition. The active mixture contains the
-training portions of these sources and excludes the benchmark datasets below. Holdout windows serve
-open-loop checks; environment resets define the separate closed-loop test sets. Dataset expansion is
-tracked separately from data already consumed by training.
+Table~\ref{tab:corpus} distinguishes data consumed by the archived run from prepared and acquired
+expansions. The first mixture samples DROID, Bridge, and EgoDex with probabilities 50.88\%, 20.43\%,
+and 28.69\%. The five-source stage uses temperature 0.7 on training-window counts and probabilities
+40.44\%, 16.24\%, 22.80\%, 4.66\%, and 15.87\% in table order. The cache reserves an episode-level
+holdout using a deterministic one-in-ten partition. All windows from an episode follow that
+partition. Ego4D instead groups clips by source video: its merged cache contains 436,116 training
+and 50,856 holdout windows from 592 and 72 video identifiers, with zero shared identifiers.
+The first Ego4D cache supplies world supervision; consequence supervision requires an admitted
+tracking pipeline. Dataset availability and exposure during optimization are recorded separately.
 
+\begin{table}[H]
+\centering\small
+\begin{tabularx}{\linewidth}{@{}lCCC@{}}
+\toprule
+Source & Stage & Targets & Train windows \\
+\midrule
+\panelrow{4}{A. Consumed after the 8,400-update resume}
+DROID & Active & World, action & 1,674,648 \\
+BridgeData V2 & Active & World, action & 454,690 \\
+EgoDex & Active & World, consequence & 738,550 \\
+RoboMIND Franka & Active & World, action & 76,446 \\
+RoboMIND UR5e & Active & World, action & 439,974 \\
+\midrule
+\panelrow{4}{B. Next admissions; outside the consumed mixture}
+Ego4D & Merged & World & 436,116 \\
+RoboMIND AgileX & Encoding & World, action & Pending \\
+InternData-A1 & Acquiring & World, action & Pending \\
+RoboCOIN subset & Encoding & World, action & Pending \\
+EPIC-KITCHENS-100 & Acquiring & World & Pending \\
+\bottomrule
+\end{tabularx}
+\caption{\textbf{Pretraining inventory at the evidence snapshot.} Counts are cached training windows, not unique trajectories or duration. Targets describe the admitted or intended adapter. The expansion rows carry no sampling probability until training admission.}
+\label{tab:corpus}
+\end{table}
+
+RoboMIND AgileX supplies the next bimanual data source. Its inspected export covers 10,269 episodes,
+with encoding still in progress. InternData-A1 acquisition spans multiple embodiments; the first
+RoboCOIN tranche contains 38 selected corpus repositories. Additional Ego4D access and an
+AgiBotWorld-Beta subset remain conditional on access and validation. The current selection omits
+RT-1, CALVIN, RoboSet, and RH20T. LIBERO, RoboTwin2.0-Full, VLABench, RoboCasa365 target tasks,
+and RoboDojo are reserved for downstream training. LIBERO-Plus and LIBERO-PRO supply evaluation
+only. Future corpus revisions must preserve these evaluation boundaries.
 
 \textbf{Model and optimization.}
 The world stream uses Wan2.2-TI2V-5B through its released Diffusers implementation, initialized with
@@ -85,7 +132,8 @@ global batch 64, and a cosine learning-rate schedule; Appendix~\ref{app:details}
 
 \textbf{Tasks and comparison protocol.}
 The core downstream arenas are LIBERO \citep{libero}, RoboTwin 2.0 Full \citep{robotwin}, VLABench
-\citep{vlabench}, and the RoboCasa365 target-task split \citep{robocasa365}. Direct adaptation
+\citep{vlabench}, and the RoboCasa365 target-task split \citep{robocasa365}, with RoboDojo supplying additional
+capability tests. Direct adaptation
 starts from the public video initialization plus a fresh agent; pretrained adaptation starts from a
 JAM foundation release. The paired comparison fixes the demonstrations, action adapter, training
 budget, sampler, and environment version. LIBERO-Plus \citep{liberoplus} and LIBERO-PRO
@@ -103,7 +151,8 @@ calibration. Frozen-world probes predict actions and consequences from intermedi
 with generated action and consequence inputs fully corrupted. A shuffled-label probe and an
 observation-only predictor establish reference levels. Planned uncertainty estimates use a paired
 hierarchical bootstrap over training seeds, tasks, and shared episode resets with 10,000 resamples
-and 95\% intervals. Open-loop metrics use episode-level resampling.
+and 95\% intervals. Final open-loop comparisons use episode-level resampling. The preliminary probes below use
+window-level sampling and their separately stated bootstrap protocol.
 
 
 \subsection{Controls required by the scientific question}
@@ -127,12 +176,22 @@ awaiting measurement. It does not treat the existing switches as an already comp
 experiment.
 
 \textbf{Representation probes and interventions.}
-A world probe freezes the pretrained parameters and reads the same selected layer and pooling rule
-in every arm. Generated action and consequence tokens are fully corrupted during feature extraction;
-their clean targets are used only to train or evaluate the probe on separate episodes. A linear
-probe tests accessible information, while a capacity-matched nonlinear probe checks dependence on
-readout capacity. Observation-only and shuffled-label predictors provide reference levels. World
-features are compared at fixed noise levels and matched visible context.
+The measured milestone study freezes the world parameters and reads frame-mean features at layers
+5, 10, 15, 20, 25, and 29. Initial observations remain clean; future-world inputs use corruption
+level 0.5. Action and consequence inputs are pure Gaussian noise. Each source contributes up to
+4,000 windows from its held-out corpus partition, split into 2,800 probe-training and 1,200
+probe-test windows. These internal splits operate on windows and can share episodes. Ridge
+regularization is selected on a quarter of the probe-training windows and the final readout is
+refitted on that training split. The grid spans 1 through 100,000. Action R-squared intervals use
+1,000 bootstrap resamples over test windows. Figure~\ref{fig:representation} reports every sampled
+layer for JAM, the video prior, and a randomly initialized world stream. Copy-first and shuffled-label
+controls accompany the archived reports. Consequence displacement above magnitude 8 is masked.
+
+This diagnostic tests readout from partially observed future dynamics. Establishing a pretraining
+effect under matched coupling controls additionally requires episode-disjoint probe fitting,
+observation-only controls, and matched information at extraction. A capacity-matched nonlinear
+readout can then separate information accessibility from probe capacity. The current probe scores
+are preliminary representation measurements with the stated visible future context.
 
 Action shuffling tests sensitivity to the action input. Counterfactual prediction additionally
 requires a target future obtained by executing the alternative action from the same simulator state.
@@ -149,14 +208,16 @@ and fixes its downstream demonstration budget. Camera configuration, temporal du
 available keypoint groups accompany each result.
 
 \textbf{Conditional sampling checks.}
-Every conditional use specifies all generated variables. For action-conditioned world generation, an
-unobserved consequence stream remains latent and must be denoised on its own schedule. The audited
-action-clamped sampler couples its default consequence schedule to the action schedule; supplying
-only actions can therefore leave an initialized consequence latent unchanged. Conditional benchmark
-measurements require this behavior to be resolved or all clamped variables to be supplied
-explicitly. The manuscript consequently treats policy sampling as the primary implementation and
-conditional comparisons as pending validation. Independent training levels define the corruption
-family; each deployment sampler still requires its own correctness and fidelity check.
+Every conditional use specifies all generated variables. An action-clamped world sampler must
+continue integrating unobserved consequences. The updated sampler implements that independent
+consequence schedule, correcting the earlier coupling to the clamped action level. The archived
+post-correction test uses the update-5,100 checkpoint, 300 LIBERO holdout windows, and 10 Euler steps.
+Donor, hold, and time-shuffled actions produce small consequence-error changes whose paired
+95\% intervals all include zero. Figure~\ref{fig:representation} uses this corrected report. It
+measures action-input sensitivity against the observed future, while counterfactual fidelity
+requires the separately executed futures described above. Conditional benchmark evaluation remains
+pending. Independent corruption levels define a training family; each deployment path also requires
+a fidelity check.
 
 \FloatBarrier
 
@@ -171,26 +232,33 @@ standalone launch configurations.
 
 The LIBERO closed-loop evaluation was interrupted before a complete suite result file was produced.
 Partial rollout videos therefore contribute neither success rates nor selected qualitative evidence
-to the paper. Foundation transfer, coupling ablations, and consequence probes await completed runs.
+to the paper. Foundation transfer and coupling ablations await completed runs. The milestone probes and
+post-correction sensitivity report are measured diagnostics with the limitations stated above.
 External reference results retain their own provenance and evaluation scope. The planned tables and
 scaling figure use design values inherited or extended from the working manuscript; they are layout
 targets rather than preregistered outcomes or model predictions.
 
-The data audit identified extreme displacement labels in a subset of human-video windows. A
-subsequently added displacement mask is configured to reject values beyond magnitude 8; the first
-archived training segment precedes activation of this correction. Its losses retain the original
-label distribution. Evaluating the filter requires a separately identified segment and comparison.
-This example motivates tracking label confidence and projection failure alongside prediction error.
-Camera motion, occlusion, and the mismatch between observed and predicted consequence distributions
-are additional failure settings in the evaluation design.
+The data audit identified extreme displacement labels in some human-video windows. A displacement
+mask rejects magnitudes above 8 from the 8,400-update resume onward. The same resume changes the
+source mixture, maps absent modalities to pure-noise inputs, and changes the sharding topology.
+The first segment retains the original label distribution. Figure~\ref{fig:training} preserves this
+boundary and its raw losses. Attributing a change to the label filter requires a matched comparison.
+Camera motion, occlusion, and the gap between observed and predicted consequences remain additional
+failure settings.
 
 \subsection{External reference results}
 \label{app:reference}
-Table~\ref{tab:reference} reorganizes source-reported results around the capabilities they evaluate.
-The linked source identifies the external method and retains its original table entries. R1 is a
-provenance identifier used to distinguish that system from JAM; the artifact includes an immutable
-source URL and an exact source pointer for every copied row.
-\input{Tables/reference}
+Each main benchmark has a dedicated table with all baseline rows present in its source export.
+Table~\ref{tab:libero} supplies the standard LIBERO suites alongside the robustness tables in the
+main text. R1 is the external method identified by the immutable source link, distinct from JAM.
+The website aggregates source-reported evaluations; its presence alone does not establish that
+all baseline runs share one evaluation implementation. The archive retains original numeric strings,
+model labels, source revisions, and a cell-level rendering map. The official export contains no
+LIBERO-PRO table, so Table~\ref{tab:libero_pro} uses the benchmark maintainers' own leaderboard.
+Its normalized values are multiplied by 100 exactly. Its reported totals are preserved despite
+model-dependent coverage of environment tests. External protocol scopes remain attached to their
+values until a matched JAM evaluation is available.
+\input{Tables/libero}
 \FloatBarrier
 
 \subsection{Reproduction and experiment ledger}

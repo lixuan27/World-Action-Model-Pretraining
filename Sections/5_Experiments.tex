@@ -1,57 +1,77 @@
 \clearpage
 \section{Experiments}
 \label{sec:experiments}
-The evaluation connects reciprocal computation to control, transfer, and representation quality.
-Each comparison isolates one step in this proposed relationship.
-
 \subsection{Experimental setup}
-JAM pretrains on DROID \citep{droid}, BridgeData V2 \citep{bridge}, and EgoDex \citep{egodex},
-combining robot commands with human motion supervision from the first update. The model pairs a
-pretrained video backbone with a newly initialized agent stream, totaling 6.02 billion parameters.
-Foundation training uses eight H200 accelerators and global batch 512. Episode-level holdouts
-separate training windows from open-loop evaluation. Downstream tests cover LIBERO \citep{libero},
-RoboTwin 2.0 \citep{robotwin}, VLABench \citep{vlabench}, and RoboCasa365 \citep{robocasa365};
-LIBERO-Plus \citep{liberoplus} and LIBERO-PRO \citep{liberopro} test distribution shifts.
+JAM begins embodied pretraining on DROID \citep{droid}, BridgeData V2 \citep{bridge}, and
+EgoDex \citep{egodex}, then admits RoboMIND \citep{robomind} Franka and UR5e at update 8,400.
+Figure~\ref{fig:mixture} separates the consumed mixture from the next data admissions.
+The 6.02-billion-parameter model combines a public video initialization with a newly initialized
+agent stream. Foundation training uses eight H200 accelerators and global batch 512;
+episode-level holdouts separate training windows from open-loop checks. Benchmark adaptation
+uses the designated training partitions, with LIBERO-Plus and LIBERO-PRO reserved for evaluation.
+Appendix~\ref{app:setup} records the complete data inventory, schedules, and evaluation protocols.
 
-Paired comparisons hold demonstrations, adaptation budget, samplers, and environment resets fixed.
-Control uses task success; representation tests use frozen-world probes, perceptual prediction error,
-and consequence displacement error. The planned protocol uses three training seeds with paired
-bootstrap intervals. The evidence snapshot contains a completed 20,000-update direct-adaptation run
-and foundation logs through update \FoundationSteps{}. These are measured optimization records.
-External benchmark scores retain source attribution; JAM benchmark cells marked T are layout
-targets awaiting evaluation. Appendix~\ref{app:setup} specifies data proportions, optimization,
-evaluation manifests, and statistics.
+The evidence snapshot contains foundation optimization through update \FoundationSteps{},
+a completed 20,000-update LIBERO adaptation, and frozen-world diagnostics at update 5,100.
+Training behavior appears in Figure~\ref{fig:foundation}; benchmark tables retain source-reported
+baseline values and reserve a blue row for JAM evaluation. Paired comparisons fix demonstrations,
+adaptation budgets, and environment resets. Success measures closed-loop control; action readout,
+consequence displacement, and input sensitivity assess representation content. Controlled
+pretraining and scaling displays retain explicit target markers while their measurements are
+pending. Probe sampling, uncertainty, and evidence boundaries appear in Appendix~\ref{app:controls}.
 
-\subsection{Optimization and downstream control}
-Figure~\ref{fig:training} records both stages of joint optimization, and Table~\ref{tab:main}
-organizes downstream control by task family.
 \begin{figure}[H]
-\centering\includegraphics[width=\linewidth]{Figures/training.pdf}
-\caption{\textbf{Do the three objectives optimize together?} Measured world, action, and consequence losses during completed LIBERO adaptation (top) and the archived foundation prefix (bottom). Thin traces show logged batches; thick traces average the available supervised values within the last 11 records. Missing supervision is excluded, and each objective retains its own logarithmic scale. Top annotations summarize the final tenth of adaptation records. Foundation outliers remain visible. These curves measure training behavior; control and transfer require separate evaluation.}
-\label{fig:training}
+\centering\includegraphics[width=\linewidth]{Figures/data_mixture.pdf}
+\caption{\textbf{Which sources have entered pretraining?} Sampling probabilities follow training-window counts with temperature 0.7. RoboMIND Franka and UR5e enter after the 8,400-update checkpoint. Ego4D has a merged cache; the other listed expansions remain in encoding or acquisition. Admission into training requires a validated cache and a new resolved mixture.}
+\label{fig:mixture}
 \end{figure}
-\input{Tables/main_results}
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{Figures/foundation.pdf}
+\caption{\textbf{How do the three objectives evolve?} Measured foundation losses retain raw outliers and local averages. The dotted line marks the 8,400-update recipe boundary. Appendix Figure~\ref{fig:training} includes the completed adaptation and the smoothing protocol.}
+\label{fig:foundation}
+\end{figure}
 
-\subsection{Generalization under distribution shift}
-Table~\ref{tab:robustness} reports visual, semantic, and embodiment shifts with benchmark-specific breakdowns.
-\input{Tables/robustness}
+
 
 \clearpage
-\subsection{Reciprocal computation and representation}
-Table~\ref{tab:joint} links the coupling controls to representation diagnostics, with the paired
-intervention protocol illustrated in Figure~\ref{fig:intervention}.
+\subsection{Benchmark control and generalization}
+Table~\ref{tab:libero_plus} resolves visual and semantic robustness into seven perturbation axes.
+\input{Tables/libero_plus}
+Table~\ref{tab:libero_pro} separates perturbations across four task suites using the benchmark-maintainer leaderboard.
+\input{Tables/libero_pro}
+
+\clearpage
+Table~\ref{tab:vlabench} evaluates task completion, progress, and intention under semantic and visual shifts.
+\input{Tables/vlabench}
+
+\clearpage
+Table~\ref{tab:robotwin} compares bimanual manipulation in clean and randomized environments.
+\input{Tables/robotwin}
+Table~\ref{tab:robocasa_365} separates household skills from their seen and unseen compositions.
+\input{Tables/robocasa_365}
+
+\clearpage
+Table~\ref{tab:robodojo} compares generalization, precision, long-horizon control, memory, and open tasks.
+\input{Tables/robodojo}
+
+\clearpage
+\subsection{Representation and reciprocal computation}
+Figure~\ref{fig:representation} measures accessible action and consequence information alongside sensitivity to action-input changes.
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{Figures/representation.pdf}
+\caption{\textbf{What is accessible in the world features?} A--B: frozen-world ridge probes at every sampled depth, using partially noised future observations and fully corrupted action and consequence inputs. The held-out corpus windows are split into 2,800 probe-training and 1,200 probe-test windows; these probe splits can share episodes. Action-readout bands use 1,000 window-bootstrap resamples. C: consequence-error changes under substituted actions on 300 LIBERO windows, with paired 95\% intervals. These intervals include zero. This panel measures input sensitivity; executed alternative-action futures are required for a causal prediction test.}
+\label{fig:representation}
+\end{figure}
+Table~\ref{tab:joint} separates the value of embodied pretraining from the information and gradient paths within joint computation.
 \input{Tables/joint_analysis}
-\input{Figures/intervention}
 
 \clearpage
 \subsection{Data, capacity, and supervision}
-Table~\ref{tab:data_scaling} and Figure~\ref{fig:scaling} separate supervision source, unique data,
-optimization duration, and agent capacity.
+Table~\ref{tab:data_scaling} and Figure~\ref{fig:scaling} organize matched-budget comparisons of supervision, unique data, duration, and capacity.
 \input{Tables/data_scaling}
 \begin{figure}[H]
 \centering\includegraphics[width=\linewidth]{Figures/scaling_targets.pdf}
-\caption{\textbf{How does the study separate data, training, and capacity?} Layout targets for LIBERO-Plus success. Each panel varies one axis while fixing the other two: corpus fraction at 60,000 updates, update count on the full corpus, and agent width at full corpus and 60,000 updates. All plotted points are PLANNED-VALUE, awaiting measurement. Dashed curves and their ordering specify the display, with no empirical scaling claim.}
+\caption{\textbf{How are data and compute effects separated?} Planned LIBERO-Plus displays vary unique data, duration, or agent width at otherwise fixed budgets. All points are PLANNED-VALUE, awaiting measurement; the full-corpus reference uses 60,000 updates.}
 \label{fig:scaling}
 \end{figure}
-
 \FloatBarrier

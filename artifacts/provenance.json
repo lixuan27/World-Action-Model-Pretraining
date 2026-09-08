@@ -1,15 +1,15 @@
 {
-  "snapshot_date": "2026-09-07",
+  "snapshot_date": "2026-09-08",
   "source_root": "/public/home/lixuan/lixuan/JAM",
-  "source_head": "9bb88f9dd77bf01d523c367991556ac0df7129d7",
+  "source_head": "27a9703989073c12ef50f8ad2d4f733ea2bf4fe1",
   "note": "Live audit revision; individual runs may have launched at earlier revisions. File hashes identify archived evidence.",
   "files": [
     {
       "source": "runs/jam_base_v1/metrics.jsonl",
       "source_sha256": "d8aaa4cf207da8354e00bc8b2d352afb47ce9c75865f2fc77328003534b03174",
-      "published": "artifacts/measurements/jam_base_v1.jsonl",
+      "published": "artifacts/measurements/history/jam_base_v1_through_5200.jsonl",
       "published_sha256": "d8aaa4cf207da8354e00bc8b2d352afb47ce9c75865f2fc77328003534b03174",
-      "status": "measured"
+      "status": "superseded"
     },
     {
       "source": "runs/jam_base_v1/config.yaml",
@@ -128,6 +128,139 @@
       "source": "README.md",
       "source_sha256": "653af8cfddf8d57b061263c6aa4b17e4239896502aa68d3f273c75ab5ca577c5",
       "status": "reviewed_project_record"
+    },
+    {
+      "source": "runs/jam_base_v1/metrics.jsonl",
+      "source_sha256": "026cdc5eac2c57c332d8b4ffc552c386b526fa3efe487c5d164c3c05497c4e40",
+      "published": "artifacts/measurements/jam_base_v1.jsonl",
+      "published_sha256": "026cdc5eac2c57c332d8b4ffc552c386b526fa3efe487c5d164c3c05497c4e40",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "results/analysis/summary_probes_m5100.json",
+      "source_sha256": "34f8b24ba4b23a540462bcc74322ae9ae6a08e6d2dfb2c7abcc1fab3ca464b91",
+      "published": "artifacts/measurements/analysis/summary_probes_m5100.json",
+      "published_sha256": "34f8b24ba4b23a540462bcc74322ae9ae6a08e6d2dfb2c7abcc1fab3ca464b91",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "results/analysis/base_v1_m5100/probes_droid.json",
+      "source_sha256": "180cfc12f8ee09952f0c19ae6c516c6c4cb1e6c28c4d4469af544c467e8dbc9d",
+      "published": "artifacts/measurements/analysis/base_v1_m5100/probes_droid.json",
+      "published_sha256": "180cfc12f8ee09952f0c19ae6c516c6c4cb1e6c28c4d4469af544c467e8dbc9d",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "results/analysis/base_v1_m5100/counterfactual_libero.json",
+      "source_sha256": "6daf2ed3d77982c2ed8048386f64d0e237daa202663b799a64c7884032ef8f8c",
+      "published": "artifacts/measurements/analysis/base_v1_m5100/counterfactual_libero.json",
+      "published_sha256": "6daf2ed3d77982c2ed8048386f64d0e237daa202663b799a64c7884032ef8f8c",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "results/analysis/base_v1_m5100/probes_libero.json",
+      "source_sha256": "0c80ae9273875060f2712b2362748c07d1616cc1fb61dc1a316786378df9274d",
+      "published": "artifacts/measurements/analysis/base_v1_m5100/probes_libero.json",
+      "published_sha256": "0c80ae9273875060f2712b2362748c07d1616cc1fb61dc1a316786378df9274d",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "results/analysis/base_v1_m5100/probes_egodex.json",
+      "source_sha256": "3b8743a8129b1f7b42524ed6c2d79b7b9d892fbf16489765e24f0699d036209b",
+      "published": "artifacts/measurements/analysis/base_v1_m5100/probes_egodex.json",
+      "published_sha256": "3b8743a8129b1f7b42524ed6c2d79b7b9d892fbf16489765e24f0699d036209b",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "results/analysis/base_v1_m5100/probes_bridge.json",
+      "source_sha256": "e06bad38092dcd3c927a5b055313a011390a3b8b2b3de5f9e18b5cf24a85b332",
+      "published": "artifacts/measurements/analysis/base_v1_m5100/probes_bridge.json",
+      "published_sha256": "e06bad38092dcd3c927a5b055313a011390a3b8b2b3de5f9e18b5cf24a85b332",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "results/analysis/floors/probes_droid_bare_prior.json",
+      "source_sha256": "3be446caaaf2c472aa15d1c9545132504fc8a7266da991f85e1af79c294e662f",
+      "published": "artifacts/measurements/analysis/floors/probes_droid_bare_prior.json",
+      "published_sha256": "3be446caaaf2c472aa15d1c9545132504fc8a7266da991f85e1af79c294e662f",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "results/analysis/floors/probes_libero_bare_prior.json",
+      "source_sha256": "a6057122d7e9fd87352a4339a3ad1d3805187c35f3179322998fec5d57f28814",
+      "published": "artifacts/measurements/analysis/floors/probes_libero_bare_prior.json",
+      "published_sha256": "a6057122d7e9fd87352a4339a3ad1d3805187c35f3179322998fec5d57f28814",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "results/analysis/floors/probes_egodex_bare_prior.json",
+      "source_sha256": "673b722793ec4efe83f30397aab29e772a4a3d028979cc7c99618b255f2c65c0",
+      "published": "artifacts/measurements/analysis/floors/probes_egodex_bare_prior.json",
+      "published_sha256": "673b722793ec4efe83f30397aab29e772a4a3d028979cc7c99618b255f2c65c0",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "results/analysis/floors/probes_egodex_random_init.json",
+      "source_sha256": "cb8267f07824e41d2a0b99e5f3375a104c32c9da2ba56f22aaa6892a717c9341",
+      "published": "artifacts/measurements/analysis/floors/probes_egodex_random_init.json",
+      "published_sha256": "cb8267f07824e41d2a0b99e5f3375a104c32c9da2ba56f22aaa6892a717c9341",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "results/analysis/floors/probes_libero_random_init.json",
+      "source_sha256": "e4df40a4c0c1cf87ca2ca456d0e35675cadc4ae7c5a733bb7ac66d3e7b75eb0d",
+      "published": "artifacts/measurements/analysis/floors/probes_libero_random_init.json",
+      "published_sha256": "e4df40a4c0c1cf87ca2ca456d0e35675cadc4ae7c5a733bb7ac66d3e7b75eb0d",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "results/analysis/floors/probes_droid_random_init.json",
+      "source_sha256": "919c1a9b8735b0b0db7d269b12d362cb68240a316fdbbfed29b39274d314387a",
+      "published": "artifacts/measurements/analysis/floors/probes_droid_random_init.json",
+      "published_sha256": "919c1a9b8735b0b0db7d269b12d362cb68240a316fdbbfed29b39274d314387a",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "results/data/ego4d_split_check.json",
+      "source_sha256": "ece25bf3973e0dae3bbef8d0ce4ea3293dbf791804690902e13e51391cad686d",
+      "published": "artifacts/measurements/data/ego4d_split_check.json",
+      "published_sha256": "ece25bf3973e0dae3bbef8d0ce4ea3293dbf791804690902e13e51391cad686d",
+      "status": "measured",
+      "snapshot": "2026-09-08T08:47:32.513946"
+    },
+    {
+      "source": "runs/jam_base_v1/config.yaml",
+      "source_sha256": "6e16e0e020f8371f987850610d697f67e0fd274f9a1b345fa9ae2be49d3d7d9e",
+      "published": "artifacts/configs/jam_base_v1_s2b.json",
+      "published_sha256": "20dcf69d85acf9b515fd76cad57ce54e2f3a92f6e8ab1ac638bd5d3a1520c97e",
+      "status": "resolved_configuration",
+      "snapshot": "2026-09-08T08:47:32.513946",
+      "runtime_note": "The config requests hybrid sharding; the one-node launch records FULL_SHARD with mesh (8,). See foundation_s2b_startup.txt."
+    },
+    {
+      "source": "logs/train/jam_base_v1_n8_retry2_282354.out",
+      "excerpt": "first 15 lines, ending at update 8600",
+      "published": "artifacts/measurements/foundation_s2b_startup.txt",
+      "published_sha256": "de4d806a0162cc69138636d247642fc3145984ed7efd155b0f790482e88c3e00",
+      "status": "measured_runtime_excerpt"
     }
-  ]
+  ],
+  "latest_read_only_snapshot": {
+    "captured_at": "2026-09-08T08:47:32.513946",
+    "source_revision": "27a9703989073c12ef50f8ad2d4f733ea2bf4fe1"
+  },
+  "previous_snapshot_head": "9bb88f9dd77bf01d523c367991556ac0df7129d7"
 }

@@ -1,0 +1,286 @@
+[
+ {
+  "tag": "base_v1_m5100",
+  "source": "bridge",
+  "model": "base_v1_m5100",
+  "n_windows": 4000,
+  "file": "results/analysis/base_v1_m5100/probes_bridge.json",
+  "actions": {
+   "layer": 15,
+   "r2": 0.6117219754282981,
+   "r2_ci": [
+    0.599369337673004,
+    0.6237235292602508
+   ],
+   "r2_shuffled": -0.2586045920999416,
+   "ridge": 1000.0
+  }
+ },
+ {
+  "tag": "base_v1_m5100",
+  "source": "droid",
+  "model": "base_v1_m5100",
+  "n_windows": 4000,
+  "file": "results/analysis/base_v1_m5100/probes_droid.json",
+  "actions": {
+   "layer": 15,
+   "r2": 0.7699142637803493,
+   "r2_ci": [
+    0.76011202982774,
+    0.7795746276955678
+   ],
+   "r2_shuffled": -0.3314247707865048,
+   "ridge": 1000.0
+  }
+ },
+ {
+  "tag": "base_v1_m5100",
+  "source": "egodex",
+  "model": "base_v1_m5100",
+  "n_windows": 4000,
+  "file": "results/analysis/base_v1_m5100/probes_egodex.json",
+  "consequence": {
+   "layer": 15,
+   "r2": 0.5956547052094818,
+   "r2_ci": [
+    0.5722817371778258,
+    0.6173587819757853
+   ],
+   "ade": 0.10391854930200681,
+   "direction_agreement": 0.3606676046652706
+  },
+  "consequence_floors": {
+   "copy_first": {
+    "ade": 0.12079309028748136,
+    "direction_agreement": 0.0
+   },
+   "target_mean": {
+    "ade": 0.12125873271235894,
+    "direction_agreement": 0.008018673203311977
+   },
+   "shuffled": {
+    "ade": 0.16089779498363144,
+    "direction_agreement": -0.006349890492980332
+   }
+  }
+ },
+ {
+  "tag": "base_v1_m5100",
+  "source": "libero",
+  "model": "base_v1_m5100",
+  "n_windows": 4000,
+  "file": "results/analysis/base_v1_m5100/probes_libero.json",
+  "actions": {
+   "layer": 15,
+   "r2": 0.7958275005780997,
+   "r2_ci": [
+    0.78662932033589,
+    0.8058668885327244
+   ],
+   "r2_shuffled": -0.2510210501540837,
+   "ridge": 1000.0
+  },
+  "consequence": {
+   "layer": 15,
+   "r2": 0.6645253602825576,
+   "r2_ci": [
+    0.6549606386553856,
+    0.6736059255278637
+   ],
+   "ade": 0.055915541725449665,
+   "direction_agreement": 0.8092364627482959
+  },
+  "consequence_floors": {
+   "copy_first": {
+    "ade": 0.1329449459556642,
+    "direction_agreement": 0.0
+   },
+   "target_mean": {
+    "ade": 0.13145973372775252,
+    "direction_agreement": 0.168297411662093
+   },
+   "shuffled": {
+    "ade": 0.17876360196017557,
+    "direction_agreement": 0.0394350315374812
+   }
+  }
+ },
+ {
+  "tag": "floors",
+  "source": "droid",
+  "model": "bare_prior",
+  "n_windows": 4000,
+  "file": "results/analysis/floors/probes_droid_bare_prior.json",
+  "actions": {
+   "layer": 20,
+   "r2": 0.21116213298890962,
+   "r2_ci": [
+    0.19590558706703737,
+    0.2272024340766702
+   ],
+   "r2_shuffled": -0.07277574849276469,
+   "ridge": 10000.0
+  }
+ },
+ {
+  "tag": "floors",
+  "source": "droid",
+  "model": "random_init",
+  "n_windows": 4000,
+  "file": "results/analysis/floors/probes_droid_random_init.json",
+  "actions": {
+   "layer": 29,
+   "r2": 0.0851595352189739,
+   "r2_ci": [
+    0.07010079451910663,
+    0.10080230864704018
+   ],
+   "r2_shuffled": -0.05633270409700519,
+   "ridge": 10000.0
+  }
+ },
+ {
+  "tag": "floors",
+  "source": "egodex",
+  "model": "bare_prior",
+  "n_windows": 4000,
+  "file": "results/analysis/floors/probes_egodex_bare_prior.json",
+  "consequence": {
+   "layer": 15,
+   "r2": 0.2495424051580566,
+   "r2_ci": [
+    0.2147059074819117,
+    0.28725208565766314
+   ],
+   "ade": 0.13002193340868864,
+   "direction_agreement": 0.09245551258559367
+  },
+  "consequence_floors": {
+   "copy_first": {
+    "ade": 0.12079309028748136,
+    "direction_agreement": 0.0
+   },
+   "target_mean": {
+    "ade": 0.12125873271235894,
+    "direction_agreement": 0.008018673203311977
+   },
+   "shuffled": {
+    "ade": 0.16089779498363144,
+    "direction_agreement": -0.006349890492980332
+   }
+  }
+ },
+ {
+  "tag": "floors",
+  "source": "egodex",
+  "model": "random_init",
+  "n_windows": 4000,
+  "file": "results/analysis/floors/probes_egodex_random_init.json",
+  "consequence": {
+   "layer": 10,
+   "r2": 0.11544537475042227,
+   "r2_ci": [
+    0.08054383515298426,
+    0.15212731164078785
+   ],
+   "ade": 0.1489761662815727,
+   "direction_agreement": 0.052828695050992636
+  },
+  "consequence_floors": {
+   "copy_first": {
+    "ade": 0.12079309028748136,
+    "direction_agreement": 0.0
+   },
+   "target_mean": {
+    "ade": 0.12125873271235894,
+    "direction_agreement": 0.008018673203311977
+   },
+   "shuffled": {
+    "ade": 0.16089779498363144,
+    "direction_agreement": -0.006349890492980332
+   }
+  }
+ },
+ {
+  "tag": "floors",
+  "source": "libero",
+  "model": "bare_prior",
+  "n_windows": 4000,
+  "file": "results/analysis/floors/probes_libero_bare_prior.json",
+  "actions": {
+   "layer": 10,
+   "r2": 0.7224960357197778,
+   "r2_ci": [
+    0.7098632569661185,
+    0.7351966550516271
+   ],
+   "r2_shuffled": -0.17964537134597203,
+   "ridge": 1000.0
+  },
+  "consequence": {
+   "layer": 5,
+   "r2": 0.5836930650944196,
+   "r2_ci": [
+    0.5727880926349936,
+    0.5945800182385785
+   ],
+   "ade": 0.06795915887423516,
+   "direction_agreement": 0.7480069343395379
+  },
+  "consequence_floors": {
+   "copy_first": {
+    "ade": 0.1329449459556642,
+    "direction_agreement": 0.0
+   },
+   "target_mean": {
+    "ade": 0.13145973372775252,
+    "direction_agreement": 0.168297411662093
+   },
+   "shuffled": {
+    "ade": 0.17876360196017557,
+    "direction_agreement": 0.0394350315374812
+   }
+  }
+ },
+ {
+  "tag": "floors",
+  "source": "libero",
+  "model": "random_init",
+  "n_windows": 4000,
+  "file": "results/analysis/floors/probes_libero_random_init.json",
+  "actions": {
+   "layer": 29,
+   "r2": 0.5060634149233326,
+   "r2_ci": [
+    0.487818391114693,
+    0.5238892850703627
+   ],
+   "r2_shuffled": -0.42168338610281264,
+   "ridge": 10.0
+  },
+  "consequence": {
+   "layer": 29,
+   "r2": 0.36644612936521137,
+   "r2_ci": [
+    0.3532642317795588,
+    0.3804939487503817
+   ],
+   "ade": 0.0942937145951145,
+   "direction_agreement": 0.6271636241064279
+  },
+  "consequence_floors": {
+   "copy_first": {
+    "ade": 0.1329449459556642,
+    "direction_agreement": 0.0
+   },
+   "target_mean": {
+    "ade": 0.13145973372775252,
+    "direction_agreement": 0.168297411662093
+   },
+   "shuffled": {
+    "ade": 0.17876360196017557,
+    "direction_agreement": 0.0394350315374812
+   }
+  }
+ }
+]

@@ -1,0 +1,24 @@
+{
+ "cache": "data/cache/ego4d/deb206ee996ce96f",
+ "grouping": "ego4d_video_uid_sha256_v1",
+ "holdout_mod": 10,
+ "windows": {
+  "all": 486972,
+  "train": 436116,
+  "holdout": 50856,
+  "conserved": true
+ },
+ "episodes": {
+  "all": 121743,
+  "train": 109029,
+  "holdout": 12714
+ },
+ "video_uids": {
+  "all": 664,
+  "train": 592,
+  "holdout": 72,
+  "shared": 0
+ },
+ "legacy_rule_video_uids_crossing_sides": 660,
+ "both_sides_nonempty": true
+}
