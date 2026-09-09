@@ -18,8 +18,8 @@ The benchmark tables retain source-reported baselines. Tables~\ref{tab:libero_pl
 label optimistic JAM estimates; remaining blue rows await evaluation. Paired comparisons fix
 demonstrations, adaptation budgets, and environment resets.
 Success measures closed-loop control; frozen-feature readouts and input sensitivity assess
-representation content. Controlled pretraining and scaling displays retain target markers
-while measurements are pending. Appendix~\ref{app:controls} specifies probe sampling and uncertainty.
+representation content. Controlled pretraining and scaling displays retain empty result fields
+until measurements are available. Appendix~\ref{app:controls} specifies probe sampling and uncertainty.
 
 \subsection{Benchmark control and generalization}
 Table~\ref{tab:libero_plus} resolves robustness across seven perturbation axes.
@@ -62,8 +62,8 @@ Table~\ref{tab:joint} separates the value of embodied pretraining from the infor
 Table~\ref{tab:data_scaling} and Figure~\ref{fig:scaling} organize matched-budget comparisons of supervision, unique data, duration, and capacity.
 \input{Tables/data_scaling}
 \begin{figure}[H]
-\centering\includegraphics[width=\linewidth]{Figures/scaling_targets.pdf}
-\caption{\textbf{How are data and compute effects separated?} Planned LIBERO-Plus displays vary unique data, duration, or agent width at otherwise fixed budgets. All points are PLANNED-VALUE, awaiting measurement; the full-corpus reference uses 60,000 updates.}
+\centering\includegraphics[width=\linewidth]{Figures/scaling_pending.pdf}
+\caption{\textbf{How are data and compute effects separated?} LIBERO-Plus comparisons vary unique data, duration, or agent width at otherwise fixed budgets. Axes retain the experimental settings; result areas remain empty until measurement. The full-corpus reference uses 60,000 updates.}
 \label{fig:scaling}
 \end{figure}
 \FloatBarrier

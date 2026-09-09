@@ -161,19 +161,24 @@ fig.text(.225,.98,'LIBERO · 300 windows',va='top',fontsize=9.2,weight='bold')
 fig.text(.94,.98,'Paired 95% intervals include zero',va='top',ha='right',fontsize=8.2,color='#677B89')
 save(fig,'action_sensitivity')
 
-# 4. Planned scaling displays remain visibly separate from all measurements.
-plans=json.loads((P/'experiments/layout_targets.json').read_text())['tables'];s=plans['scaling'];scale=list(plans['scale_controls']['rows'].values())
+# 4. Retain the scaling protocol, with no unmeasured outcomes on the axes.
+plans=json.loads((P/'experiments/pending_studies.json').read_text())['tables'];s=plans['scaling'];scale=list(plans['scale_controls']['rows'].values())
 fig,axes=plt.subplots(1,3,figsize=(6.5,2.45));fig.subplots_adjust(left=.08,right=.985,bottom=.22,top=.70,wspace=.34)
 sets=[(s['fractions'],s['subset_success'],'A. Data diversity','Corpus fraction'),
       (s['updates'],s['milestone_success'],'B. Training duration','Optimizer updates'),
       ([x[0] for x in scale[:3]],[x[1] for x in scale[:3]],'C. Agent capacity','Agent width')]
-for ax,(xx,yy,title,xlab),c in zip(axes,sets,[BLUE,SAND,ROSE]):
-    style(ax);ax.plot(xx,yy,'o--',color=c,mfc='white',mew=1.2,lw=1.3,ms=4)
-    ax.set_title(title,loc='left');ax.set_xlabel(xlab);ax.set_ylim(45,100);ax.set_yticks([50,70,90])
-axes[0].set_ylabel('Target success (%)');axes[0].set_xticks(s['fractions'],['1/8','1/4','1/2','Full'])
+for ax,(xx,yy,title,xlab) in zip(axes,sets):
+    assert len(xx)==len(yy) and all(y is None for y in yy), 'Pending scaling outcomes require measurement provenance.'
+    style(ax)
+    pad=(max(xx)-min(xx))*.06
+    ax.set_xlim(min(xx)-pad,max(xx)+pad)
+    ax.set_title(title,loc='left');ax.set_xlabel(xlab);ax.set_ylim(0,100);ax.set_yticks([0,50,100])
+axes[0].set_ylabel('Success (%)');axes[0].set_xticks(s['fractions'],['1/8','1/4','1/2','Full'])
 axes[1].set_xticks([5000,30000,60000],['5k','30k','60k']);axes[2].set_xticks([768,1024,1280])
-fig.text(.08,.975,'PLANNED DISPLAY  |  Values await measurement',fontsize=9.1,color='#995037',weight='bold',va='top')
+fig.text(.08,.975,'LIBERO-Plus scaling protocol',fontsize=9.1,color=INK,weight='bold',va='top')
 fig.text(.08,.865,'LIBERO-Plus; one factor varies in each panel while the remaining budgets are fixed.',fontsize=8,va='top')
-save(fig,'scaling_targets')
+assert all(len(ax.lines)==0 and len(ax.collections)==0 for ax in axes)
+save(fig,'scaling_pending')
+qa[-1].update({'status':'awaiting_measurement','plotted_result_points':0,'plotted_result_curves':0})
 (P/'artifacts/figure_qa.json').write_text(json.dumps(qa,indent=2)+'\n')
-print('Built four serif vector figures with measured / planned separation.')
+print('Built three measured serif figures and one empty scaling protocol display.')

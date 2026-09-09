@@ -1,0 +1,50 @@
+{
+  "status": "awaiting_measurement",
+  "marker": "PENDING-MEASUREMENT",
+  "meaning": "Experimental settings are retained; null outcomes render as empty cells or unplotted points. Populate only from archived measurements with checkpoint, evaluation manifest, and aggregation provenance.",
+  "tables": {
+    "initialization": {
+      "columns": ["LIBERO success", "LIBERO-Plus success"],
+      "rows": {
+        "Without embodied pretraining": [null, null],
+        "JAM pretraining": [null, null]
+      }
+    },
+    "coupling": {
+      "columns": ["LIBERO success", "LIBERO-Plus success", "Action probe R-squared", "Consequence ADE"],
+      "rows": {
+        "World-only pretraining": [null, null, null, null],
+        "Action-only pretraining": [null, null, null, null],
+        "Independent multitask": [null, null, null, null],
+        "Auxiliary, detached world features": [null, null, null, null],
+        "World-to-agent, attached": [null, null, null, null],
+        "JAM, reciprocal and attached": [null, null, null, null]
+      }
+    },
+    "composition": {
+      "columns": ["LIBERO success", "LIBERO-Plus success", "Held-out consequence ADE"],
+      "rows": {
+        "Robot data": [null, null, null],
+        "Robot + human video": [null, null, null],
+        "Robot + human video and consequences": [null, null, null]
+      }
+    },
+    "scaling": {
+      "fractions": [0.125, 0.25, 0.5, 1.0],
+      "subset_success": [null, null, null, null],
+      "updates": [5000, 15000, 30000, 45000, 60000],
+      "milestone_success": [null, null, null, null, null]
+    },
+    "scale_controls": {
+      "columns": ["Setting", "LIBERO-Plus success"],
+      "rows": {
+        "Agent width 768; full action labels": [768, null],
+        "Agent width 1024; full action labels": [1024, null],
+        "Agent width 1280; full action labels": [1280, null],
+        "Action-label density 25 percent": [25, null],
+        "Action-label density 50 percent": [50, null],
+        "Action-label density 100 percent": [100, null]
+      }
+    }
+  }
+}

@@ -21,7 +21,7 @@ tectonic -X compile main.tex --keep-logs --keep-intermediates
 python3 scripts/validate.py --verify-external
 ```
 
-The first Tectonic build downloads standard TeX packages. Figures 1 and 2 use the latest supplied version-11 PowerPoint deck, exported as vector PDFs with the supplied Toppan fonts. Four numerical figures, including the appendix sensitivity check, are generated with Matplotlib in DejaVu Serif. Figure 3 uses Toppan Bunkyu Mincho, with STIX serif mathematical glyphs, and provides a PDF, PNG, editable SVG, and portable outlined SVG. Paper builds launch no training.
+The first Tectonic build downloads standard TeX packages. Figures 1 and 2 use the latest supplied version-11 PowerPoint deck, exported as vector PDFs with the supplied Toppan fonts. Three measured figures, including the appendix sensitivity check, and an empty scaling protocol display are generated with Matplotlib in DejaVu Serif. Figure 3 uses Toppan Bunkyu Mincho, with STIX serif mathematical glyphs, and provides a PDF, PNG, editable SVG, and portable outlined SVG. Paper builds launch no training.
 
 The editable source for both figures is `Figures/source/JAM-framework-v11.pptx`, copied byte-for-byte from the updated file under `Desktop/JAM-Figures/Framework/`. The deck has two slides: slide 1 is the framework, and slide 2 is the teaser. Export a working copy of the complete deck from PowerPoint as PDF. Normalize and select its pages with:
 
@@ -49,15 +49,15 @@ The main text occupies **11 pages**, including the homepage teaser, framework, c
 | 3 | VLABench | Overall SR, PS, IS; eight source baselines |
 | 4 | Bimanual manipulation | RoboTwin2.0-Full and RoboDojo in side-by-side panels |
 | 5 | Mobile manipulation | RoboCasa365 and EBench in side-by-side panels |
-| 6 | Pretraining and reciprocal computation | Initialization and coupling controls, marked targets |
-| 7 | Data and supervision | Mixture, capacity, and annotation density, marked targets |
+| 6 | Pretraining and reciprocal computation | Initialization and coupling controls, empty pending results |
+| 7 | Data and supervision | Mixture, capacity, and annotation density, empty pending results |
 | Appendix | Current recipe; LIBERO | Seven-source probabilities; all 18 standard LIBERO baselines |
 
 The dataset-mixture figure is removed. The appendix reports the current runtime recipe directly. The full six-panel training-dynamics figure follows all main benchmark tables in a single Joint optimization subsection. Compact benchmark panels preserve their own baseline coverage, with pale-blue JAM rows and short headers.
 
 RoboDojo reports overall success rate and overall task score, corresponding to the aggregate values from the former A and B panels. EBench reports overall success rate and task score. VLABench reports the source-reported overall SR, PS, and IS metrics.
 
-`JAM direct` meant task adaptation from public video weights and a newly initialized agent, without JAM embodied pretraining. It was an initialization control, not a separate JAM method. Main benchmark tables now contain a single JAM row. The control appears only in the pretraining ablation, named **Without embodied pretraining**. Its displayed target scores remain marked T.
+`JAM direct` meant task adaptation from public video weights and a newly initialized agent, without JAM embodied pretraining. It was an initialization control, not a separate JAM method. Main benchmark tables now contain a single JAM row. The control appears only in the pretraining ablation, named **Without embodied pretraining**. Its result cells remain empty until measured evidence is available.
 
 ## Fixed evidence snapshot
 
@@ -69,7 +69,7 @@ Four evidence classes remain explicit:
 
 - **Measured:** complete 20,000-update LIBERO adaptation losses; the foundation prefix through update 10,501; world-feature probes at update 5,100; and a corrected action-input sensitivity report. These diagnostics do not establish closed-loop performance or causal pretraining gains. The internal probe train/test split is window-based and can share episodes; future observations are partly visible during extraction. All non-oracle sensitivity intervals include zero.
 - **External:** source-reported baseline values, with original strings, immutable revisions, hashes, and cell pointers. No external value is a JAM measurement. Missing source entries are NR, never zero.
-- **Planned:** controlled-study tables and the scaling display retain marked layout values from `experiments/layout_targets.json`. Superscript T and explicit plot labels identify them. They are neither measured results nor preregistered predictions.
+- **Pending:** Sections 5.4 and 5.5 retain the controlled-study design in `experiments/pending_studies.json`, with every unmeasured outcome stored as `null`. The 43 result cells in Tables 6 and 7 are empty. Figure 6 retains experimental axes with no result points or curves. Widths, label fractions, and update budgets remain visible as settings. Generators reject numerical outcomes in this pending-only file; incorporating measured results requires an archived result artifact and a corresponding provenance-aware generator/validator update. Figure 5 retains its measured representation diagnostics.
 - **Estimated:** Tables 1–3 contain user-requested optimistic JAM estimates from `experiments/benchmark_estimates.json`. A single italic caption line identifies them as awaiting evaluation after planned training and adaptation. They are subjective planning values, not measurements or statistically calibrated forecasts. Other JAM benchmark rows retain **Awaiting evaluation**. Baseline maxima are computed exclusively from external measured values; estimates do not enter that ranking.
 
 The planning audit at **9 September 2026, 04:17 UTC+8**, revision `131ea0507209f2653b5e05d87f2ee4b2beaf4e6f`, observes the seven-source pilot at update **13,250** and no formal full-corpus run directory. `artifacts/benchmark_estimate_basis.json` records this state and the formal configuration hashes. The estimate scenario assumes completion of the planned 60,000-update full-corpus run, successful admission of its broader robot/human sources, and subsequent task-specific adaptation. It does not describe the pilot checkpoint. Expanded source availability, representation probes, and training losses do not establish benchmark success rates.
@@ -89,7 +89,7 @@ The requested reference website's immutable benchmark export is archived in `art
 - `main.tex`, `Sections/`, `jam.bib`: manuscript and citations.
 - `Figures/`, `Tables/`: editable diagrams, vector figures, and generated tables.
 - `artifacts/`: evidence, sanitized configurations, source reports, and provenance.
-- `experiments/`: protocol ledger, explicitly planned layout values, and separately marked optimistic benchmark estimates.
+- `experiments/`: protocol ledger, pending-study settings with null outcomes, and separately marked optimistic benchmark estimates.
 - `scripts/`: generation and evidence/layout validation.
 - `docs/revision_audit.md`: verified corrections and interpretation limits.
 

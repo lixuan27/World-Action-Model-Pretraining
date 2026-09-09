@@ -2,8 +2,8 @@ from pathlib import Path
 import json
 P=Path(__file__).resolve().parents[1]
 T=P/"Tables"
-plans=json.loads((P/"experiments/layout_targets.json").read_text())
-pn,display=plans["tables"],plans["display"]
+studies=json.loads((P/"experiments/pending_studies.json").read_text())
+pn=studies["tables"]
 refs=json.loads((P/"artifacts/external_reference.json").read_text())
 refs2=json.loads((P/"artifacts/external_baselines.json").read_text())
 lookup={(r["table"],r["model"]):r for r in refs["rows"]+refs2["rows"]}
@@ -16,12 +16,10 @@ def model(name):
     return {'π₀': r'$\pi_0$', 'π₀.₅': r'$\pi_{0.5}$', 'Cosmos-Policy': 'Cosmos Policy'}.get(name, name)
 
 
-def target(x):
-    return r'\target{' + (f'{x:.2f}' if abs(x) < 1 else f'{x:.1f}') + '}'
-
-
-def jam(name, scores):
-    return [r'\jamshade\textbf{JAM ' + name + '}'] + [target(x) for x in scores]
+def pending(x):
+    if x is not None:
+        raise ValueError('Pending outcomes must be null; archive measurement provenance before adding results.')
+    return ''
 
 
 def panel(title, headers, rows, fmt=None):
@@ -37,11 +35,11 @@ def panel(title, headers, rows, fmt=None):
 
 
 def table(filename, label, panels, caption, planned=True, size=9):
-    out = ['% PLANNED-VALUE: superscript T identifies design values awaiting measurement.' if planned else '% EXTERNAL-REFERENCE: verbatim source values.',
+    out = ['% PENDING-MEASUREMENT: empty result cells await archived experimental evidence.' if planned else '% EXTERNAL-REFERENCE: verbatim source values.',
            r'\begin{table}[H]', r'\centering',
            r'\begingroup\fontsize{' + str(size) + '}{' + str(size + 1.5) + r'}\selectfont',
            r'\setlength{\tabcolsep}{3.5pt}\renewcommand{\arraystretch}{1.12}',
            '\n\\vspace{2pt}\n'.join(panels), r'\endgroup',
-           r'\caption{' + caption + (' ' + r'\targetnote' if planned else '') + '}',
+           r'\caption{' + caption + (' ' + r'\pendingstudynote' if planned else '') + '}',
            r'\label{' + label + '}', r'\end{table}']
     (T / filename).write_text('\n'.join(out) + '\n')

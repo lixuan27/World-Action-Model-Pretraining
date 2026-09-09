@@ -138,7 +138,7 @@ implementation, disabling agent visibility also removes the state token from the
 attention. The existing visibility switches therefore change both generated-token exchange and part
 of the conditioning interface. The planned comparison routes equivalent static state and
 current-observation information to every arm before interpreting a performance difference as an
-effect of coupling. The paper's target table describes this stricter protocol, whose results remain
+effect of coupling. The paper's controlled-study table describes this stricter protocol, whose results remain
 awaiting measurement. It does not treat the existing switches as an already completed controlled
 experiment.
 
@@ -217,9 +217,9 @@ The LIBERO closed-loop evaluation was interrupted before a complete suite result
 Partial rollout videos therefore contribute neither success rates nor selected qualitative evidence
 to the paper. Foundation transfer and coupling ablations await completed runs. The milestone probes and
 post-correction sensitivity report are measured diagnostics with the limitations stated above.
-External reference results retain their own provenance and evaluation scope. The planned tables and
-scaling figure use design values inherited or extended from the working manuscript; they are layout
-targets rather than preregistered outcomes or model predictions.
+External reference results retain their own provenance and evaluation scope. Controlled-study tables
+and the scaling figure preserve the experimental settings, with result fields left empty until
+measurements become available.
 
 Tables~\ref{tab:libero_plus}--\ref{tab:vlabench} additionally contain optimistic planning estimates
 for completion of the full-corpus foundation schedule and task adaptation. Their captions identify
@@ -254,9 +254,9 @@ values until a matched JAM evaluation is available.
 \FloatBarrier
 
 \subsection{Reproduction and experiment ledger}
-Measured logs, external references, layout targets, and benchmark estimates occupy separate artifact files. The README gives the complete build procedure. The commands \texttt{python3} \path{scripts/build_artifacts.py} and \texttt{python3} \path{scripts/validate.py} regenerate the numerical displays and check evidence consistency, respectively.
+Measured logs, external references, pending-study settings, and benchmark estimates occupy separate artifact files. The README gives the complete build procedure. The commands \texttt{python3} \path{scripts/build_artifacts.py} and \texttt{python3} \path{scripts/validate.py} regenerate the displays and check evidence consistency, respectively.
 
 The protocol ledger links each scientific question to inspected source configurations and required
 result artifacts. It identifies controls that still require implementation changes. Promoting a
-target to a measurement requires its result file, checkpoint, evaluation manifest, and aggregation
+pending result to a measurement requires its result file, checkpoint, evaluation manifest, and aggregation
 command; the corresponding scientific claim is then reviewed against that evidence.

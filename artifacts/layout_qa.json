@@ -1,6 +1,6 @@
 {
   "artifact": "paper/JAM.pdf",
-  "sha256": "57748c784d18ee60881d512647141d4f6e52484eeb4cd8c3b375a00a9ac65d2a",
+  "sha256": "81a6221723cff174d10e584d22a33b1505c1906658594564bfbef2677ea00f1f",
   "main_pages": 11,
   "total_pages": 17,
   "setup_paragraphs": 2,
@@ -8,7 +8,7 @@
   "main_benchmarks": 7,
   "appendix_benchmark_tables": 1,
   "scientific_plot_font": "DejaVu Serif, embedded",
-  "visual_review": "Figures 1 and 2 refreshed from the supplied two-slide PPT. Teaser remains on page 1 at full text width after outer-margin cropping. Framework is on page 4. A single overlapping teaser label is shifted 8 pt left; all other drawing content is retained. Native figures and pages 1\u20135, 9\u201311, and 16 inspected for legibility, clipping, and numbering. Main text remains 11 pages. Tables 1\u20133 now contain explicitly labeled optimistic JAM estimates. Pages 6\u20138 and 16\u201317 reviewed after this revision; each italic estimate caption occupies exactly one line, with no overlap or clipping. Main text remains 11 pages and all figures retain their previous numbering.",
+  "visual_review": "Figures 1 and 2 refreshed from the supplied two-slide PPT. Teaser remains on page 1 at full text width after outer-margin cropping. Framework is on page 4. A single overlapping teaser label is shifted 8 pt left; all other drawing content is retained. Native figures and pages 1\u20135, 9\u201311, and 16 inspected for legibility, clipping, and numbering. Main text remains 11 pages. Tables 1\u20133 now contain explicitly labeled optimistic JAM estimates. Pages 6\u20138 and 16\u201317 reviewed after this revision; each italic estimate caption occupies exactly one line, with no overlap or clipping. Main text remains 11 pages and all figures retain their previous numbering. Sections 5.4 and 5.5 now contain 43 empty pending result cells; Figure 6 retains protocol axes with no result points or curves. Updated pages 6, 9-11, and 16-17 reviewed at raster resolution. No overlap or clipping; Figure 5 measured readouts and figure numbering are preserved.",
   "source_audit": {
     "export_rows": 113,
     "displayed_export_baselines": 85,
@@ -48,5 +48,31 @@
       16,
       17
     ]
+  },
+  "pending_studies_qa": {
+    "tables": [
+      6,
+      7
+    ],
+    "table_pages": [
+      10,
+      11
+    ],
+    "empty_result_cells": 43,
+    "scaling_figure": 6,
+    "scaling_page": 11,
+    "plotted_result_points": 0,
+    "plotted_result_curves": 0,
+    "source": "experiments/pending_studies.json",
+    "measured_representation_unchanged": true,
+    "reviewed_pages": [
+      6,
+      9,
+      10,
+      11,
+      16,
+      17
+    ],
+    "status": "PASS"
   }
 }

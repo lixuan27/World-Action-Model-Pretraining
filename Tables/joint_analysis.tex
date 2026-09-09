@@ -1,4 +1,4 @@
-% PLANNED-VALUE: superscript T identifies design values awaiting measurement.
+% PENDING-MEASUREMENT: empty result cells await archived experimental evidence.
 \begin{table}[H]
 \centering
 \begingroup\fontsize{9}{10.5}\selectfont
@@ -8,8 +8,8 @@
 \panelrow{3}{A. Initialization at matched adaptation budget}
 Initialization & LIBERO & Plus \\
 \midrule
-Without embodied pretraining & \target{97.2} & \target{53.8} \\
-\jamshade\textbf{JAM pretraining} & \target{99.4} & \target{90.2} \\
+Without embodied pretraining &  &  \\
+\jamshade\textbf{JAM pretraining} &  &  \\
 \bottomrule
 \end{tabularx}
 \vspace{2pt}
@@ -18,15 +18,15 @@ Without embodied pretraining & \target{97.2} & \target{53.8} \\
 \panelrow{8}{B. Information exchange and gradient routing}
 Variant & W reads A & A reads W & Gradient & LIBERO & Plus & A probe & C error \\
 \midrule
-World only & Off & Off & Off & \target{94.0} & \target{42.0} & \target{0.30} & \target{0.18} \\
-Action only & Off & Off & Off & \target{95.0} & \target{45.0} & \target{0.32} & \target{0.17} \\
-Independent & Off & Off & Off & \target{96.1} & \target{47.6} & \target{0.38} & \target{0.15} \\
-Auxiliary & Off & On & Off & \target{96.8} & \target{49.4} & \target{0.40} & \target{0.12} \\
-One-way & Off & On & On & \target{97.0} & \target{51.7} & \target{0.46} & \target{0.10} \\
-\jamshade{}\textbf{JAM joint} & On & On & On & \target{97.2} & \target{53.8} & \target{0.52} & \target{0.08} \\
+World only & Off & Off & Off &  &  &  &  \\
+Action only & Off & Off & Off &  &  &  &  \\
+Independent & Off & Off & Off &  &  &  &  \\
+Auxiliary & Off & On & Off &  &  &  &  \\
+One-way & Off & On & On &  &  &  &  \\
+\jamshade{}\textbf{JAM joint} & On & On & On &  &  &  &  \\
 \bottomrule
 \end{tabularx}
 \endgroup
-\caption{\textbf{Which part of pretraining changes the representation?} Panel A isolates embodied pretraining from task adaptation. Panel B holds source exposure and clean conditions fixed. W and A denote world and action; Gradient denotes action-loss access to world parameters. A probe reports R-squared; C error is consequence average displacement error (ADE). All entries in this controlled study await measurement. \targetnote}
+\caption{\textbf{Which part of pretraining changes the representation?} Panel A isolates embodied pretraining from task adaptation. Panel B holds source exposure and clean conditions fixed. W and A denote world and action; Gradient denotes action-loss access to world parameters. A probe reports R-squared; C error is consequence average displacement error (ADE). \pendingstudynote}
 \label{tab:joint}
 \end{table}

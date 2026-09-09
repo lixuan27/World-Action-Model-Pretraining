@@ -18,9 +18,12 @@
     "text_bounds": "PASS"
   },
   {
-    "figure": "scaling_targets",
+    "figure": "scaling_pending",
     "font": "DejaVu Serif",
     "format": "vector PDF",
-    "text_bounds": "PASS"
+    "text_bounds": "PASS",
+    "status": "awaiting_measurement",
+    "plotted_result_points": 0,
+    "plotted_result_curves": 0
   }
 ]

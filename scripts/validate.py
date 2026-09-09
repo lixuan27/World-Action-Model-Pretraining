@@ -84,9 +84,31 @@ d=[json.loads(l) for l in (P/'artifacts/measurements/e0_libero_bi.jsonl').read_t
 check(len(d)==summary['n_log_points'] and d[-1]['step']==summary['steps'],'Training summary shape mismatch')
 for k in ['world','action','consequence','total']:
  key='loss/'+k;mean=statistics.mean(r[key] for r in d[-max(1,len(d)//10):]);check(abs(mean-summary[key]['final_mean_last10pct'])<1e-7,'Summary mean mismatch '+key)
-plan=json.load(open(P/'experiments/layout_targets.json'));check(plan['status']=='planned','Layout target status changed')
-for name in ['joint_analysis','data_scaling']:
- s=(P/'Tables'/f'{name}.tex').read_text();check('PLANNED-VALUE' in s and '\\targetnote' in s and '\\target{' in s,'Unmarked targets '+name)
+plan=json.load(open(P/'experiments/pending_studies.json'))
+check(plan['status']=='awaiting_measurement' and plan['marker']=='PENDING-MEASUREMENT','Pending-study status')
+check(not (P/'experiments/layout_targets.json').exists(),'Obsolete numerical layout targets remain')
+studies=plan['tables']
+for key in ['initialization','coupling','composition']:
+ check(all(len(row)==len(studies[key]['columns']) and all(v is None for v in row) for row in studies[key]['rows'].values()),'Unmeasured outcomes must be null: '+key)
+scale_rows=list(studies['scale_controls']['rows'].values())
+check([row[0] for row in scale_rows]==[768,1024,1280,25,50,100] and all(row[1] is None for row in scale_rows),'Capacity and supervision settings or pending outcomes')
+for settings,outcomes in [('fractions','subset_success'),('updates','milestone_success')]:
+ check(len(studies['scaling'][settings])==len(studies['scaling'][outcomes]) and all(v is None for v in studies['scaling'][outcomes]),'Unmeasured scaling outcomes: '+outcomes)
+blank_count=0
+for name,want in [('joint_analysis',28),('data_scaling',15)]:
+ s=(P/'Tables'/f'{name}.tex').read_text()
+ check('PENDING-MEASUREMENT' in s and '\\pendingstudynote' in s and '\\target' not in s,'Pending table markup: '+name)
+ found=0
+ for line in s.splitlines():
+  if '&' not in line or not line.endswith(r'\\'):continue
+  cells=[c.strip() for c in line[:-2].split('&')]
+  if cells[0] in ['Initialization','Variant','Mixture','Axis']:continue
+  count=({3:2,8:4} if name=='joint_analysis' else {7:3,5:1}).get(len(cells),0)
+  check(count>0 and all(c=='' for c in cells[-count:]),'Pending result cells must be empty: '+line)
+  found+=count
+ check(found==want,'Pending-cell count: '+name)
+ blank_count+=found
+check('Superscript T marks layout targets' not in text and r'\target{' not in text,'Numerical T targets remain in manuscript')
 
 # Verify source rows and each rendered cell from the pinned archive every run.
 external=json.load(open(P/'artifacts/external_baselines.json'))
@@ -172,7 +194,10 @@ for i in range(len(layers)):
  check(abs(comparison['jam_consequence_ade_reduction_percent_vs_video_prior'][i]-100*(prior['consequence_ade'][i]-jam['consequence_ade'][i])/prior['consequence_ade'][i])<1e-12,'Consequence gain derivation')
 check(comparison['jam_beats_copy_first_layers']==[layers[i] for i,v in enumerate(jam['consequence_ade']) if v<comparison['copy_first_consequence_ade']],'Copy-first comparison')
 qa=json.load(open(P/'artifacts/figure_qa.json'))
-check(len(qa)==4 and {x['figure'] for x in qa}=={'training','representation','action_sensitivity','scaling_targets'} and all(x['font']=='DejaVu Serif' and x['text_bounds']=='PASS' for x in qa),'Figure typography or bounds audit')
+check(len(qa)==4 and {x['figure'] for x in qa}=={'training','representation','action_sensitivity','scaling_pending'} and all(x['font']=='DejaVu Serif' and x['text_bounds']=='PASS' for x in qa),'Figure typography or bounds audit')
+scaling_qa=next(x for x in qa if x['figure']=='scaling_pending')
+check(scaling_qa['status']=='awaiting_measurement' and scaling_qa['plotted_result_points']==0 and scaling_qa['plotted_result_curves']==0,'Unmeasured scaling plot contains results')
+check(not any((P/'Figures'/('scaling_targets'+ext)).exists() for ext in ['.pdf','.png']),'Obsolete scaling targets remain')
 for stem,slide in [('teaser_v11',2),('framework_v11',1)]:
  drawing=json.load(open(P/f'artifacts/{stem}_qa.json'))
  check(drawing['source_slide']==slide and drawing['slide_count']==2,'Supplied slide mapping '+stem)
@@ -207,7 +232,7 @@ if (P/'main.log').exists():
   check(bad not in log,'Compile log: '+bad)
 if errors:
  print('\n'.join('FAIL: '+e for e in errors));sys.exit(1)
-print(f'PASS: {main_pages} main pages (maximum 12); {len(setup_paragraphs)} setup paragraphs; {len(sections)} main sections; {len(labels)} unique labels; {len(cites)} verified citation keys; evidence hashes, summary means, and target markers valid.')
+print(f'PASS: {main_pages} main pages (maximum 12); {len(setup_paragraphs)} setup paragraphs; {len(sections)} main sections; {len(labels)} unique labels; {len(cites)} verified citation keys; evidence hashes and summary means valid; {blank_count} pending result cells empty.')
 
 print(f'PASS: {external_count} archived export rows; {len(seen)} displayed export baselines; {cell_count} source cells; six official PRO rows; seven-source mixture and measured probe settings verified.')
 print('PASS: three estimated JAM rows explicitly labeled; LIBERO-Plus task weights and LIBERO-PRO estimated total verified.')
